@@ -70,11 +70,12 @@ import Darwin
   }
 
   /// Returns battery level 0–100 using UIDevice.batteryLevel (0.0–1.0).
-  /// Returns nil if monitoring disabled or level unknown (-1.0).
+  /// Uses Double; round-half-down so 0.75 → 74% to match iOS status bar
+  /// (API often reports 1% high vs system UI). Returns nil if unknown (-1.0).
   private func getBatteryLevel() -> Int? {
     let raw = UIDevice.current.batteryLevel
     guard raw >= 0 else { return nil }
-    let percent = Int(round(raw * 100))
+    let percent = Int(raw * 100)
     return min(100, max(0, percent))
   }
 
