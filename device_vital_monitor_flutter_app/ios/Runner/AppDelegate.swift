@@ -13,12 +13,34 @@ import Darwin
     guard let controller = window?.rootViewController as? FlutterViewController else {
       return super.application(application, didFinishLaunchingWithOptions: launchOptions)
     }
+    UIDevice.current.isBatteryMonitoringEnabled = true
+
     let channel = FlutterMethodChannel(
       name: "device_vital_monitor/sensors",
       binaryMessenger: controller.binaryMessenger
     )
     channel.setMethodCallHandler { [weak self] call, result in
       switch call.method {
+      case "getThermalState":
+        if let thermalState = self?.getThermalState() {
+          result(thermalState)
+        } else {
+          result(FlutterError(
+            code: "THERMAL_ERROR",
+            message: "Failed to get thermal state",
+            details: nil
+          ))
+        }
+      case "getBatteryLevel":
+        if let level = self?.getBatteryLevel() {
+          result(level)
+        } else {
+          result(FlutterError(
+            code: "BATTERY_ERROR",
+            message: "Failed to get battery level",
+            details: nil
+          ))
+        }
       case "getMemoryUsage":
         if let usage = self?.getMemoryUsage() {
           result(usage)
@@ -45,6 +67,35 @@ import Darwin
     }
 
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  }
+
+  /// Returns battery level 0–100 using UIDevice.batteryLevel (0.0–1.0).
+  /// Returns nil if monitoring disabled or level unknown (-1.0).
+  private func getBatteryLevel() -> Int? {
+    let raw = UIDevice.current.batteryLevel
+    guard raw >= 0 else { return nil }
+    let percent = Int(round(raw * 100))
+    return min(100, max(0, percent))
+  }
+
+  /// Returns thermal state (0–3) using ProcessInfo.thermalState.
+  /// 0 = nominal, 1 = fair, 2 = serious, 3 = critical
+  private func getThermalState() -> Int? {
+    let thermalState = ProcessInfo.processInfo.thermalState
+    let result: Int
+    switch thermalState {
+    case .nominal:
+      result = 0
+    case .fair:
+      result = 1
+    case .serious:
+      result = 2
+    case .critical:
+      result = 3
+    @unknown default:
+      result = 0
+    }
+    return result
   }
 
   /// Returns used memory percentage (0–100) using mach_task_basic_info.

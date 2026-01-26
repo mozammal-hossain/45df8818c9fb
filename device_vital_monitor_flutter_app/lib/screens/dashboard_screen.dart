@@ -9,6 +9,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  int? _thermalState;
+  bool _isLoadingThermal = true;
   int? _batteryLevel;
   String? _batteryHealth;
   String? _chargerConnection;
@@ -27,12 +29,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _fetchSensorData() async {
     setState(() {
+      _isLoadingThermal = true;
       _isLoadingBattery = true;
       _isLoadingMemory = true;
       _isLoadingStorage = true;
     });
     try {
       final results = await Future.wait([
+        DeviceSensorService.getThermalState(),
         DeviceSensorService.getBatteryLevel(),
         DeviceSensorService.getBatteryHealth(),
         DeviceSensorService.getChargerConnection(),
@@ -42,12 +46,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ]);
       if (mounted) {
         setState(() {
-          _batteryLevel = results[0] as int?;
-          _batteryHealth = results[1] as String?;
-          _chargerConnection = results[2] as String?;
-          _batteryStatus = results[3] as String?;
-          _memoryUsage = results[4] as int?;
-          _storageInfo = results[5] as Map<String, int>?;
+          _thermalState = results[0] as int?;
+          _batteryLevel = results[1] as int?;
+          _batteryHealth = results[2] as String?;
+          _chargerConnection = results[3] as String?;
+          _batteryStatus = results[4] as String?;
+          _memoryUsage = results[5] as int?;
+          _storageInfo = results[6] as Map<String, int>?;
+          _isLoadingThermal = false;
           _isLoadingBattery = false;
           _isLoadingMemory = false;
           _isLoadingStorage = false;
@@ -56,12 +62,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } catch (_) {
       if (mounted) {
         setState(() {
+          _thermalState = null;
           _batteryLevel = null;
           _batteryHealth = null;
           _chargerConnection = null;
           _batteryStatus = null;
           _memoryUsage = null;
           _storageInfo = null;
+          _isLoadingThermal = false;
           _isLoadingBattery = false;
           _isLoadingMemory = false;
           _isLoadingStorage = false;
@@ -143,6 +151,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  String _getThermalStateLabel(int state) {
+    switch (state) {
+      case 0:
+        return 'NONE';
+      case 1:
+        return 'LIGHT';
+      case 2:
+        return 'MODERATE';
+      case 3:
+        return 'SEVERE';
+      default:
+        return 'UNKNOWN';
+    }
+  }
+
+  String _getThermalStateDescription(int state) {
+    switch (state) {
+      case 0:
+        return 'System operating within normal temperature ranges.';
+      case 1:
+        return 'Slightly elevated temperature, monitoring recommended.';
+      case 2:
+        return 'Moderate thermal stress detected. Consider reducing usage.';
+      case 3:
+        return 'Severe thermal condition. Device may throttle performance.';
+      default:
+        return 'Thermal state unavailable.';
+    }
+  }
+
+  Color _getThermalStateColor(int state) {
+    switch (state) {
+      case 0:
+        return const Color(0xFF4CAF50); // Green
+      case 1:
+        return const Color(0xFFFF9800); // Orange
+      case 2:
+        return const Color(0xFFFF5722); // Deep Orange
+      case 3:
+        return const Color(0xFFD32F2F); // Red
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,14 +247,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildMemoryUsageCard(),
             const SizedBox(height: 16),
             
-            // CPU Load and Disk Space Cards (side by side)
-            Row(
-              children: [
-                Expanded(child: _buildCpuLoadCard()),
-                const SizedBox(width: 16),
-                Expanded(child: _buildDiskSpaceCard()),
-              ],
-            ),
+            // Disk Space Card
+            _buildDiskSpaceCard(),
             const SizedBox(height: 24),
             
             // Log Status Snapshot Button
@@ -214,6 +261,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildThermalStateCard() {
+    final thermalState = _thermalState ?? 0;
+    final hasData = _thermalState != null && !_isLoadingThermal;
+    final stateLabel = hasData ? _getThermalStateLabel(thermalState) : '—';
+    final stateColor = hasData ? _getThermalStateColor(thermalState) : Colors.grey;
+    final stateDescription = hasData ? _getThermalStateDescription(thermalState) : 'Loading thermal state...';
+
     return _buildCard(
       child: Row(
         children: [
@@ -221,12 +274,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange[50],
+              color: stateColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.thermostat,
-              color: Colors.orange,
+              color: stateColor,
               size: 32,
             ),
           ),
@@ -253,14 +306,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    const Text(
-                      '1',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                    if (_isLoadingThermal)
+                      const SizedBox(
+                        height: 32,
+                        width: 32,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      Text(
+                        '$_thermalState',
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -268,12 +328,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFE8A87C),
+                        color: stateColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Text(
-                        'LIGHT',
-                        style: TextStyle(
+                      child: Text(
+                        stateLabel,
+                        style: const TextStyle(
                           color: Colors.white,
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
@@ -283,9 +343,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'System operating within normal temperature ranges.',
-                  style: TextStyle(
+                Text(
+                  stateDescription,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Colors.black54,
                   ),
@@ -293,7 +353,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
-          // Visual element placeholder
+          // Visual element
           Container(
             width: 80,
             height: 80,
@@ -301,8 +361,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(8),
               gradient: LinearGradient(
                 colors: [
-                  Colors.orange[200]!,
-                  Colors.orange[400]!,
+                  stateColor.withOpacity(0.3),
+                  stateColor.withOpacity(0.7),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -597,35 +657,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     } else {
       return '${size.toStringAsFixed(size >= 100 ? 0 : 1)} ${units[unitIndex]}';
     }
-  }
-
-  Widget _buildCpuLoadCard() {
-    return _buildCard(
-      backgroundColor: Colors.blue[50],
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'CPU LOAD',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue[800],
-              letterSpacing: 0.5,
-            ),
-          ),
-          const SizedBox(height: 12),
-          const Text(
-            '12%',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildDiskSpaceCard() {

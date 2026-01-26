@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Build
+import android.os.PowerManager
 import android.os.StatFs
 import android.os.Environment
 import android.util.Log
@@ -21,6 +22,14 @@ class MainActivity : FlutterActivity() {
         
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
+                "getThermalState" -> {
+                    try {
+                        val thermalState = getThermalState()
+                        result.success(thermalState)
+                    } catch (e: Exception) {
+                        result.error("THERMAL_ERROR", "Failed to get thermal state: ${e.message}", null)
+                    }
+                }
                 "getBatteryLevel" -> {
                     try {
                         val batteryLevel = getBatteryLevel()
@@ -148,6 +157,34 @@ class MainActivity : FlutterActivity() {
         }
         Log.d(TAG, "getBatteryStatus: raw=$status -> $result")
         return result
+    }
+
+    private fun getThermalState(): Int {
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // API 30+ (Android 11+) - Thermal API officially released
+            // Using PowerManager.getCurrentThermalStatus() as per Android Thermal API
+            // Reference: https://developer.android.com/games/optimize/adpf/thermal
+            val thermalStatus = powerManager.currentThermalStatus
+            val result = when (thermalStatus) {
+                PowerManager.THERMAL_STATUS_NONE -> 0
+                PowerManager.THERMAL_STATUS_LIGHT -> 1
+                PowerManager.THERMAL_STATUS_MODERATE -> 2
+                PowerManager.THERMAL_STATUS_SEVERE -> 3
+                PowerManager.THERMAL_STATUS_CRITICAL -> 3
+                PowerManager.THERMAL_STATUS_EMERGENCY -> 3
+                PowerManager.THERMAL_STATUS_SHUTDOWN -> 3
+                else -> 0
+            }
+            Log.d(TAG, "getThermalState: raw=$thermalStatus -> $result")
+            result
+        } else {
+            // Older versions: return default (NONE)
+            // Thermal API requires Android 11 (API 30+) as per official documentation
+            Log.w(TAG, "getThermalState: API level ${Build.VERSION.SDK_INT} doesn't support Thermal API (requires API 30+), returning 0")
+            0
+        }
     }
 
     companion object {
