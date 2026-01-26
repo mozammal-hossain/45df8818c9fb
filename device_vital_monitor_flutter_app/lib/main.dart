@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/theme_provider.dart';
 import 'providers/theme_provider_scope.dart';
 import 'screens/dashboard_screen.dart';
@@ -40,6 +41,8 @@ class _MyAppState extends State<MyApp> {
           theme: AppTheme.buildLightTheme(),
           darkTheme: AppTheme.buildDarkTheme(),
           themeMode: _themeProvider.mode,
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
           home: const DashboardScreen(),
         ),
       ),

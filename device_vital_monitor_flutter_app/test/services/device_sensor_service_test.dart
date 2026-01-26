@@ -22,11 +22,11 @@ void main() {
       test('should return memory usage percentage when successful', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 45;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 45;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -36,11 +36,11 @@ void main() {
       test('should return 0% memory usage', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 0;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 0;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -50,11 +50,11 @@ void main() {
       test('should return 100% memory usage', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 100;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 100;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -64,11 +64,11 @@ void main() {
       test('should return memory usage at critical threshold (90%)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 90;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 90;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -78,11 +78,11 @@ void main() {
       test('should return memory usage at high threshold (75%)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 75;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 75;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -92,11 +92,11 @@ void main() {
       test('should return memory usage at moderate threshold (50%)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 50;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 50;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -106,11 +106,11 @@ void main() {
       test('should return memory usage at normal threshold (25%)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 25;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 25;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -120,11 +120,11 @@ void main() {
       test('should return memory usage at optimized level (10%)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 10;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 10;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -137,11 +137,11 @@ void main() {
         for (final value in testValues) {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
               .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-            if (methodCall.method == 'getMemoryUsage') {
-              return value;
-            }
-            return null;
-          });
+                if (methodCall.method == 'getMemoryUsage') {
+                  return value;
+                }
+                return null;
+              });
 
           final result = await DeviceSensorService.getMemoryUsage();
           expect(result, equals(value), reason: 'Failed for value: $value');
@@ -153,14 +153,14 @@ void main() {
       test('should return null on PlatformException', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'UNAVAILABLE',
-              message: 'Memory usage not available',
-            );
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                throw PlatformException(
+                  code: 'UNAVAILABLE',
+                  message: 'Memory usage not available',
+                );
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -170,11 +170,11 @@ void main() {
       test('should return null on MissingPluginException', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw MissingPluginException('Method not implemented');
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                throw MissingPluginException('Method not implemented');
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -184,11 +184,11 @@ void main() {
       test('should return null when method channel returns null', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return null;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return null;
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -198,11 +198,11 @@ void main() {
       test('should handle generic exceptions gracefully', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw Exception('Unexpected error');
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                throw Exception('Unexpected error');
+              }
+              return null;
+            });
 
         // The MethodChannel wraps generic exceptions as PlatformException,
         // so the service should return null
@@ -210,103 +210,115 @@ void main() {
         expect(result, isNull);
       });
 
-      test('should return null on PlatformException with PERMISSION_DENIED code', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'PERMISSION_DENIED',
-              message: 'Permission denied',
-            );
-          }
-          return null;
-        });
+      test(
+        'should return null on PlatformException with PERMISSION_DENIED code',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                if (methodCall.method == 'getMemoryUsage') {
+                  throw PlatformException(
+                    code: 'PERMISSION_DENIED',
+                    message: 'Permission denied',
+                  );
+                }
+                return null;
+              });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+          final result = await DeviceSensorService.getMemoryUsage();
 
-        expect(result, isNull);
-      });
+          expect(result, isNull);
+        },
+      );
 
-      test('should return null on PlatformException with NOT_IMPLEMENTED code', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'NOT_IMPLEMENTED',
-              message: 'Method not implemented',
-            );
-          }
-          return null;
-        });
+      test(
+        'should return null on PlatformException with NOT_IMPLEMENTED code',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                if (methodCall.method == 'getMemoryUsage') {
+                  throw PlatformException(
+                    code: 'NOT_IMPLEMENTED',
+                    message: 'Method not implemented',
+                  );
+                }
+                return null;
+              });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+          final result = await DeviceSensorService.getMemoryUsage();
 
-        expect(result, isNull);
-      });
+          expect(result, isNull);
+        },
+      );
 
-      test('should return null on PlatformException with TIMEOUT code', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'TIMEOUT',
-              message: 'Operation timed out',
-            );
-          }
-          return null;
-        });
+      test(
+        'should return null on PlatformException with TIMEOUT code',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                if (methodCall.method == 'getMemoryUsage') {
+                  throw PlatformException(
+                    code: 'TIMEOUT',
+                    message: 'Operation timed out',
+                  );
+                }
+                return null;
+              });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+          final result = await DeviceSensorService.getMemoryUsage();
 
-        expect(result, isNull);
-      });
+          expect(result, isNull);
+        },
+      );
 
-      test('should return null on PlatformException with UNKNOWN_ERROR code', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'UNKNOWN_ERROR',
-              message: 'Unknown error occurred',
-            );
-          }
-          return null;
-        });
+      test(
+        'should return null on PlatformException with UNKNOWN_ERROR code',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                if (methodCall.method == 'getMemoryUsage') {
+                  throw PlatformException(
+                    code: 'UNKNOWN_ERROR',
+                    message: 'Unknown error occurred',
+                  );
+                }
+                return null;
+              });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+          final result = await DeviceSensorService.getMemoryUsage();
 
-        expect(result, isNull);
-      });
+          expect(result, isNull);
+        },
+      );
 
-      test('should return null on PlatformException with null message', () async {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'ERROR',
-              message: null,
-            );
-          }
-          return null;
-        });
+      test(
+        'should return null on PlatformException with null message',
+        () async {
+          TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+              .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+                if (methodCall.method == 'getMemoryUsage') {
+                  throw PlatformException(code: 'ERROR', message: null);
+                }
+                return null;
+              });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+          final result = await DeviceSensorService.getMemoryUsage();
 
-        expect(result, isNull);
-      });
+          expect(result, isNull);
+        },
+      );
 
       test('should return null on PlatformException with details', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            throw PlatformException(
-              code: 'ERROR',
-              message: 'Error with details',
-              details: {'errorCode': 123, 'errorType': 'memory'},
-            );
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                throw PlatformException(
+                  code: 'ERROR',
+                  message: 'Error with details',
+                  details: {'errorCode': 123, 'errorType': 'memory'},
+                );
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -318,11 +330,11 @@ void main() {
       test('should handle integer values correctly', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 42; // Explicitly an int
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 42; // Explicitly an int
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -333,11 +345,11 @@ void main() {
       test('should handle large integer values', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 2147483647; // Max 32-bit int
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 2147483647; // Max 32-bit int
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -348,11 +360,11 @@ void main() {
       test('should handle negative values', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return -10; // Invalid but service should handle it
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return -10; // Invalid but service should handle it
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -363,11 +375,11 @@ void main() {
       test('should handle values greater than 100', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 150; // Invalid but service should handle it
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 150; // Invalid but service should handle it
+              }
+              return null;
+            });
 
         final result = await DeviceSensorService.getMemoryUsage();
 
@@ -380,11 +392,11 @@ void main() {
       test('should handle multiple concurrent calls', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            return 50;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                return 50;
+              }
+              return null;
+            });
 
         final futures = List.generate(
           5,
@@ -402,12 +414,12 @@ void main() {
       test('should complete within reasonable time', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            await Future.delayed(const Duration(milliseconds: 10));
-            return 50;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                await Future.delayed(const Duration(milliseconds: 10));
+                return 50;
+              }
+              return null;
+            });
 
         final stopwatch = Stopwatch()..start();
         await DeviceSensorService.getMemoryUsage();
@@ -419,12 +431,12 @@ void main() {
       test('should handle slow responses (100ms delay)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            await Future.delayed(const Duration(milliseconds: 100));
-            return 50;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                await Future.delayed(const Duration(milliseconds: 100));
+                return 50;
+              }
+              return null;
+            });
 
         final stopwatch = Stopwatch()..start();
         final result = await DeviceSensorService.getMemoryUsage();
@@ -438,12 +450,12 @@ void main() {
       test('should handle very slow responses (500ms delay)', () async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            await Future.delayed(const Duration(milliseconds: 500));
-            return 50;
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                await Future.delayed(const Duration(milliseconds: 500));
+                return 50;
+              }
+              return null;
+            });
 
         final stopwatch = Stopwatch()..start();
         final result = await DeviceSensorService.getMemoryUsage();
@@ -460,12 +472,12 @@ void main() {
         int callCount = 0;
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
             .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-          if (methodCall.method == 'getMemoryUsage') {
-            callCount++;
-            return callCount * 10; // Return different values
-          }
-          return null;
-        });
+              if (methodCall.method == 'getMemoryUsage') {
+                callCount++;
+                return callCount * 10; // Return different values
+              }
+              return null;
+            });
 
         final futures = List.generate(
           10,

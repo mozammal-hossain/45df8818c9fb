@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/theme/theme.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/theme_provider_scope.dart';
 import '../services/device_sensor_service.dart';
 
@@ -81,11 +82,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  String _getBatteryStatus(int level) {
-    if (level >= 80) return 'HEALTHY';
-    if (level >= 50) return 'MODERATE';
-    if (level >= 20) return 'LOW';
-    return 'CRITICAL';
+  String _getBatteryStatus(AppLocalizations l10n, int level) {
+    if (level >= 80) return l10n.batteryStatusHealthy;
+    if (level >= 50) return l10n.batteryStatusModerate;
+    if (level >= 20) return l10n.batteryStatusLow;
+    return l10n.batteryStatusCritical;
   }
 
   Color _getBatteryStatusColor(BuildContext context, int level) {
@@ -96,90 +97,89 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return colors.error;
   }
 
-  String _getEstimatedTimeRemaining(int level) {
-    // Rough estimation: assuming average usage
+  String _getEstimatedTimeRemaining(AppLocalizations l10n, int level) {
     final hours = (level * 0.14).round();
-    return 'Estimated ${hours}h remaining';
+    return l10n.estimatedTimeRemaining(hours);
   }
 
-  String _formatBatteryHealth(String health) {
+  String _formatBatteryHealth(AppLocalizations l10n, String health) {
     switch (health) {
       case 'GOOD':
-        return 'Good';
+        return l10n.batteryHealthGood;
       case 'OVERHEAT':
-        return 'Overheat';
+        return l10n.batteryHealthOverheat;
       case 'DEAD':
-        return 'Dead';
+        return l10n.batteryHealthDead;
       case 'OVER_VOLTAGE':
-        return 'Over voltage';
+        return l10n.batteryHealthOverVoltage;
       case 'UNSPECIFIED_FAILURE':
-        return 'Unspecified failure';
+        return l10n.batteryHealthUnspecifiedFailure;
       case 'COLD':
-        return 'Cold';
+        return l10n.batteryHealthCold;
       default:
         return health;
     }
   }
 
-  String _formatChargerConnection(String connection) {
+  String _formatChargerConnection(AppLocalizations l10n, String connection) {
     switch (connection) {
       case 'AC':
-        return 'AC Charger';
+        return l10n.chargerAc;
       case 'USB':
-        return 'USB';
+        return l10n.chargerUsb;
       case 'WIRELESS':
-        return 'Wireless';
+        return l10n.chargerWireless;
       case 'NONE':
-        return 'Not connected';
+        return l10n.chargerNone;
       default:
         return connection;
     }
   }
 
-  String _formatBatteryStatus(String status) {
+  String _formatBatteryStatus(AppLocalizations l10n, String status) {
     switch (status) {
       case 'CHARGING':
-        return 'Charging';
+        return l10n.batteryCharging;
       case 'DISCHARGING':
-        return 'Discharging';
+        return l10n.batteryDischarging;
       case 'FULL':
-        return 'Full';
+        return l10n.batteryFull;
       case 'NOT_CHARGING':
-        return 'Not charging';
+        return l10n.batteryNotCharging;
       case 'UNKNOWN':
-        return 'Unknown';
+        return l10n.batteryUnknown;
       default:
         return status;
     }
   }
 
-  String _getThermalStateLabel(int state) {
+  String _getThermalStateLabel(AppLocalizations l10n, int state) {
     switch (state) {
       case 0:
-        return 'NONE';
+        return l10n.thermalStateNone;
       case 1:
-        return 'LIGHT';
+        return l10n.thermalStateLight;
       case 2:
-        return 'MODERATE';
+        return l10n.thermalStateModerate;
       case 3:
-        return 'SEVERE';
+        return l10n.thermalStateSevere;
       default:
-        return 'UNKNOWN';
+        return l10n.thermalStateUnknown;
     }
   }
 
-  String _getThermalStateDescription(int state) {
+  String _getThermalStateDescription(AppLocalizations l10n, int state) {
     switch (state) {
       case 0:
-        return 'System operating within normal temperature ranges.';
+        return l10n.thermalDescriptionNone;
       case 1:
-        return 'Slightly elevated temperature, monitoring recommended.';
+        return l10n.thermalDescriptionLight;
       case 2:
-        return 'Moderate thermal stress detected. Consider reducing usage.';
+        return l10n.thermalDescriptionModerate;
       case 3:
-        return 'Severe thermal condition. Device may throttle performance.';
+        return l10n.thermalDescriptionSevere;
       default:
-        return 'Thermal state unavailable.';
+        return l10n.thermalDescriptionUnavailable;
     }
   }
 
@@ -204,6 +204,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final themeProvider = ThemeProviderScope.of(context);
+    final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: scheme.surfaceContainerLow,
@@ -214,12 +215,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
             // Handle menu tap
           },
         ),
-        title: const Text('Device Vital Monitor'),
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.brightness_6),
             onPressed: themeProvider.cycleThemeMode,
-            tooltip: 'Toggle light / dark / system theme',
+            tooltip: l10n.toggleThemeTooltip,
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),
@@ -254,17 +255,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildThermalStateCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final thermalState = _thermalState ?? 0;
     final hasData = _thermalState != null && !_isLoadingThermal;
-    final stateLabel = hasData ? _getThermalStateLabel(thermalState) : '—';
+    final stateLabel = hasData
+        ? _getThermalStateLabel(l10n, thermalState)
+        : l10n.dash;
     final colors = Theme.of(context).extension<AppColors>()!;
     final scheme = Theme.of(context).colorScheme;
     final stateColor = hasData
         ? _getThermalStateColor(context, thermalState)
         : scheme.outline;
     final stateDescription = hasData
-        ? _getThermalStateDescription(thermalState)
-        : 'Loading thermal state...';
+        ? _getThermalStateDescription(l10n, thermalState)
+        : l10n.loadingThermalState;
     final textTheme = Theme.of(context).textTheme;
 
     return _buildCard(
@@ -284,7 +288,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Thermal State', style: textTheme.titleLarge),
+                Text(l10n.thermalState, style: textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -343,10 +347,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildBatteryLevelCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final batteryLevel = _batteryLevel ?? 0;
     final status = _batteryLevel != null
-        ? _getBatteryStatus(batteryLevel)
-        : 'LOADING';
+        ? _getBatteryStatus(l10n, batteryLevel)
+        : l10n.batteryStatusLoading;
     final colors = Theme.of(context).extension<AppColors>()!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -380,7 +385,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Row(
                       children: [
-                        Text('Battery Level', style: textTheme.titleLarge),
+                        Text(l10n.batteryLevel, style: textTheme.titleLarge),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -415,28 +420,34 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     if (_batteryLevel != null && !_isLoadingBattery) ...[
                       const SizedBox(height: 4),
                       Text(
-                        _getEstimatedTimeRemaining(batteryLevel),
+                        _getEstimatedTimeRemaining(l10n, batteryLevel),
                         style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _batteryHealth != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Device health: ${_formatBatteryHealth(_batteryHealth!)}',
+                        l10n.deviceHealthLabel(
+                          _formatBatteryHealth(l10n, _batteryHealth!),
+                        ),
                         style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _chargerConnection != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Charger: ${_formatChargerConnection(_chargerConnection!)}',
+                        l10n.chargerLabel(
+                          _formatChargerConnection(l10n, _chargerConnection!),
+                        ),
                         style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _batteryStatus != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Status: ${_formatBatteryStatus(_batteryStatus!)}',
+                        l10n.statusLabel(
+                          _formatBatteryStatus(l10n, _batteryStatus!),
+                        ),
                         style: textTheme.bodySmall,
                       ),
                     ],
@@ -463,9 +474,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMemoryUsageCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final percent = _memoryUsage ?? 0;
     final hasData = _memoryUsage != null && !_isLoadingMemory;
-    final statusLabel = hasData ? _getMemoryStatusLabel(percent) : '—';
+    final statusLabel = hasData
+        ? _getMemoryStatusLabel(l10n, percent)
+        : l10n.dash;
     final colors = Theme.of(context).extension<AppColors>()!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -490,7 +504,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Memory Usage', style: textTheme.titleLarge),
+                Text(l10n.memoryUsage, style: textTheme.titleLarge),
                 const SizedBox(height: 4),
                 Text(statusLabel, style: textTheme.bodySmall),
                 const SizedBox(height: 8),
@@ -512,8 +526,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     const SizedBox(width: 8),
                     Text(
                       hasData
-                          ? 'used'
-                          : (_isLoadingMemory ? 'loading…' : 'unavailable'),
+                          ? l10n.used
+                          : (_isLoadingMemory
+                                ? l10n.loading
+                                : l10n.unavailable),
                       style: textTheme.bodySmall,
                     ),
                   ],
@@ -538,7 +554,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 Text(
-                  hasData ? '$percent%' : (_isLoadingMemory ? '…' : '—'),
+                  hasData ? '$percent%' : (_isLoadingMemory ? '…' : l10n.dash),
                   style: textTheme.titleLarge,
                 ),
               ],
@@ -549,12 +565,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  String _getMemoryStatusLabel(int percent) {
-    if (percent >= 90) return 'Critical';
-    if (percent >= 75) return 'High';
-    if (percent >= 50) return 'Moderate';
-    if (percent >= 25) return 'Normal';
-    return 'Optimized';
+  String _getMemoryStatusLabel(AppLocalizations l10n, int percent) {
+    if (percent >= 90) return l10n.memoryCritical;
+    if (percent >= 75) return l10n.memoryHigh;
+    if (percent >= 50) return l10n.memoryModerate;
+    if (percent >= 25) return l10n.memoryNormal;
+    return l10n.memoryOptimized;
   }
 
   Color _getMemoryStatusColor(BuildContext context, int percent) {
@@ -566,10 +582,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   /// Formats bytes to human-readable format (GB, MB, etc.)
-  String _formatBytes(int bytes) {
-    if (bytes < 0) return '0 B';
+  String _formatBytes(AppLocalizations l10n, int bytes) {
+    if (bytes < 0) return l10n.zeroBytes;
 
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    final units = [
+      l10n.unitB,
+      l10n.unitKB,
+      l10n.unitMB,
+      l10n.unitGB,
+      l10n.unitTB,
+    ];
     int unitIndex = 0;
     double size = bytes.toDouble();
 
@@ -586,6 +608,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildDiskSpaceCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasData = _storageInfo != null && !_isLoadingStorage;
     final totalBytes = _storageInfo?['total'] ?? 0;
     final usedBytes = _storageInfo?['used'] ?? 0;
@@ -618,10 +641,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Disk Space', style: textTheme.titleLarge),
+                    Text(l10n.diskSpace, style: textTheme.titleLarge),
                     const SizedBox(height: 4),
                     Text(
-                      hasData ? _getMemoryStatusLabel(usagePercent) : '—',
+                      hasData
+                          ? _getMemoryStatusLabel(l10n, usagePercent)
+                          : l10n.dash,
                       style: textTheme.bodySmall,
                     ),
                   ],
@@ -643,9 +668,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               crossAxisAlignment: CrossAxisAlignment.baseline,
               textBaseline: TextBaseline.alphabetic,
               children: [
-                Text(_formatBytes(totalBytes), style: textTheme.displayMedium),
+                Text(
+                  _formatBytes(l10n, totalBytes),
+                  style: textTheme.displayMedium,
+                ),
                 const SizedBox(width: 8),
-                Text('total', style: textTheme.bodySmall),
+                Text(l10n.total, style: textTheme.bodySmall),
               ],
             ),
             const SizedBox(height: 8),
@@ -656,12 +684,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Used: ${_formatBytes(usedBytes)}',
+                        l10n.usedFormatted(_formatBytes(l10n, usedBytes)),
                         style: textTheme.bodySmall,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Available: ${_formatBytes(availableBytes)}',
+                        l10n.availableFormatted(
+                          _formatBytes(l10n, availableBytes),
+                        ),
                         style: textTheme.bodySmall,
                       ),
                     ],
@@ -697,7 +727,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ] else
-            Text('Storage information unavailable', style: textTheme.bodySmall),
+            Text(l10n.storageUnavailable, style: textTheme.bodySmall),
         ],
       ),
     );
@@ -724,12 +754,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildLogStatusButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ElevatedButton.icon(
       onPressed: () {
         // Handle log status snapshot
       },
       icon: const Icon(Icons.bar_chart),
-      label: const Text('Log Status Snapshot'),
+      label: Text(l10n.logStatusSnapshot),
     );
   }
 }

@@ -1,0 +1,106 @@
+{
+  "@@locale": "en",
+  "appTitle": "Device Vital Monitor",
+  "toggleThemeTooltip": "Toggle light / dark / system theme",
+  "thermalState": "Thermal State",
+  "thermalStateNone": "NONE",
+  "thermalStateLight": "LIGHT",
+  "thermalStateModerate": "MODERATE",
+  "thermalStateSevere": "SEVERE",
+  "thermalStateUnknown": "UNKNOWN",
+  "thermalDescriptionNone": "System operating within normal temperature ranges.",
+  "thermalDescriptionLight": "Slightly elevated temperature, monitoring recommended.",
+  "thermalDescriptionModerate": "Moderate thermal stress detected. Consider reducing usage.",
+  "thermalDescriptionSevere": "Severe thermal condition. Device may throttle performance.",
+  "thermalDescriptionUnavailable": "Thermal state unavailable.",
+  "loadingThermalState": "Loading thermal state...",
+  "batteryLevel": "Battery Level",
+  "batteryStatusHealthy": "HEALTHY",
+  "batteryStatusModerate": "MODERATE",
+  "batteryStatusLow": "LOW",
+  "batteryStatusCritical": "CRITICAL",
+  "batteryStatusLoading": "LOADING",
+  "estimatedTimeRemaining": "Estimated {hours}h remaining",
+  "@estimatedTimeRemaining": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
+  },
+  "deviceHealthLabel": "Device health: {health}",
+  "@deviceHealthLabel": {
+    "placeholders": {
+      "health": {
+        "type": "String"
+      }
+    }
+  },
+  "chargerLabel": "Charger: {connection}",
+  "@chargerLabel": {
+    "placeholders": {
+      "connection": {
+        "type": "String"
+      }
+    }
+  },
+  "statusLabel": "Status: {status}",
+  "@statusLabel": {
+    "placeholders": {
+      "status": {
+        "type": "String"
+      }
+    }
+  },
+  "batteryHealthGood": "Good",
+  "batteryHealthOverheat": "Overheat",
+  "batteryHealthDead": "Dead",
+  "batteryHealthOverVoltage": "Over voltage",
+  "batteryHealthUnspecifiedFailure": "Unspecified failure",
+  "batteryHealthCold": "Cold",
+  "chargerAc": "AC Charger",
+  "chargerUsb": "USB",
+  "chargerWireless": "Wireless",
+  "chargerNone": "Not connected",
+  "batteryCharging": "Charging",
+  "batteryDischarging": "Discharging",
+  "batteryFull": "Full",
+  "batteryNotCharging": "Not charging",
+  "batteryUnknown": "Unknown",
+  "memoryUsage": "Memory Usage",
+  "memoryCritical": "Critical",
+  "memoryHigh": "High",
+  "memoryModerate": "Moderate",
+  "memoryNormal": "Normal",
+  "memoryOptimized": "Optimized",
+  "used": "used",
+  "loading": "loading…",
+  "unavailable": "unavailable",
+  "dash": "—",
+  "diskSpace": "Disk Space",
+  "total": "total",
+  "usedFormatted": "Used: {formatted}",
+  "@usedFormatted": {
+    "placeholders": {
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "availableFormatted": "Available: {formatted}",
+  "@availableFormatted": {
+    "placeholders": {
+      "formatted": {
+        "type": "String"
+      }
+    }
+  },
+  "storageUnavailable": "Storage information unavailable",
+  "logStatusSnapshot": "Log Status Snapshot",
+  "unitB": "B",
+  "unitKB": "KB",
+  "unitMB": "MB",
+  "unitGB": "GB",
+  "unitTB": "TB",
+  "zeroBytes": "0 B"
+}

@@ -142,8 +142,9 @@ class DeviceSensorService {
       if (total != null) storageInfo[_storageTotalKey] = total;
       if (used != null) storageInfo[_storageUsedKey] = used;
       if (available != null) storageInfo[_storageAvailableKey] = available;
-      if (usagePercent != null)
+      if (usagePercent != null) {
         storageInfo[_storageUsagePercentKey] = usagePercent;
+      }
 
       return storageInfo.isNotEmpty ? storageInfo : null;
     } on PlatformException catch (e) {
