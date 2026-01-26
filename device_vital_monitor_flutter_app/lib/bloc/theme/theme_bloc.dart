@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
+import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 part 'theme_event.dart';
@@ -7,22 +8,19 @@ part 'theme_state.dart';
 
 const String _themeModeKey = 'theme_mode';
 
-/// Bloc for managing theme state
+/// {@template theme_bloc}
+/// Bloc for managing theme state.
+/// {@endtemplate}
 class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
+  /// {@macro theme_bloc}
   ThemeBloc({ThemeMode initial = ThemeMode.system})
-      : super(ThemeInitial(initial)) {
+      : super(ThemeState(mode: initial)) {
     on<ThemeCycleRequested>(_onThemeCycleRequested);
     on<ThemeModeChanged>(_onThemeModeChanged);
-    on<ThemeModeLoaded>(_onThemeModeLoaded);
   }
 
   /// Current theme mode
-  ThemeMode get currentMode {
-    return switch (state) {
-      ThemeInitial(mode: final mode) => mode,
-      ThemeModeUpdated(mode: final mode) => mode,
-    };
-  }
+  ThemeMode get currentMode => state.mode;
 
   Future<void> _onThemeCycleRequested(
     ThemeCycleRequested event,
@@ -34,7 +32,7 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
       ThemeMode.dark => ThemeMode.system,
       ThemeMode.system => ThemeMode.light,
     };
-    emit(ThemeModeUpdated(nextMode));
+    emit(state.copyWith(mode: nextMode));
     await _persist(nextMode);
   }
 
@@ -43,15 +41,8 @@ class ThemeBloc extends Bloc<ThemeEvent, ThemeState> {
     Emitter<ThemeState> emit,
   ) async {
     if (currentMode == event.mode) return;
-    emit(ThemeModeUpdated(event.mode));
+    emit(state.copyWith(mode: event.mode));
     await _persist(event.mode);
-  }
-
-  void _onThemeModeLoaded(
-    ThemeModeLoaded event,
-    Emitter<ThemeState> emit,
-  ) {
-    emit(ThemeInitial(event.mode));
   }
 
   Future<void> _persist(ThemeMode mode) async {

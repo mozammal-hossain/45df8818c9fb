@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/dashboard/dashboard_bloc.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/memory_formatters.dart';
@@ -8,20 +10,18 @@ import 'vital_card.dart';
 
 /// Card widget displaying memory usage information.
 class MemoryUsageCard extends StatelessWidget {
-  const MemoryUsageCard({
-    super.key,
-    required this.memoryUsage,
-    required this.isLoading,
-  });
-
-  final int? memoryUsage;
-  final bool isLoading;
+  const MemoryUsageCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final percent = memoryUsage ?? 0;
-    final hasData = memoryUsage != null && !isLoading;
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final isLoading = state.status == DashboardStatus.loading ||
+            state.status == DashboardStatus.initial;
+        final l10n = AppLocalizations.of(context)!;
+        final memoryUsage = state.memoryUsage;
+        final percent = memoryUsage ?? 0;
+        final hasData = memoryUsage != null && !isLoading;
     final statusLabel = hasData
         ? MemoryFormatters.getMemoryStatusLabel(l10n, percent)
         : l10n.dash;
@@ -104,6 +104,8 @@ class MemoryUsageCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 }

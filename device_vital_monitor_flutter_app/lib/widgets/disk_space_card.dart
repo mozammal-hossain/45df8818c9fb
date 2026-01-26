@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/dashboard/dashboard_bloc.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../utils/memory_formatters.dart';
@@ -9,23 +11,21 @@ import 'vital_card.dart';
 
 /// Card widget displaying disk space information.
 class DiskSpaceCard extends StatelessWidget {
-  const DiskSpaceCard({
-    super.key,
-    required this.storageInfo,
-    required this.isLoading,
-  });
-
-  final Map<String, int>? storageInfo;
-  final bool isLoading;
+  const DiskSpaceCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final hasData = storageInfo != null && !isLoading;
-    final totalBytes = storageInfo?['total'] ?? 0;
-    final usedBytes = storageInfo?['used'] ?? 0;
-    final availableBytes = storageInfo?['available'] ?? 0;
-    final usagePercent = storageInfo?['usagePercent'] ?? 0;
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final isLoading = state.status == DashboardStatus.loading ||
+            state.status == DashboardStatus.initial;
+        final l10n = AppLocalizations.of(context)!;
+        final storageInfo = state.storageInfo;
+        final hasData = storageInfo != null && !isLoading;
+        final totalBytes = storageInfo?.total ?? 0;
+        final usedBytes = storageInfo?.used ?? 0;
+        final availableBytes = storageInfo?.available ?? 0;
+        final usagePercent = storageInfo?.usagePercent ?? 0;
     final colors = Theme.of(context).extension<AppColors>()!;
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
@@ -146,6 +146,8 @@ class DiskSpaceCard extends StatelessWidget {
             Text(l10n.storageUnavailable, style: textTheme.bodySmall),
         ],
       ),
+    );
+      },
     );
   }
 }

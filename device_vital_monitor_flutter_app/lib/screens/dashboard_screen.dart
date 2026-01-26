@@ -1,92 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/dashboard/dashboard_bloc.dart';
 import '../bloc/theme/theme_bloc.dart';
-import '../core/injection/injection.dart';
 import '../l10n/app_localizations.dart';
-import '../services/device_sensor_service.dart';
 import '../widgets/battery_level_card.dart';
 import '../widgets/disk_space_card.dart';
 import '../widgets/memory_usage_card.dart';
 import '../widgets/thermal_state_card.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  late final DeviceSensorService _deviceSensorService;
-  int? _thermalState;
-  bool _isLoadingThermal = true;
-  int? _batteryLevel;
-  String? _batteryHealth;
-  String? _chargerConnection;
-  String? _batteryStatus;
-  bool _isLoadingBattery = true;
-  int? _memoryUsage;
-  bool _isLoadingMemory = true;
-  Map<String, int>? _storageInfo;
-  bool _isLoadingStorage = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _deviceSensorService = getIt<DeviceSensorService>();
-    _fetchSensorData();
-  }
-
-  Future<void> _fetchSensorData() async {
-    setState(() {
-      _isLoadingThermal = true;
-      _isLoadingBattery = true;
-      _isLoadingMemory = true;
-      _isLoadingStorage = true;
-    });
-    try {
-      final results = await Future.wait([
-        _deviceSensorService.getThermalState(),
-        _deviceSensorService.getBatteryLevel(),
-        _deviceSensorService.getBatteryHealth(),
-        _deviceSensorService.getChargerConnection(),
-        _deviceSensorService.getBatteryStatus(),
-        _deviceSensorService.getMemoryUsage(),
-        _deviceSensorService.getStorageInfo(),
-      ]);
-      if (mounted) {
-        setState(() {
-          _thermalState = results[0] as int?;
-          _batteryLevel = results[1] as int?;
-          _batteryHealth = results[2] as String?;
-          _chargerConnection = results[3] as String?;
-          _batteryStatus = results[4] as String?;
-          _memoryUsage = results[5] as int?;
-          _storageInfo = results[6] as Map<String, int>?;
-          _isLoadingThermal = false;
-          _isLoadingBattery = false;
-          _isLoadingMemory = false;
-          _isLoadingStorage = false;
-        });
-      }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _thermalState = null;
-          _batteryLevel = null;
-          _batteryHealth = null;
-          _chargerConnection = null;
-          _batteryStatus = null;
-          _memoryUsage = null;
-          _storageInfo = null;
-          _isLoadingThermal = false;
-          _isLoadingBattery = false;
-          _isLoadingMemory = false;
-          _isLoadingStorage = false;
-        });
-      }
-    }
+  void _fetchSensorData(BuildContext context) {
+    context.read<DashboardBloc>().add(const DashboardSensorDataRequested());
   }
 
   @override
@@ -124,41 +51,45 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
         ],
       ),
-      body: RefreshIndicator(
-        onRefresh: _fetchSensorData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ThermalStateCard(
-                thermalState: _thermalState,
-                isLoading: _isLoadingThermal,
+      body: BlocConsumer<DashboardBloc, DashboardState>(
+        listener: (context, state) {
+          // Trigger initial fetch when screen loads (only once)
+          if (state.status == DashboardStatus.initial) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _fetchSensorData(context);
+            });
+          }
+          // Handle failure state if needed
+          if (state.status == DashboardStatus.failure) {
+            // Could show error snackbar here
+            debugPrint('Dashboard error: ${state.error}');
+          }
+        },
+        builder: (context, state) {
+          return RefreshIndicator(
+            onRefresh: () async {
+              _fetchSensorData(context);
+            },
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const ThermalStateCard(),
+                  const SizedBox(height: 16),
+                  const BatteryLevelCard(),
+                  const SizedBox(height: 16),
+                  const MemoryUsageCard(),
+                  const SizedBox(height: 16),
+                  const DiskSpaceCard(),
+                  const SizedBox(height: 24),
+                  _buildLogStatusButton(context),
+                ],
               ),
-              const SizedBox(height: 16),
-              BatteryLevelCard(
-                batteryLevel: _batteryLevel,
-                batteryHealth: _batteryHealth,
-                chargerConnection: _chargerConnection,
-                batteryStatus: _batteryStatus,
-                isLoading: _isLoadingBattery,
-              ),
-              const SizedBox(height: 16),
-              MemoryUsageCard(
-                memoryUsage: _memoryUsage,
-                isLoading: _isLoadingMemory,
-              ),
-              const SizedBox(height: 16),
-              DiskSpaceCard(
-                storageInfo: _storageInfo,
-                isLoading: _isLoadingStorage,
-              ),
-              const SizedBox(height: 24),
-              _buildLogStatusButton(context),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }

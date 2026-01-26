@@ -1,39 +1,39 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/dashboard/dashboard_bloc.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import 'vital_card.dart';
 
 /// Card widget displaying thermal state information.
 class ThermalStateCard extends StatelessWidget {
-  const ThermalStateCard({
-    super.key,
-    required this.thermalState,
-    required this.isLoading,
-  });
-
-  final int? thermalState;
-  final bool isLoading;
+  const ThermalStateCard({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    final state = thermalState ?? 0;
-    final hasData = thermalState != null && !isLoading;
-    final stateLabel = hasData
-        ? _getThermalStateLabel(l10n, state)
-        : l10n.dash;
-    final colors = Theme.of(context).extension<AppColors>()!;
-    final scheme = Theme.of(context).colorScheme;
-    final stateColor = hasData
-        ? _getThermalStateColor(context, state)
-        : scheme.outline;
-    final stateDescription = hasData
-        ? _getThermalStateDescription(l10n, state)
-        : l10n.loadingThermalState;
-    final textTheme = Theme.of(context).textTheme;
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final isLoading = state.status == DashboardStatus.loading ||
+            state.status == DashboardStatus.initial;
+        final l10n = AppLocalizations.of(context)!;
+        final thermalState = state.thermalState;
+        final stateValue = thermalState ?? 0;
+        final hasData = thermalState != null && !isLoading;
+        final stateLabel = hasData
+            ? _getThermalStateLabel(l10n, stateValue)
+            : l10n.dash;
+        final colors = Theme.of(context).extension<AppColors>()!;
+        final scheme = Theme.of(context).colorScheme;
+        final stateColor = hasData
+            ? _getThermalStateColor(context, stateValue)
+            : scheme.outline;
+        final stateDescription = hasData
+            ? _getThermalStateDescription(l10n, stateValue)
+            : l10n.loadingThermalState;
+        final textTheme = Theme.of(context).textTheme;
 
-    return VitalCard(
+        return VitalCard(
       child: Row(
         children: [
           Container(
@@ -104,6 +104,8 @@ class ThermalStateCard extends StatelessWidget {
           ),
         ],
       ),
+    );
+      },
     );
   }
 

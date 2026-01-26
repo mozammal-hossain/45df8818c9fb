@@ -1,18 +1,18 @@
 part of 'theme_bloc.dart';
 
-/// State for theme management
-sealed class ThemeState {
-  const ThemeState();
-}
+/// {@template theme_state}
+/// State for theme management.
+/// {@endtemplate}
+final class ThemeState extends Equatable {
+  /// {@macro theme_state}
+  const ThemeState({this.mode = ThemeMode.system});
 
-/// Initial state with the current theme mode
-class ThemeInitial extends ThemeState {
-  const ThemeInitial(this.mode);
   final ThemeMode mode;
-}
 
-/// State when theme mode has changed
-class ThemeModeUpdated extends ThemeState {
-  const ThemeModeUpdated(this.mode);
-  final ThemeMode mode;
+  ThemeState copyWith({ThemeMode? mode}) {
+    return ThemeState(mode: mode ?? this.mode);
+  }
+
+  @override
+  List<Object?> get props => [mode];
 }
