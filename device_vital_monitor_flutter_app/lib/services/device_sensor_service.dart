@@ -7,6 +7,20 @@ class DeviceSensorService {
   DeviceSensorService._();
   static const _channel = MethodChannel('device_vital_monitor/sensors');
 
+  /// Returns thermal state 0-3, or null if unavailable / error.
+  /// 0 = NONE, 1 = LIGHT, 2 = MODERATE, 3 = SEVERE
+  static Future<int?> getThermalState() async {
+    try {
+      final state = await _channel.invokeMethod<int>('getThermalState');
+      return state;
+    } on PlatformException catch (e) {
+      debugPrint('DeviceSensorService.getThermalState PlatformException: ${e.code} ${e.message}');
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
   /// Returns battery level 0-100, or null if unavailable / error.
   static Future<int?> getBatteryLevel() async {
     try {
