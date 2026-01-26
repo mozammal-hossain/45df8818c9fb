@@ -63,4 +63,65 @@ class DeviceSensorService {
       return null;
     }
   }
+
+  /// Returns memory usage as percentage 0–100 (system-wide on Android, process vs total on iOS).
+  /// Null if unavailable / error.
+  static Future<int?> getMemoryUsage() async {
+    try {
+      final level = await _channel.invokeMethod<int>('getMemoryUsage');
+      return level;
+    } on PlatformException catch (e) {
+      debugPrint('DeviceSensorService.getMemoryUsage PlatformException: ${e.code} ${e.message}');
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
+  /// Storage information model
+  static const String _storageTotalKey = 'total';
+  static const String _storageUsedKey = 'used';
+  static const String _storageAvailableKey = 'available';
+  static const String _storageUsagePercentKey = 'usagePercent';
+
+  /// Returns storage information as a map with:
+  /// - 'total': total storage in bytes (int)
+  /// - 'used': used storage in bytes (int)
+  /// - 'available': available storage in bytes (int)
+  /// - 'usagePercent': usage percentage 0-100 (int)
+  /// Returns null if unavailable / error.
+  static Future<Map<String, int>?> getStorageInfo() async {
+    try {
+      final result = await _channel.invokeMethod<Map<Object?, Object?>>('getStorageInfo');
+      if (result == null) return null;
+      
+      // Convert to Map<String, int>
+      // Handle both int and int64 (Long) types from native code
+      final storageInfo = <String, int>{};
+      
+      // Helper to convert dynamic to int
+      int? toInt(Object? value) {
+        if (value is int) return value;
+        if (value is num) return value.toInt();
+        return null;
+      }
+      
+      final total = toInt(result[_storageTotalKey]);
+      final used = toInt(result[_storageUsedKey]);
+      final available = toInt(result[_storageAvailableKey]);
+      final usagePercent = toInt(result[_storageUsagePercentKey]);
+      
+      if (total != null) storageInfo[_storageTotalKey] = total;
+      if (used != null) storageInfo[_storageUsedKey] = used;
+      if (available != null) storageInfo[_storageAvailableKey] = available;
+      if (usagePercent != null) storageInfo[_storageUsagePercentKey] = usagePercent;
+      
+      return storageInfo.isNotEmpty ? storageInfo : null;
+    } on PlatformException catch (e) {
+      debugPrint('DeviceSensorService.getStorageInfo PlatformException: ${e.code} ${e.message}');
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
 }

@@ -14,21 +14,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
   String? _chargerConnection;
   String? _batteryStatus;
   bool _isLoadingBattery = true;
+  int? _memoryUsage;
+  bool _isLoadingMemory = true;
+  Map<String, int>? _storageInfo;
+  bool _isLoadingStorage = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchBatteryLevel();
+    _fetchSensorData();
   }
 
-  Future<void> _fetchBatteryLevel() async {
-    setState(() => _isLoadingBattery = true);
+  Future<void> _fetchSensorData() async {
+    setState(() {
+      _isLoadingBattery = true;
+      _isLoadingMemory = true;
+      _isLoadingStorage = true;
+    });
     try {
       final results = await Future.wait([
         DeviceSensorService.getBatteryLevel(),
         DeviceSensorService.getBatteryHealth(),
         DeviceSensorService.getChargerConnection(),
         DeviceSensorService.getBatteryStatus(),
+        DeviceSensorService.getMemoryUsage(),
+        DeviceSensorService.getStorageInfo(),
       ]);
       if (mounted) {
         setState(() {
@@ -36,7 +46,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _batteryHealth = results[1] as String?;
           _chargerConnection = results[2] as String?;
           _batteryStatus = results[3] as String?;
+          _memoryUsage = results[4] as int?;
+          _storageInfo = results[5] as Map<String, int>?;
           _isLoadingBattery = false;
+          _isLoadingMemory = false;
+          _isLoadingStorage = false;
         });
       }
     } catch (_) {
@@ -46,7 +60,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _batteryHealth = null;
           _chargerConnection = null;
           _batteryStatus = null;
+          _memoryUsage = null;
+          _storageInfo = null;
           _isLoadingBattery = false;
+          _isLoadingMemory = false;
+          _isLoadingStorage = false;
         });
       }
     }
@@ -157,7 +175,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: _fetchBatteryLevel,
+        onRefresh: _fetchSensorData,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16.0),
@@ -438,6 +456,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildMemoryUsageCard() {
+    final percent = _memoryUsage ?? 0;
+    final hasData = _memoryUsage != null && !_isLoadingMemory;
+    final statusLabel = hasData ? _getMemoryStatusLabel(percent) : '—';
+    final statusColor = hasData ? _getMemoryStatusColor(percent) : Colors.grey;
+
     return _buildCard(
       child: Row(
         children: [
@@ -467,9 +490,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Optimized',
-                  style: TextStyle(
+                Text(
+                  statusLabel,
+                  style: const TextStyle(
                     fontSize: 13,
                     color: Colors.black54,
                   ),
@@ -479,18 +502,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   textBaseline: TextBaseline.alphabetic,
                   children: [
-                    const Text(
-                      '3.6 GB',
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                    if (_isLoadingMemory)
+                      const SizedBox(
+                        height: 28,
+                        width: 28,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    else
+                      Text(
+                        '${_memoryUsage ?? 0}%',
+                        style: const TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 8),
-                    const Text(
-                      'of 8GB used',
-                      style: TextStyle(
+                    Text(
+                      hasData ? 'used' : (_isLoadingMemory ? 'loading…' : 'unavailable'),
+                      style: const TextStyle(
                         fontSize: 13,
                         color: Colors.black54,
                       ),
@@ -500,7 +530,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ),
-          // Circular progress indicator
           SizedBox(
             width: 80,
             height: 80,
@@ -511,17 +540,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   width: 80,
                   height: 80,
                   child: CircularProgressIndicator(
-                    value: 0.45,
+                    value: hasData ? (percent / 100).clamp(0.0, 1.0) : null,
                     strokeWidth: 8,
                     backgroundColor: Colors.grey[300],
                     valueColor: AlwaysStoppedAnimation<Color>(
-                      Colors.blue[600]!,
+                      statusColor,
                     ),
                   ),
                 ),
-                const Text(
-                  '45%',
-                  style: TextStyle(
+                Text(
+                  hasData ? '$percent%' : (_isLoadingMemory ? '…' : '—'),
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.black87,
@@ -533,6 +562,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
     );
+  }
+
+  String _getMemoryStatusLabel(int percent) {
+    if (percent >= 90) return 'Critical';
+    if (percent >= 75) return 'High';
+    if (percent >= 50) return 'Moderate';
+    if (percent >= 25) return 'Normal';
+    return 'Optimized';
+  }
+
+  Color _getMemoryStatusColor(int percent) {
+    if (percent >= 90) return const Color(0xFFD32F2F);
+    if (percent >= 75) return const Color(0xFFFF5722);
+    if (percent >= 50) return const Color(0xFFFF9800);
+    return Colors.blue[600]!;
+  }
+
+  /// Formats bytes to human-readable format (GB, MB, etc.)
+  String _formatBytes(int bytes) {
+    if (bytes < 0) return '0 B';
+    
+    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    int unitIndex = 0;
+    double size = bytes.toDouble();
+    
+    while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+    }
+    
+    if (unitIndex == 0) {
+      return '${size.toInt()} ${units[unitIndex]}';
+    } else {
+      return '${size.toStringAsFixed(size >= 100 ? 0 : 1)} ${units[unitIndex]}';
+    }
   }
 
   Widget _buildCpuLoadCard() {
@@ -565,29 +629,162 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildDiskSpaceCard() {
+    final hasData = _storageInfo != null && !_isLoadingStorage;
+    final totalBytes = _storageInfo?['total'] ?? 0;
+    final usedBytes = _storageInfo?['used'] ?? 0;
+    final availableBytes = _storageInfo?['available'] ?? 0;
+    final usagePercent = _storageInfo?['usagePercent'] ?? 0;
+    final statusColor = hasData ? _getMemoryStatusColor(usagePercent) : Colors.grey;
+
     return _buildCard(
-      backgroundColor: Colors.blue[50],
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'DISK SPACE',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.bold,
-              color: Colors.blue[800],
-              letterSpacing: 0.5,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue[50],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.storage,
+                  color: Colors.blue,
+                  size: 32,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Disk Space',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    if (hasData)
+                      Text(
+                        _getMemoryStatusLabel(usagePercent),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      )
+                    else
+                      const Text(
+                        '—',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
-          const Text(
-            '242 GB',
-            style: TextStyle(
-              fontSize: 32,
-              fontWeight: FontWeight.bold,
-              color: Colors.black87,
+          const SizedBox(height: 16),
+          if (_isLoadingStorage)
+            const Center(
+              child: SizedBox(
+                height: 32,
+                width: 32,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (hasData) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  _formatBytes(totalBytes),
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Text(
+                  'total',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.black54,
+                  ),
+                ),
+              ],
             ),
-          ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Used: ${_formatBytes(usedBytes)}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Available: ${_formatBytes(availableBytes)}',
+                        style: const TextStyle(
+                          fontSize: 13,
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(
+                          value: (usagePercent / 100).clamp(0.0, 1.0),
+                          strokeWidth: 6,
+                          backgroundColor: Colors.grey[300],
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '$usagePercent%',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else
+            const Text(
+              'Storage information unavailable',
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.black54,
+              ),
+            ),
         ],
       ),
     );
@@ -604,7 +801,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
