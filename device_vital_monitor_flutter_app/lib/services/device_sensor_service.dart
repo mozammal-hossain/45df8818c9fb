@@ -1,15 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:injectable/injectable.dart';
 
 /// Service for reading device sensors via native MethodChannel.
 /// Uses [device_vital_monitor/sensors] channel (Android MainActivity).
+@lazySingleton
 class DeviceSensorService {
-  DeviceSensorService._();
+  DeviceSensorService();
   static const _channel = MethodChannel('device_vital_monitor/sensors');
 
   /// Returns thermal state 0-3, or null if unavailable / error.
   /// 0 = NONE, 1 = LIGHT, 2 = MODERATE, 3 = SEVERE
-  static Future<int?> getThermalState() async {
+  Future<int?> getThermalState() async {
     try {
       final state = await _channel.invokeMethod<int>('getThermalState');
       return state;
@@ -24,7 +26,7 @@ class DeviceSensorService {
   }
 
   /// Returns battery level 0-100, or null if unavailable / error.
-  static Future<int?> getBatteryLevel() async {
+  Future<int?> getBatteryLevel() async {
     try {
       final level = await _channel.invokeMethod<int>('getBatteryLevel');
       return level;
@@ -37,7 +39,7 @@ class DeviceSensorService {
 
   /// Returns Android battery health: GOOD, OVERHEAT, DEAD, OVER_VOLTAGE,
   /// UNSPECIFIED_FAILURE, COLD, or UNKNOWN. Null if unavailable / error.
-  static Future<String?> getBatteryHealth() async {
+  Future<String?> getBatteryHealth() async {
     try {
       final result = await _channel.invokeMethod<Object?>('getBatteryHealth');
       if (result == null) return null;
@@ -54,7 +56,7 @@ class DeviceSensorService {
 
   /// Returns charger connection type: AC, USB, WIRELESS, or NONE.
   /// Null if unavailable / error.
-  static Future<String?> getChargerConnection() async {
+  Future<String?> getChargerConnection() async {
     try {
       final result = await _channel.invokeMethod<Object?>(
         'getChargerConnection',
@@ -73,7 +75,7 @@ class DeviceSensorService {
 
   /// Returns battery status: CHARGING, DISCHARGING, FULL, NOT_CHARGING, or UNKNOWN.
   /// Null if unavailable / error.
-  static Future<String?> getBatteryStatus() async {
+  Future<String?> getBatteryStatus() async {
     try {
       final result = await _channel.invokeMethod<Object?>('getBatteryStatus');
       if (result == null) return null;
@@ -90,7 +92,7 @@ class DeviceSensorService {
 
   /// Returns memory usage as percentage 0–100 (system-wide on Android, process vs total on iOS).
   /// Null if unavailable / error.
-  static Future<int?> getMemoryUsage() async {
+  Future<int?> getMemoryUsage() async {
     try {
       final level = await _channel.invokeMethod<int>('getMemoryUsage');
       return level;
@@ -116,7 +118,7 @@ class DeviceSensorService {
   /// - 'available': available storage in bytes (int)
   /// - 'usagePercent': usage percentage 0-100 (int)
   /// Returns null if unavailable / error.
-  static Future<Map<String, int>?> getStorageInfo() async {
+  Future<Map<String, int>?> getStorageInfo() async {
     try {
       final result = await _channel.invokeMethod<Map<Object?, Object?>>(
         'getStorageInfo',

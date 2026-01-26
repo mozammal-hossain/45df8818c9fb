@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../bloc/theme/theme_bloc.dart';
+import '../core/injection/injection.dart';
 import '../core/theme/theme.dart';
 import '../l10n/app_localizations.dart';
-import '../providers/theme_provider_scope.dart';
 import '../services/device_sensor_service.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -13,6 +15,7 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  late final DeviceSensorService _deviceSensorService;
   int? _thermalState;
   bool _isLoadingThermal = true;
   int? _batteryLevel;
@@ -28,6 +31,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    _deviceSensorService = getIt<DeviceSensorService>();
     _fetchSensorData();
   }
 
@@ -40,13 +44,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
     try {
       final results = await Future.wait([
-        DeviceSensorService.getThermalState(),
-        DeviceSensorService.getBatteryLevel(),
-        DeviceSensorService.getBatteryHealth(),
-        DeviceSensorService.getChargerConnection(),
-        DeviceSensorService.getBatteryStatus(),
-        DeviceSensorService.getMemoryUsage(),
-        DeviceSensorService.getStorageInfo(),
+        _deviceSensorService.getThermalState(),
+        _deviceSensorService.getBatteryLevel(),
+        _deviceSensorService.getBatteryHealth(),
+        _deviceSensorService.getChargerConnection(),
+        _deviceSensorService.getBatteryStatus(),
+        _deviceSensorService.getMemoryUsage(),
+        _deviceSensorService.getStorageInfo(),
       ]);
       if (mounted) {
         setState(() {
@@ -203,7 +207,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    final themeProvider = ThemeProviderScope.of(context);
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
@@ -217,10 +220,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         title: Text(l10n.appTitle),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: themeProvider.cycleThemeMode,
-            tooltip: l10n.toggleThemeTooltip,
+          BlocBuilder<ThemeBloc, ThemeState>(
+            builder: (context, state) {
+              return IconButton(
+                icon: const Icon(Icons.brightness_6),
+                onPressed: () {
+                  context.read<ThemeBloc>().add(const ThemeCycleRequested());
+                },
+                tooltip: l10n.toggleThemeTooltip,
+              );
+            },
           ),
           IconButton(
             icon: const Icon(Icons.more_vert),

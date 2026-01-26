@@ -7,8 +7,10 @@ void main() {
 
   group('DeviceSensorService - Memory Usage Tests', () {
     const MethodChannel channel = MethodChannel('device_vital_monitor/sensors');
+    late DeviceSensorService service;
 
     setUp(() {
+      service = DeviceSensorService();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
     });
@@ -28,7 +30,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(45));
       });
@@ -42,7 +44,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(0));
       });
@@ -56,7 +58,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(100));
       });
@@ -70,7 +72,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(90));
       });
@@ -84,7 +86,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(75));
       });
@@ -98,7 +100,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(50));
       });
@@ -112,7 +114,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(25));
       });
@@ -126,7 +128,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, equals(10));
       });
@@ -143,7 +145,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
           expect(result, equals(value), reason: 'Failed for value: $value');
         }
       });
@@ -162,7 +164,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isNull);
       });
@@ -176,7 +178,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isNull);
       });
@@ -190,7 +192,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isNull);
       });
@@ -206,7 +208,7 @@ void main() {
 
         // The MethodChannel wraps generic exceptions as PlatformException,
         // so the service should return null
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
         expect(result, isNull);
       });
 
@@ -224,7 +226,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
 
           expect(result, isNull);
         },
@@ -244,7 +246,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
 
           expect(result, isNull);
         },
@@ -264,7 +266,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
 
           expect(result, isNull);
         },
@@ -284,7 +286,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
 
           expect(result, isNull);
         },
@@ -301,7 +303,7 @@ void main() {
                 return null;
               });
 
-          final result = await DeviceSensorService.getMemoryUsage();
+          final result = await service.getMemoryUsage();
 
           expect(result, isNull);
         },
@@ -320,7 +322,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isNull);
       });
@@ -336,7 +338,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isA<int>());
         expect(result, equals(42));
@@ -351,7 +353,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isA<int>());
         expect(result, equals(2147483647));
@@ -366,7 +368,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isA<int>());
         expect(result, equals(-10));
@@ -381,7 +383,7 @@ void main() {
               return null;
             });
 
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
 
         expect(result, isA<int>());
         expect(result, equals(150));
@@ -400,7 +402,7 @@ void main() {
 
         final futures = List.generate(
           5,
-          (_) => DeviceSensorService.getMemoryUsage(),
+          (_) => service.getMemoryUsage(),
         );
 
         final results = await Future.wait(futures);
@@ -422,7 +424,7 @@ void main() {
             });
 
         final stopwatch = Stopwatch()..start();
-        await DeviceSensorService.getMemoryUsage();
+        await service.getMemoryUsage();
         stopwatch.stop();
 
         expect(stopwatch.elapsedMilliseconds, lessThan(100));
@@ -439,7 +441,7 @@ void main() {
             });
 
         final stopwatch = Stopwatch()..start();
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
         stopwatch.stop();
 
         expect(result, equals(50));
@@ -458,7 +460,7 @@ void main() {
             });
 
         final stopwatch = Stopwatch()..start();
-        final result = await DeviceSensorService.getMemoryUsage();
+        final result = await service.getMemoryUsage();
         stopwatch.stop();
 
         expect(result, equals(50));
@@ -481,7 +483,7 @@ void main() {
 
         final futures = List.generate(
           10,
-          (_) => DeviceSensorService.getMemoryUsage(),
+          (_) => service.getMemoryUsage(),
         );
 
         final results = await Future.wait(futures);
