@@ -1,0 +1,151 @@
+import 'package:flutter/material.dart';
+
+import '../core/theme/app_colors.dart';
+import '../l10n/app_localizations.dart';
+import '../utils/memory_formatters.dart';
+import '../utils/status_colors.dart';
+import '../utils/storage_formatters.dart';
+import 'vital_card.dart';
+
+/// Card widget displaying disk space information.
+class DiskSpaceCard extends StatelessWidget {
+  const DiskSpaceCard({
+    super.key,
+    required this.storageInfo,
+    required this.isLoading,
+  });
+
+  final Map<String, int>? storageInfo;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final hasData = storageInfo != null && !isLoading;
+    final totalBytes = storageInfo?['total'] ?? 0;
+    final usedBytes = storageInfo?['used'] ?? 0;
+    final availableBytes = storageInfo?['available'] ?? 0;
+    final usagePercent = storageInfo?['usagePercent'] ?? 0;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColor = hasData
+        ? StatusColors.getMemoryStatusColor(context, usagePercent)
+        : scheme.outline;
+
+    return VitalCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: colors.surfaceContainerLow,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.storage, color: scheme.primary, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(l10n.diskSpace, style: textTheme.titleLarge),
+                    const SizedBox(height: 4),
+                    Text(
+                      hasData
+                          ? MemoryFormatters.getMemoryStatusLabel(
+                              l10n,
+                              usagePercent,
+                            )
+                          : l10n.dash,
+                      style: textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (isLoading)
+            const Center(
+              child: SizedBox(
+                height: 32,
+                width: 32,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            )
+          else if (hasData) ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  StorageFormatters.formatBytes(l10n, totalBytes),
+                  style: textTheme.displayMedium,
+                ),
+                const SizedBox(width: 8),
+                Text(l10n.total, style: textTheme.bodySmall),
+              ],
+            ),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        l10n.usedFormatted(
+                          StorageFormatters.formatBytes(l10n, usedBytes),
+                        ),
+                        style: textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        l10n.availableFormatted(
+                          StorageFormatters.formatBytes(l10n, availableBytes),
+                        ),
+                        style: textTheme.bodySmall,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 60,
+                  height: 60,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      SizedBox(
+                        width: 60,
+                        height: 60,
+                        child: CircularProgressIndicator(
+                          value: (usagePercent / 100).clamp(0.0, 1.0),
+                          strokeWidth: 6,
+                          backgroundColor: colors.progressTrack,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            statusColor,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        '$usagePercent%',
+                        style: textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else
+            Text(l10n.storageUnavailable, style: textTheme.bodySmall),
+        ],
+      ),
+    );
+  }
+}

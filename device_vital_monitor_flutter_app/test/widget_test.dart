@@ -4,7 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:device_vital_monitor_flutter_app/bloc/theme/theme_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/core/injection/injection.dart';
 import 'package:device_vital_monitor_flutter_app/main.dart';
+import 'package:device_vital_monitor_flutter_app/services/device_sensor_service.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -12,6 +15,12 @@ void main() {
   const MethodChannel channel = MethodChannel('device_vital_monitor/sensors');
 
   setUp(() {
+    // Initialize GetIt and register DeviceSensorService for tests
+    if (!getIt.isRegistered<DeviceSensorService>()) {
+      getIt.registerLazySingleton<DeviceSensorService>(
+        () => DeviceSensorService(),
+      );
+    }
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
           if (call.method == 'getThermalState') return 0;
@@ -33,12 +42,17 @@ void main() {
   });
 
   tearDown(() {
+    // Clean up GetIt registrations
+    if (getIt.isRegistered<DeviceSensorService>()) {
+      getIt.unregister<DeviceSensorService>();
+    }
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
 
   testWidgets('app smoke test', (WidgetTester tester) async {
-    await tester.pumpWidget(const MyApp(initialThemeMode: ThemeMode.system));
+    final themeBloc = ThemeBloc(initial: ThemeMode.system);
+    await tester.pumpWidget(MyApp(themeBloc: themeBloc));
     await tester.pumpAndSettle();
 
     expect(find.text('Device Vital Monitor'), findsOneWidget);
