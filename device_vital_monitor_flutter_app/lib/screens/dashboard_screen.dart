@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../core/theme/theme.dart';
+import '../l10n/app_localizations.dart';
+import '../providers/theme_provider_scope.dart';
 import '../services/device_sensor_service.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -78,149 +82,148 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-
-
-  String _getBatteryStatus(int level) {
-    if (level >= 80) return 'HEALTHY';
-    if (level >= 50) return 'MODERATE';
-    if (level >= 20) return 'LOW';
-    return 'CRITICAL';
+  String _getBatteryStatus(AppLocalizations l10n, int level) {
+    if (level >= 80) return l10n.batteryStatusHealthy;
+    if (level >= 50) return l10n.batteryStatusModerate;
+    if (level >= 20) return l10n.batteryStatusLow;
+    return l10n.batteryStatusCritical;
   }
 
-  Color _getBatteryStatusColor(int level) {
-    if (level >= 80) return const Color(0xFF4CAF50);
-    if (level >= 50) return const Color(0xFFFF9800);
-    if (level >= 20) return const Color(0xFFFF5722);
-    return const Color(0xFFD32F2F);
+  Color _getBatteryStatusColor(BuildContext context, int level) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    if (level >= 80) return colors.success;
+    if (level >= 50) return colors.warning;
+    if (level >= 20) return colors.low;
+    return colors.error;
   }
 
-  String _getEstimatedTimeRemaining(int level) {
-    // Rough estimation: assuming average usage
+  String _getEstimatedTimeRemaining(AppLocalizations l10n, int level) {
     final hours = (level * 0.14).round();
-    return 'Estimated ${hours}h remaining';
+    return l10n.estimatedTimeRemaining(hours);
   }
 
-  String _formatBatteryHealth(String health) {
+  String _formatBatteryHealth(AppLocalizations l10n, String health) {
     switch (health) {
       case 'GOOD':
-        return 'Good';
+        return l10n.batteryHealthGood;
       case 'OVERHEAT':
-        return 'Overheat';
+        return l10n.batteryHealthOverheat;
       case 'DEAD':
-        return 'Dead';
+        return l10n.batteryHealthDead;
       case 'OVER_VOLTAGE':
-        return 'Over voltage';
+        return l10n.batteryHealthOverVoltage;
       case 'UNSPECIFIED_FAILURE':
-        return 'Unspecified failure';
+        return l10n.batteryHealthUnspecifiedFailure;
       case 'COLD':
-        return 'Cold';
+        return l10n.batteryHealthCold;
       default:
         return health;
     }
   }
 
-  String _formatChargerConnection(String connection) {
+  String _formatChargerConnection(AppLocalizations l10n, String connection) {
     switch (connection) {
       case 'AC':
-        return 'AC Charger';
+        return l10n.chargerAc;
       case 'USB':
-        return 'USB';
+        return l10n.chargerUsb;
       case 'WIRELESS':
-        return 'Wireless';
+        return l10n.chargerWireless;
       case 'NONE':
-        return 'Not connected';
+        return l10n.chargerNone;
       default:
         return connection;
     }
   }
 
-  String _formatBatteryStatus(String status) {
+  String _formatBatteryStatus(AppLocalizations l10n, String status) {
     switch (status) {
       case 'CHARGING':
-        return 'Charging';
+        return l10n.batteryCharging;
       case 'DISCHARGING':
-        return 'Discharging';
+        return l10n.batteryDischarging;
       case 'FULL':
-        return 'Full';
+        return l10n.batteryFull;
       case 'NOT_CHARGING':
-        return 'Not charging';
+        return l10n.batteryNotCharging;
       case 'UNKNOWN':
-        return 'Unknown';
+        return l10n.batteryUnknown;
       default:
         return status;
     }
   }
 
-  String _getThermalStateLabel(int state) {
+  String _getThermalStateLabel(AppLocalizations l10n, int state) {
     switch (state) {
       case 0:
-        return 'NONE';
+        return l10n.thermalStateNone;
       case 1:
-        return 'LIGHT';
+        return l10n.thermalStateLight;
       case 2:
-        return 'MODERATE';
+        return l10n.thermalStateModerate;
       case 3:
-        return 'SEVERE';
+        return l10n.thermalStateSevere;
       default:
-        return 'UNKNOWN';
+        return l10n.thermalStateUnknown;
     }
   }
 
-  String _getThermalStateDescription(int state) {
+  String _getThermalStateDescription(AppLocalizations l10n, int state) {
     switch (state) {
       case 0:
-        return 'System operating within normal temperature ranges.';
+        return l10n.thermalDescriptionNone;
       case 1:
-        return 'Slightly elevated temperature, monitoring recommended.';
+        return l10n.thermalDescriptionLight;
       case 2:
-        return 'Moderate thermal stress detected. Consider reducing usage.';
+        return l10n.thermalDescriptionModerate;
       case 3:
-        return 'Severe thermal condition. Device may throttle performance.';
+        return l10n.thermalDescriptionSevere;
       default:
-        return 'Thermal state unavailable.';
+        return l10n.thermalDescriptionUnavailable;
     }
   }
 
-  Color _getThermalStateColor(int state) {
+  Color _getThermalStateColor(BuildContext context, int state) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
     switch (state) {
       case 0:
-        return const Color(0xFF4CAF50); // Green
+        return colors.success;
       case 1:
-        return const Color(0xFFFF9800); // Orange
+        return colors.warning;
       case 2:
-        return const Color(0xFFFF5722); // Deep Orange
+        return colors.low;
       case 3:
-        return const Color(0xFFD32F2F); // Red
+        return colors.error;
       default:
-        return Colors.grey;
+        return scheme.outline;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final themeProvider = ThemeProviderScope.of(context);
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
-      backgroundColor: Colors.grey[50],
+      backgroundColor: scheme.surfaceContainerLow,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black87),
+          icon: const Icon(Icons.menu),
           onPressed: () {
             // Handle menu tap
           },
         ),
-        title: const Text(
-          'Device Vital Monitor',
-          style: TextStyle(
-            color: Colors.black87,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
-        ),
-        centerTitle: true,
+        title: Text(l10n.appTitle),
         actions: [
           IconButton(
-            icon: const Icon(Icons.more_vert, color: Colors.black87),
+            icon: const Icon(Icons.brightness_6),
+            onPressed: themeProvider.cycleThemeMode,
+            tooltip: l10n.toggleThemeTooltip,
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert),
             onPressed: () {
               // Handle more options
             },
@@ -235,72 +238,57 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Thermal State Card
-              _buildThermalStateCard(),
-            const SizedBox(height: 16),
-            
-            // Battery Level Card
-            _buildBatteryLevelCard(),
-            const SizedBox(height: 16),
-            
-            // Memory Usage Card
-            _buildMemoryUsageCard(),
-            const SizedBox(height: 16),
-            
-            // Disk Space Card
-            _buildDiskSpaceCard(),
-            const SizedBox(height: 24),
-            
-            // Log Status Snapshot Button
-            _buildLogStatusButton(),
-          ],
-        ),
+              _buildThermalStateCard(context),
+              const SizedBox(height: 16),
+              _buildBatteryLevelCard(context),
+              const SizedBox(height: 16),
+              _buildMemoryUsageCard(context),
+              const SizedBox(height: 16),
+              _buildDiskSpaceCard(context),
+              const SizedBox(height: 24),
+              _buildLogStatusButton(context),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildThermalStateCard() {
+  Widget _buildThermalStateCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final thermalState = _thermalState ?? 0;
     final hasData = _thermalState != null && !_isLoadingThermal;
-    final stateLabel = hasData ? _getThermalStateLabel(thermalState) : '—';
-    final stateColor = hasData ? _getThermalStateColor(thermalState) : Colors.grey;
-    final stateDescription = hasData ? _getThermalStateDescription(thermalState) : 'Loading thermal state...';
+    final stateLabel = hasData
+        ? _getThermalStateLabel(l10n, thermalState)
+        : l10n.dash;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
+    final stateColor = hasData
+        ? _getThermalStateColor(context, thermalState)
+        : scheme.outline;
+    final stateDescription = hasData
+        ? _getThermalStateDescription(l10n, thermalState)
+        : l10n.loadingThermalState;
+    final textTheme = Theme.of(context).textTheme;
 
     return _buildCard(
+      context,
       child: Row(
         children: [
-          // Icon
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: stateColor.withOpacity(0.1),
+              color: stateColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              Icons.thermostat,
-              color: stateColor,
-              size: 32,
-            ),
+            child: Icon(Icons.thermostat, color: stateColor, size: 32),
           ),
           const SizedBox(width: 16),
-          // Content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    const Text(
-                      'Thermal State',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
-                  ],
-                ),
+                Text(l10n.thermalState, style: textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -313,14 +301,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     else
-                      Text(
-                        '$_thermalState',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
+                      Text('$_thermalState', style: textTheme.displayLarge),
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
@@ -333,27 +314,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       child: Text(
                         stateLabel,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.bold,
+                        style: textTheme.labelLarge?.copyWith(
+                          color: colors.onStatus,
                         ),
                       ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  stateDescription,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
-                ),
+                Text(stateDescription, style: textTheme.bodySmall),
               ],
             ),
           ),
-          // Visual element
           Container(
             width: 80,
             height: 80,
@@ -361,8 +333,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               borderRadius: BorderRadius.circular(8),
               gradient: LinearGradient(
                 colors: [
-                  stateColor.withOpacity(0.3),
-                  stateColor.withOpacity(0.7),
+                  stateColor.withValues(alpha: 0.3),
+                  stateColor.withValues(alpha: 0.7),
                 ],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -374,14 +346,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildBatteryLevelCard() {
+  Widget _buildBatteryLevelCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final batteryLevel = _batteryLevel ?? 0;
-    final status = _batteryLevel != null ? _getBatteryStatus(batteryLevel) : 'LOADING';
-    final statusColor = _batteryLevel != null 
-        ? _getBatteryStatusColor(batteryLevel) 
-        : Colors.grey;
+    final status = _batteryLevel != null
+        ? _getBatteryStatus(l10n, batteryLevel)
+        : l10n.batteryStatusLoading;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColor = _batteryLevel != null
+        ? _getBatteryStatusColor(context, batteryLevel)
+        : scheme.outline;
 
     return _buildCard(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -390,12 +369,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: colors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.battery_charging_full,
-                  color: Colors.blue,
+                  color: scheme.primary,
                   size: 32,
                 ),
               ),
@@ -406,14 +385,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   children: [
                     Row(
                       children: [
-                        const Text(
-                          'Battery Level',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
+                        Text(l10n.batteryLevel, style: textTheme.titleLarge),
                         const SizedBox(width: 8),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -426,10 +398,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                           child: Text(
                             status,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colors.onStatus,
                             ),
                           ),
                         ),
@@ -445,50 +415,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     else
                       Text(
                         '${_batteryLevel ?? 0}%',
-                        style: const TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                        style: textTheme.displayLarge,
                       ),
                     if (_batteryLevel != null && !_isLoadingBattery) ...[
                       const SizedBox(height: 4),
                       Text(
-                        _getEstimatedTimeRemaining(batteryLevel),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
+                        _getEstimatedTimeRemaining(l10n, batteryLevel),
+                        style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _batteryHealth != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Device health: ${_formatBatteryHealth(_batteryHealth!)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
+                        l10n.deviceHealthLabel(
+                          _formatBatteryHealth(l10n, _batteryHealth!),
                         ),
+                        style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _chargerConnection != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Charger: ${_formatChargerConnection(_chargerConnection!)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
+                        l10n.chargerLabel(
+                          _formatChargerConnection(l10n, _chargerConnection!),
                         ),
+                        style: textTheme.bodySmall,
                       ),
                     ],
                     if (!_isLoadingBattery && _batteryStatus != null) ...[
                       const SizedBox(height: 4),
                       Text(
-                        'Status: ${_formatBatteryStatus(_batteryStatus!)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
+                        l10n.statusLabel(
+                          _formatBatteryStatus(l10n, _batteryStatus!),
                         ),
+                        style: textTheme.bodySmall,
                       ),
                     ],
                   ],
@@ -503,10 +463,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               child: LinearProgressIndicator(
                 value: batteryLevel / 100,
                 minHeight: 8,
-                backgroundColor: Colors.grey[300],
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  Colors.blue[600]!,
-                ),
+                backgroundColor: colors.progressTrack,
+                valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
               ),
             ),
           ],
@@ -515,48 +473,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildMemoryUsageCard() {
+  Widget _buildMemoryUsageCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final percent = _memoryUsage ?? 0;
     final hasData = _memoryUsage != null && !_isLoadingMemory;
-    final statusLabel = hasData ? _getMemoryStatusLabel(percent) : '—';
-    final statusColor = hasData ? _getMemoryStatusColor(percent) : Colors.grey;
+    final statusLabel = hasData
+        ? _getMemoryStatusLabel(l10n, percent)
+        : l10n.dash;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColor = hasData
+        ? _getMemoryStatusColor(context, percent)
+        : scheme.outline;
 
     return _buildCard(
+      context,
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.blue[50],
+              color: colors.surfaceContainerLow,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(
-              Icons.memory,
-              color: Colors.blue,
-              size: 32,
-            ),
+            child: Icon(Icons.memory, color: scheme.primary, size: 32),
           ),
           const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Memory Usage',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
-                ),
+                Text(l10n.memoryUsage, style: textTheme.titleLarge),
                 const SizedBox(height: 4),
-                Text(
-                  statusLabel,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
-                ),
+                Text(statusLabel, style: textTheme.bodySmall),
                 const SizedBox(height: 8),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -571,19 +521,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     else
                       Text(
                         '${_memoryUsage ?? 0}%',
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
+                        style: textTheme.displayMedium,
                       ),
                     const SizedBox(width: 8),
                     Text(
-                      hasData ? 'used' : (_isLoadingMemory ? 'loading…' : 'unavailable'),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black54,
-                      ),
+                      hasData
+                          ? l10n.used
+                          : (_isLoadingMemory
+                                ? l10n.loading
+                                : l10n.unavailable),
+                      style: textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -602,19 +549,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: CircularProgressIndicator(
                     value: hasData ? (percent / 100).clamp(0.0, 1.0) : null,
                     strokeWidth: 8,
-                    backgroundColor: Colors.grey[300],
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      statusColor,
-                    ),
+                    backgroundColor: colors.progressTrack,
+                    valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                   ),
                 ),
                 Text(
-                  hasData ? '$percent%' : (_isLoadingMemory ? '…' : '—'),
-                  style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  hasData ? '$percent%' : (_isLoadingMemory ? '…' : l10n.dash),
+                  style: textTheme.titleLarge,
                 ),
               ],
             ),
@@ -624,34 +565,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  String _getMemoryStatusLabel(int percent) {
-    if (percent >= 90) return 'Critical';
-    if (percent >= 75) return 'High';
-    if (percent >= 50) return 'Moderate';
-    if (percent >= 25) return 'Normal';
-    return 'Optimized';
+  String _getMemoryStatusLabel(AppLocalizations l10n, int percent) {
+    if (percent >= 90) return l10n.memoryCritical;
+    if (percent >= 75) return l10n.memoryHigh;
+    if (percent >= 50) return l10n.memoryModerate;
+    if (percent >= 25) return l10n.memoryNormal;
+    return l10n.memoryOptimized;
   }
 
-  Color _getMemoryStatusColor(int percent) {
-    if (percent >= 90) return const Color(0xFFD32F2F);
-    if (percent >= 75) return const Color(0xFFFF5722);
-    if (percent >= 50) return const Color(0xFFFF9800);
-    return Colors.blue[600]!;
+  Color _getMemoryStatusColor(BuildContext context, int percent) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    if (percent >= 90) return colors.error;
+    if (percent >= 75) return colors.low;
+    if (percent >= 50) return colors.warning;
+    return colors.success;
   }
 
   /// Formats bytes to human-readable format (GB, MB, etc.)
-  String _formatBytes(int bytes) {
-    if (bytes < 0) return '0 B';
-    
-    const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+  String _formatBytes(AppLocalizations l10n, int bytes) {
+    if (bytes < 0) return l10n.zeroBytes;
+
+    final units = [
+      l10n.unitB,
+      l10n.unitKB,
+      l10n.unitMB,
+      l10n.unitGB,
+      l10n.unitTB,
+    ];
     int unitIndex = 0;
     double size = bytes.toDouble();
-    
+
     while (size >= 1024 && unitIndex < units.length - 1) {
       size /= 1024;
       unitIndex++;
     }
-    
+
     if (unitIndex == 0) {
       return '${size.toInt()} ${units[unitIndex]}';
     } else {
@@ -659,15 +607,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Widget _buildDiskSpaceCard() {
+  Widget _buildDiskSpaceCard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final hasData = _storageInfo != null && !_isLoadingStorage;
     final totalBytes = _storageInfo?['total'] ?? 0;
     final usedBytes = _storageInfo?['used'] ?? 0;
     final availableBytes = _storageInfo?['available'] ?? 0;
     final usagePercent = _storageInfo?['usagePercent'] ?? 0;
-    final statusColor = hasData ? _getMemoryStatusColor(usagePercent) : Colors.grey;
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+    final statusColor = hasData
+        ? _getMemoryStatusColor(context, usagePercent)
+        : scheme.outline;
 
     return _buildCard(
+      context,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -676,45 +631,24 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.blue[50],
+                  color: colors.surfaceContainerLow,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.storage,
-                  color: Colors.blue,
-                  size: 32,
-                ),
+                child: Icon(Icons.storage, color: scheme.primary, size: 32),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Disk Space',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
+                    Text(l10n.diskSpace, style: textTheme.titleLarge),
                     const SizedBox(height: 4),
-                    if (hasData)
-                      Text(
-                        _getMemoryStatusLabel(usagePercent),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                      )
-                    else
-                      const Text(
-                        '—',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
-                      ),
+                    Text(
+                      hasData
+                          ? _getMemoryStatusLabel(l10n, usagePercent)
+                          : l10n.dash,
+                      style: textTheme.bodySmall,
+                    ),
                   ],
                 ),
               ),
@@ -735,21 +669,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
               textBaseline: TextBaseline.alphabetic,
               children: [
                 Text(
-                  _formatBytes(totalBytes),
-                  style: const TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                  ),
+                  _formatBytes(l10n, totalBytes),
+                  style: textTheme.displayMedium,
                 ),
                 const SizedBox(width: 8),
-                const Text(
-                  'total',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.black54,
-                  ),
-                ),
+                Text(l10n.total, style: textTheme.bodySmall),
               ],
             ),
             const SizedBox(height: 8),
@@ -760,19 +684,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Used: ${_formatBytes(usedBytes)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
-                        ),
+                        l10n.usedFormatted(_formatBytes(l10n, usedBytes)),
+                        style: textTheme.bodySmall,
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Available: ${_formatBytes(availableBytes)}',
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: Colors.black54,
+                        l10n.availableFormatted(
+                          _formatBytes(l10n, availableBytes),
                         ),
+                        style: textTheme.bodySmall,
                       ),
                     ],
                   ),
@@ -789,7 +709,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         child: CircularProgressIndicator(
                           value: (usagePercent / 100).clamp(0.0, 1.0),
                           strokeWidth: 6,
-                          backgroundColor: Colors.grey[300],
+                          backgroundColor: colors.progressTrack,
                           valueColor: AlwaysStoppedAnimation<Color>(
                             statusColor,
                           ),
@@ -797,10 +717,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       Text(
                         '$usagePercent%',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: textTheme.bodyMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
                         ),
                       ),
                     ],
@@ -809,30 +727,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
           ] else
-            const Text(
-              'Storage information unavailable',
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.black54,
-              ),
-            ),
+            Text(l10n.storageUnavailable, style: textTheme.bodySmall),
         ],
       ),
     );
   }
 
-  Widget _buildCard({
-    required Widget child,
-    Color? backgroundColor,
-  }) {
+  Widget _buildCard(BuildContext context, {required Widget child}) {
+    final colors = Theme.of(context).extension<AppColors>()!;
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: backgroundColor ?? Colors.white,
+        color: colors.surfaceContainer,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: scheme.shadow.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -842,28 +753,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildLogStatusButton() {
+  Widget _buildLogStatusButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return ElevatedButton.icon(
       onPressed: () {
         // Handle log status snapshot
       },
-      icon: const Icon(Icons.bar_chart, color: Colors.white),
-      label: const Text(
-        'Log Status Snapshot',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.blue[600],
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        elevation: 2,
-      ),
+      icon: const Icon(Icons.bar_chart),
+      label: Text(l10n.logStatusSnapshot),
     );
   }
 }

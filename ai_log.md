@@ -81,6 +81,39 @@ Material 3's `ColorScheme.fromSeed()` generates a harmonious color palette from 
 
 ---
 
+### Prompt 4: Localization (Internationalization)
+
+**Context:** Implemented app-wide localization so the UI can be shown in
+multiple languages (English and Spanish initially).
+
+**Approach:**
+- Added `flutter_localizations` (SDK) and `intl` to `pubspec.yaml`, and
+  `flutter.generate: true` for `gen-l10n`
+- Created `lib/l10n/app_en.arb` (template) and `lib/l10n/app_es.arb` with all
+  user-facing strings (app title, thermal/battery/memory labels, status text,
+  units, etc.)
+- Ran `flutter gen-l10n` to generate `AppLocalizations` and per-locale classes
+  in `lib/l10n/`
+- Wired `MaterialApp` with `localizationsDelegates` and `supportedLocales`
+- Replaced hardcoded strings in `main.dart` and `DashboardScreen` with
+  `AppLocalizations.of(context)!` and passed `l10n` into helpers
+  (`_formatBatteryHealth`, `_getThermalStateLabel`, `_formatBytes`, etc.)
+- Added `l10n.yaml` with `arb-dir: lib/l10n` and `template-arb-file: app_en.arb`
+- Updated tests: `widget_test` now pumps `MyApp(initialThemeMode: ThemeMode.system)`
+  with a mocked sensor channel and asserts on "Device Vital Monitor";
+  `dashboard_screen_memory_test` uses a `_localizedMaterialApp()` helper that
+  wraps `MaterialApp` with `localizationsDelegates`, `supportedLocales`,
+  `ThemeProviderScope`/`ThemeProvider`, and `locale: Locale('en')` so
+  `AppLocalizations` and theme toggle work in tests
+
+**Why it works:**
+Flutter’s `gen-l10n` tool generates type-safe `AppLocalizations` from ARB
+files. `localizationsDelegates` (including `AppLocalizations.delegate`) provide
+translations to the widget tree; `supportedLocales` defines available locales.
+The app uses the device locale when supported, otherwise falls back to English.
+
+---
+
 ## The Wins
 
 ### Win 1: MethodChannel Setup Accelerated Development

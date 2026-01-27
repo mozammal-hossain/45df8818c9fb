@@ -66,57 +66,53 @@ class AppLogger {
   }
 
   /// Log an error message
-  /// 
+  ///
   /// [message] - The error message to log
   /// [error] - Optional error object or exception
   /// [stackTrace] - Optional stack trace
-  void error(
-    String message, {
-    Object? error,
-    StackTrace? stackTrace,
-  }) {
+  void error(String message, {Object? error, StackTrace? stackTrace}) {
     if (!_enableLogging) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final errorPrefix = '❌ [ERROR]';
-    
+
     debugPrint('$errorPrefix [$timestamp] $message');
-    
+
     if (error != null) {
       debugPrint('$errorPrefix Error details: $error');
     }
-    
+
     if (stackTrace != null) {
       debugPrint('$errorPrefix Stack trace: $stackTrace');
     }
   }
 
   /// Log a success message
-  /// 
+  ///
   /// [message] - The success message to log
   void success(String message) {
     if (!_enableLogging) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final successPrefix = '✅ [SUCCESS]';
-    
+
     debugPrint('$successPrefix [$timestamp] $message');
   }
 
   /// Log an info message
-  /// 
+  ///
   /// [message] - The info message to log
   void info(String message) {
     if (!_enableLogging) return;
 
     final timestamp = DateTime.now().toIso8601String();
     final infoPrefix = 'ℹ️  [INFO]';
-    
+
     debugPrint('$infoPrefix [$timestamp] $message');
   }
 
   /// Log a debug message
-  /// 
+  ///
   /// [message] - The debug message to log
   /// [data] - Optional additional data to log
   void debug(String message, {Object? data}) {
@@ -124,9 +120,9 @@ class AppLogger {
 
     final timestamp = DateTime.now().toIso8601String();
     final debugPrefix = '🔍 [DEBUG]';
-    
+
     debugPrint('$debugPrefix [$timestamp] $message');
-    
+
     if (data != null) {
       debugPrint('$debugPrefix Data: $data');
     }

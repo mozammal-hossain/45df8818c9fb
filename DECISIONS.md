@@ -33,3 +33,42 @@
 - Store theme preference using `shared_preferences` package
 - Provide theme toggle in app settings or app bar
 - Default to `ThemeMode.system` on first launch, then respect user's saved preference
+
+---
+
+## Ambiguity 2: Localization (Internationalization)
+
+**Question:** Should the app support multiple languages, and how should locale be
+determined?
+
+**Options Considered:**
+- Option A: English only (simplest, no i18n)
+- Option B: Multiple locales with device/system locale detection only
+- Option C: Multiple locales with device locale + optional in-app language picker
+
+**Decision:** Option B. Implement localization using Flutter’s built-in
+`flutter_localizations` and `gen-l10n` (ARB files). Use the device locale by
+default; no in-app language picker for now.
+
+**Trade-offs:**
+- ARB files and generated code add some complexity and build steps
+- All user-facing strings must go through `AppLocalizations`
+- Tests must wrap widgets in `MaterialApp` with `localizationsDelegates` and
+  `supportedLocales` (and `ThemeProviderScope` where the UI uses it)
+- Benefit: Spanish (and other locales) can be added by adding ARB files and
+  translating keys
+
+**Assumptions:**
+- Initial locales: English (en) as default, Spanish (es) as second locale
+- App follows system locale when it’s supported; otherwise falls back to en
+- No requirement for persisting user-chosen locale (unlike theme)
+
+**Implementation Approach:**
+- Add `flutter_localizations` and `intl`; set `flutter.generate: true` in
+  `pubspec.yaml`
+- Add `lib/l10n/app_en.arb` (template) and `lib/l10n/app_es.arb`
+- Run `flutter gen-l10n` to generate `AppLocalizations`
+- Configure `MaterialApp` with `localizationsDelegates` and `supportedLocales`
+- Replace hardcoded strings in `main.dart` and `DashboardScreen` with
+  `AppLocalizations.of(context)!` lookups
+- Use `l10n.yaml` to configure `arb-dir` and `template-arb-file`
