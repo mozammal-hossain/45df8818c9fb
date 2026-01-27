@@ -18,3 +18,11 @@ final class DashboardSensorDataRequested extends DashboardEvent {
   /// {@macro dashboard_sensor_data_requested}
   const DashboardSensorDataRequested();
 }
+
+/// {@template dashboard_log_status_requested}
+/// Event to send current sensor data to the backend.
+/// {@endtemplate}
+final class DashboardLogStatusRequested extends DashboardEvent {
+  /// {@macro dashboard_log_status_requested}
+  const DashboardLogStatusRequested();
+}

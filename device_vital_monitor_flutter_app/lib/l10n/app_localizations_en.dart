@@ -206,4 +206,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get zeroBytes => '0 B';
+
+  @override
+  String get historyTitle => 'History';
+
+  @override
+  String get historyEmpty =>
+      'No vitals logged yet. Use “Log Status” on the dashboard.';
+
+  @override
+  String get analyticsTitle => 'Analytics (rolling window)';
+
+  @override
+  String get averageThermalLabel => 'Avg thermal';
+
+  @override
+  String get averageBatteryLabel => 'Avg battery';
+
+  @override
+  String get averageMemoryLabel => 'Avg memory';
+
+  @override
+  String get totalLogsLabel => 'Total logs';
+
+  @override
+  String get rollingWindowLogsLabel => 'Logs in window';
+
+  @override
+  String get dashboardTitle => 'Dashboard';
+
+  @override
+  String get loggingEllipsis => 'Logging…';
 }

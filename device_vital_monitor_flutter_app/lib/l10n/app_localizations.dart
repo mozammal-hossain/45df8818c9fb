@@ -463,6 +463,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'0 B'**
   String get zeroBytes;
+
+  /// No description provided for @historyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'History'**
+  String get historyTitle;
+
+  /// No description provided for @historyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No vitals logged yet. Use “Log Status” on the dashboard.'**
+  String get historyEmpty;
+
+  /// No description provided for @analyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics (rolling window)'**
+  String get analyticsTitle;
+
+  /// No description provided for @averageThermalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg thermal'**
+  String get averageThermalLabel;
+
+  /// No description provided for @averageBatteryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg battery'**
+  String get averageBatteryLabel;
+
+  /// No description provided for @averageMemoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg memory'**
+  String get averageMemoryLabel;
+
+  /// No description provided for @totalLogsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total logs'**
+  String get totalLogsLabel;
+
+  /// No description provided for @rollingWindowLogsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Logs in window'**
+  String get rollingWindowLogsLabel;
+
+  /// No description provided for @dashboardTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dashboard'**
+  String get dashboardTitle;
+
+  /// No description provided for @loggingEllipsis.
+  ///
+  /// In en, this message translates to:
+  /// **'Logging…'**
+  String get loggingEllipsis;
 }
 
 class _AppLocalizationsDelegate

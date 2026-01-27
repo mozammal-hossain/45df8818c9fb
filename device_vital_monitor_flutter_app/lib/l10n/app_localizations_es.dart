@@ -207,4 +207,35 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get zeroBytes => '0 B';
+
+  @override
+  String get historyTitle => 'Historial';
+
+  @override
+  String get historyEmpty =>
+      'Aún no hay registros. Usa «Registrar estado» en el panel.';
+
+  @override
+  String get analyticsTitle => 'Analíticas (ventana móvil)';
+
+  @override
+  String get averageThermalLabel => 'Térmico medio';
+
+  @override
+  String get averageBatteryLabel => 'Batería media';
+
+  @override
+  String get averageMemoryLabel => 'Memoria media';
+
+  @override
+  String get totalLogsLabel => 'Total registros';
+
+  @override
+  String get rollingWindowLogsLabel => 'Registros en ventana';
+
+  @override
+  String get dashboardTitle => 'Panel';
+
+  @override
+  String get loggingEllipsis => 'Registrando…';
 }

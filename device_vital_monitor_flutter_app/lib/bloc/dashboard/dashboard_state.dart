@@ -17,6 +17,14 @@ enum DashboardStatus {
   failure,
 }
 
+/// Status of the "Log Status" action.
+enum LogStatusState {
+  idle,
+  submitting,
+  success,
+  failure,
+}
+
 /// {@template dashboard_state}
 /// State for dashboard sensor data management.
 /// {@endtemplate}
@@ -35,6 +43,8 @@ final class DashboardState extends Equatable {
     this.isLoadingMemory = false,
     this.storageInfo,
     this.isLoadingStorage = false,
+    this.logStatusState = LogStatusState.idle,
+    this.logStatusMessage,
     this.error,
     this.stackTrace,
   });
@@ -51,6 +61,8 @@ final class DashboardState extends Equatable {
   final bool isLoadingMemory;
   final StorageInfo? storageInfo;
   final bool isLoadingStorage;
+  final LogStatusState logStatusState;
+  final String? logStatusMessage;
   final Object? error;
   final StackTrace? stackTrace;
 
@@ -67,6 +79,9 @@ final class DashboardState extends Equatable {
     bool? isLoadingMemory,
     StorageInfo? storageInfo,
     bool? isLoadingStorage,
+    LogStatusState? logStatusState,
+    String? logStatusMessage,
+    bool clearLogStatusMessage = false,
     Object? error,
     StackTrace? stackTrace,
   }) {
@@ -83,6 +98,9 @@ final class DashboardState extends Equatable {
       isLoadingMemory: isLoadingMemory ?? this.isLoadingMemory,
       storageInfo: storageInfo ?? this.storageInfo,
       isLoadingStorage: isLoadingStorage ?? this.isLoadingStorage,
+      logStatusState: logStatusState ?? this.logStatusState,
+      logStatusMessage:
+          clearLogStatusMessage ? null : (logStatusMessage ?? this.logStatusMessage),
       error: error ?? this.error,
       stackTrace: stackTrace ?? this.stackTrace,
     );
@@ -102,6 +120,8 @@ final class DashboardState extends Equatable {
         isLoadingMemory,
         storageInfo,
         isLoadingStorage,
+        logStatusState,
+        logStatusMessage,
         error,
         stackTrace,
       ];

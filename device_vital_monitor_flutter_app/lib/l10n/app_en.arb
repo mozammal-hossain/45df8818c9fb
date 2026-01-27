@@ -102,5 +102,15 @@
   "unitMB": "MB",
   "unitGB": "GB",
   "unitTB": "TB",
-  "zeroBytes": "0 B"
+  "zeroBytes": "0 B",
+  "historyTitle": "History",
+  "historyEmpty": "No vitals logged yet. Use “Log Status” on the dashboard.",
+  "analyticsTitle": "Analytics (rolling window)",
+  "averageThermalLabel": "Avg thermal",
+  "averageBatteryLabel": "Avg battery",
+  "averageMemoryLabel": "Avg memory",
+  "totalLogsLabel": "Total logs",
+  "rollingWindowLogsLabel": "Logs in window",
+  "dashboardTitle": "Dashboard",
+  "loggingEllipsis": "Logging…"
 }

@@ -60,5 +60,15 @@
   "unitMB": "MB",
   "unitGB": "GB",
   "unitTB": "TB",
-  "zeroBytes": "0 B"
+  "zeroBytes": "0 B",
+  "historyTitle": "Historial",
+  "historyEmpty": "Aún no hay registros. Usa «Registrar estado» en el panel.",
+  "analyticsTitle": "Analíticas (ventana móvil)",
+  "averageThermalLabel": "Térmico medio",
+  "averageBatteryLabel": "Batería media",
+  "averageMemoryLabel": "Memoria media",
+  "totalLogsLabel": "Total registros",
+  "rollingWindowLogsLabel": "Registros en ventana",
+  "dashboardTitle": "Panel",
+  "loggingEllipsis": "Registrando…"
 }
