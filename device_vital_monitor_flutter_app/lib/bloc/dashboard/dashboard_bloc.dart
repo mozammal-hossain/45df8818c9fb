@@ -14,8 +14,7 @@ part 'dashboard_state.dart';
 @injectable
 class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   /// {@macro dashboard_bloc}
-  DashboardBloc(this._deviceSensorService)
-      : super(const DashboardState()) {
+  DashboardBloc(this._deviceSensorService) : super(const DashboardState()) {
     on<DashboardSensorDataRequested>(_onSensorDataRequested);
   }
 
@@ -25,9 +24,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     DashboardSensorDataRequested event,
     Emitter<DashboardState> emit,
   ) async {
-    emit(state.copyWith(
-      status: DashboardStatus.loading,
-    ));
+    emit(state.copyWith(status: DashboardStatus.loading));
 
     try {
       final results = await Future.wait([
@@ -40,26 +37,31 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
         _deviceSensorService.getStorageInfo(),
       ]);
 
-      emit(state.copyWith(
-        status: DashboardStatus.loaded,
-        thermalState: results[0] as int?,
-        batteryLevel: results[1] as int?,
-        batteryHealth: results[2] as String?,
-        chargerConnection: results[3] as String?,
-        batteryStatus: results[4] as String?,
-        memoryUsage: results[5] as int?,
-        storageInfo: results[6] as StorageInfo?,
-        isLoadingThermal: false,
-        isLoadingBattery: false,
-        isLoadingMemory: false,
-        isLoadingStorage: false,
-      ));
+      emit(
+        state.copyWith(
+          status: DashboardStatus.loaded,
+          thermalState: results[0] as int?,
+          batteryLevel: results[1] as int?,
+          batteryHealth: results[2] as String?,
+          chargerConnection: results[3] as String?,
+          batteryStatus: results[4] as String?,
+          memoryUsage: results[5] as int?,
+          storageInfo: results[6] as StorageInfo?,
+          isLoadingThermal: false,
+          isLoadingBattery: false,
+          isLoadingMemory: false,
+          isLoadingStorage: false,
+        ),
+      );
     } catch (error, stackTrace) {
-      emit(state.copyWith(
-        status: DashboardStatus.failure,
-        error: error,
-        stackTrace: stackTrace,
-      ));
+      print('DashboardBloc Error: $error'); // DEBUG
+      emit(
+        state.copyWith(
+          status: DashboardStatus.failure,
+          error: error,
+          stackTrace: stackTrace,
+        ),
+      );
       addError(error, stackTrace);
     }
   }

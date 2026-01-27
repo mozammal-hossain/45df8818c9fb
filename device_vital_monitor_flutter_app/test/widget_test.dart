@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:device_vital_monitor_flutter_app/bloc/dashboard/dashboard_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/bloc/theme/theme_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/core/injection/injection.dart';
 import 'package:device_vital_monitor_flutter_app/main.dart';
@@ -52,8 +53,16 @@ void main() {
 
   testWidgets('app smoke test', (WidgetTester tester) async {
     final themeBloc = ThemeBloc(initial: ThemeMode.system);
-    await tester.pumpWidget(MyApp(themeBloc: themeBloc));
-    await tester.pumpAndSettle();
+    final deviceSensorService = getIt<DeviceSensorService>();
+    final dashboardBloc = DashboardBloc(deviceSensorService);
+    await tester.pumpWidget(MyApp(
+      themeBloc: themeBloc,
+      dashboardBloc: dashboardBloc,
+    ));
+    // Wait for initial build and data fetch
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
 
     expect(find.text('Device Vital Monitor'), findsOneWidget);
   });

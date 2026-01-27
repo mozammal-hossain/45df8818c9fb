@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/dashboard/dashboard_bloc.dart';
 import '../core/theme/app_colors.dart';
 import '../l10n/app_localizations.dart';
+import 'loading_shimmer.dart';
 import 'vital_card.dart';
 
 /// Card widget displaying thermal state information.
@@ -14,12 +15,56 @@ class ThermalStateCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<DashboardBloc, DashboardState>(
       builder: (context, state) {
-        final isLoading = state.status == DashboardStatus.loading ||
+        final isLoading =
+            state.status == DashboardStatus.loading ||
             state.status == DashboardStatus.initial;
+
+        if (isLoading) {
+          return VitalCard(
+            child: Row(
+              children: [
+                const LoadingShimmer(
+                  height: 56,
+                  width: 56,
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const LoadingShimmer(height: 24, width: 120),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          const LoadingShimmer(height: 40, width: 60),
+                          const SizedBox(width: 12),
+                          const LoadingShimmer(
+                            height: 24,
+                            width: 80,
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      const LoadingShimmer(height: 16, width: 180),
+                    ],
+                  ),
+                ),
+                const LoadingShimmer(
+                  height: 80,
+                  width: 80,
+                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                ),
+              ],
+            ),
+          );
+        }
+
         final l10n = AppLocalizations.of(context)!;
         final thermalState = state.thermalState;
         final stateValue = thermalState ?? 0;
-        final hasData = thermalState != null && !isLoading;
+        final hasData = thermalState != null;
         final stateLabel = hasData
             ? _getThermalStateLabel(l10n, stateValue)
             : l10n.dash;
@@ -30,81 +75,74 @@ class ThermalStateCard extends StatelessWidget {
             : scheme.outline;
         final stateDescription = hasData
             ? _getThermalStateDescription(l10n, stateValue)
-            : l10n.loadingThermalState;
+            : l10n.thermalDescriptionUnavailable;
         final textTheme = Theme.of(context).textTheme;
 
         return VitalCard(
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: stateColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(Icons.thermostat, color: stateColor, size: 32),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(l10n.thermalState, style: textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: stateColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(Icons.thermostat, color: stateColor, size: 32),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isLoading)
-                      const SizedBox(
-                        height: 32,
-                        width: 32,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    else
-                      Text('$thermalState', style: textTheme.displayLarge),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: stateColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        stateLabel,
-                        style: textTheme.labelLarge?.copyWith(
-                          color: colors.onStatus,
+                    Text(l10n.thermalState, style: textTheme.titleLarge),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
+                      children: [
+                        Text('$stateValue', style: textTheme.displayLarge),
+                        const SizedBox(width: 12),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: stateColor,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            stateLabel,
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colors.onStatus,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
+                    const SizedBox(height: 4),
+                    Text(stateDescription, style: textTheme.bodySmall),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Text(stateDescription, style: textTheme.bodySmall),
-              ],
-            ),
-          ),
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8),
-              gradient: LinearGradient(
-                colors: [
-                  stateColor.withValues(alpha: 0.3),
-                  stateColor.withValues(alpha: 0.7),
-                ],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
               ),
-            ),
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  gradient: LinearGradient(
+                    colors: [
+                      stateColor.withValues(alpha: 0.3),
+                      stateColor.withValues(alpha: 0.7),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
-    );
+        );
       },
     );
   }
