@@ -9,3 +9,7 @@ sealed class HistoryEvent extends Equatable {
 final class HistoryRequested extends HistoryEvent {
   const HistoryRequested();
 }
+
+final class HistoryLoadMoreRequested extends HistoryEvent {
+  const HistoryLoadMoreRequested();
+}

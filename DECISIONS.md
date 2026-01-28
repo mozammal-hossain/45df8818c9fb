@@ -169,6 +169,23 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ---
 
+#### Ambiguity 5: GET /api/vitals — Fixed “Latest 100” vs Pagination
+
+**Question:** The brief says “Return historical logs (latest 100 entries).” Should the endpoint return exactly 100 items, or support pagination for a scrollable History UI?
+
+**Options Considered:**
+
+- **Option A:** Return exactly the latest 100 entries, no pagination. Matches the brief literally but can be slow and doesn’t suit a scrollable list (fetch all upfront).
+- **Option B:** Paginated endpoint with `page` and `pageSize`; default `pageSize` 20, max 100. History screen fetches page 1 first, then loads more as the user scrolls.
+
+**Decision:** Option B – **paginated GET /api/vitals**. Use `page` (default 1) and `pageSize` (default 20, max 100). The History screen is scrollable and uses “load more” when the user nears the bottom, instead of loading a large chunk upfront.
+
+**Trade-offs:** Slightly more complex API and client logic, but faster initial load, better UX for long histories, and alignment with a scrollable list. The “latest 100” cap is reflected by `pageSize` max 100; clients can still request up to 100 per page if needed.
+
+**Implementation:** Backend returns a paged envelope (`data`, `page`, `page_size`, `total_count`, `total_pages`, `has_next_page`, `has_previous_page`). Flutter uses `getHistoryPage`, `HistoryLoadMoreRequested`, and `ListView.builder` with scroll-to-load-more.
+
+---
+
 ## 3. Assumptions Made
 
 ### Flutter App
@@ -187,6 +204,7 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 - **Client honesty:** The backend trusts that `device_id`, `timestamp`, and sensor values are from the client as sent; we do not authenticate or attest device identity for this assignment.
 - **Rolling window shape:** “Last 100” is by **newest-first** (most recent timestamp first), then take 100. This matches the history endpoint’s “latest 100 entries” semantics.
 - **Analytics semantics:** When there are fewer than 100 logs, the rolling average uses all available logs; when there are zero, we return zeros and still expose `rolling_window_logs` (as the configured window size) for clarity.
+- **GET /api/vitals:** Paginated; default `pageSize` 20, max 100. History screen uses scroll-to-load-more rather than fetching a large fixed set upfront.
 
 ---
 

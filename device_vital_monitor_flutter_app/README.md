@@ -76,7 +76,7 @@ Blocs are provided at app or screen level. Dependency injection uses **get_it** 
 ### Domain and data
 
 - **Repositories** (interfaces in `domain/repositories/`, implementations in `data/repositories/`):
-  - **VitalsRepository**: `logVital(...)`, `getHistory()` → `List<VitalLog>`, `getAnalytics()` → `AnalyticsResult`. Implemented with `VitalsRemoteDatasource` (Dio, base URL from `ApiConfig`).
+  - **VitalsRepository**: `logVital(...)`, `getHistoryPage(...)` → `PagedResult<VitalLog>`, `getAnalytics()` → `AnalyticsResult`. Implemented with `VitalsRemoteDatasource` (Dio, base URL from `ApiConfig`).
   - **DeviceRepository**: `getDeviceInfo()`, `getSensorData()` → `SensorData`, `thermalStatusChangeStream`. Implemented with `DeviceIdLocalDatasource` and `SensorPlatformDatasource`.
   - **PreferencesRepository**: theme/locale persistence (e.g. SharedPreferences).
 - **Use cases** (`domain/usecases/`): `GetSensorDataUsecase` (returns `Result<SensorData>`), `LogVitalSnapshotUsecase`, `GetHistoryUsecase`, `GetAnalyticsUsecase`.

@@ -5,7 +5,7 @@ import 'package:device_vital_monitor_flutter_app/core/config/api_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/error/exceptions.dart';
 import 'package:device_vital_monitor_flutter_app/data/models/request/vital_log_request.dart';
 import 'package:device_vital_monitor_flutter_app/data/models/response/analytics_response.dart';
-import 'package:device_vital_monitor_flutter_app/data/models/response/vital_log_response.dart';
+import 'package:device_vital_monitor_flutter_app/data/models/response/paged_vitals_response.dart';
 
 @lazySingleton
 class VitalsRemoteDatasource {
@@ -57,10 +57,15 @@ class VitalsRemoteDatasource {
     }
   }
 
-  Future<List<VitalLogResponse>> getHistory() async {
+  /// Fetches a single page of history. [page] and [pageSize] map to query params.
+  Future<PagedVitalsResponse> getHistoryPage({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
     try {
-      final response = await _dio.get<List<dynamic>>(
+      final response = await _dio.get<Map<String, dynamic>>(
         _config.vitalsPath,
+        queryParameters: {'page': page, 'pageSize': pageSize},
         options: Options(
           validateStatus: (status) => status != null && status < 400,
         ),
@@ -72,12 +77,19 @@ class VitalsRemoteDatasource {
           response,
         );
       }
-      final list = response.data;
-      if (list == null) return [];
-      return list
-          .whereType<Map<String, dynamic>>()
-          .map((e) => VitalLogResponse.fromJson(e))
-          .toList();
+      final data = response.data;
+      if (data == null) {
+        return const PagedVitalsResponse(
+          data: [],
+          page: 1,
+          pageSize: 20,
+          totalCount: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        );
+      }
+      return PagedVitalsResponse.fromJson(data);
     } on DioException catch (e) {
       throw VitalsRepositoryException(
         e.type == DioExceptionType.connectionTimeout ||

@@ -7,8 +7,40 @@ import 'package:device_vital_monitor_flutter_app/presentation/screens/history/wi
 import 'package:device_vital_monitor_flutter_app/presentation/screens/history/widgets/vital_log_item.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/widgets/common/error_view.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
+
+  @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  final _scrollController = ScrollController();
+  static const _loadMoreThreshold = 200.0;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (!mounted) return;
+    final bloc = context.read<HistoryBloc>();
+    final state = bloc.state;
+    if (!state.hasNextPage || state.isLoadingMore) return;
+    final pos = _scrollController.position;
+    if (pos.pixels >= pos.maxScrollExtent - _loadMoreThreshold) {
+      bloc.add(const HistoryLoadMoreRequested());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,32 +79,63 @@ class HistoryScreen extends StatelessWidget {
             onRefresh: () async {
               context.read<HistoryBloc>().add(const HistoryRequested());
             },
-            child: SingleChildScrollView(
+            child: CustomScrollView(
+              controller: _scrollController,
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (state.analytics != null) ...[
-                    AnalyticsCard(analytics: state.analytics!),
-                    const SizedBox(height: 24),
-                  ],
-                  Text(l10n.historyTitle, style: textTheme.titleLarge),
-                  const SizedBox(height: 12),
-                  if (state.logs.isEmpty)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 24),
-                      child: Text(
-                        l10n.historyEmpty,
-                        style: textTheme.bodyMedium?.copyWith(
-                          color: scheme.onSurfaceVariant,
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.all(16),
+                  sliver: SliverToBoxAdapter(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        if (state.analytics != null) ...[
+                          AnalyticsCard(analytics: state.analytics!),
+                          const SizedBox(height: 24),
+                        ],
+                        Text(l10n.historyTitle, style: textTheme.titleLarge),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
+                  ),
+                ),
+                if (state.logs.isEmpty)
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Text(
+                          l10n.historyEmpty,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
-                    )
-                  else
-                    ...state.logs.map((log) => VitalLogItem(log: log)),
-                ],
-              ),
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    sliver: SliverList.builder(
+                      itemCount: state.logs.length,
+                      itemBuilder: (context, index) =>
+                          VitalLogItem(log: state.logs[index]),
+                    ),
+                  ),
+                if (state.isLoadingMore)
+                  const SliverToBoxAdapter(
+                    child: Padding(
+                      padding: EdgeInsets.all(16),
+                      child: Center(child: SizedBox(
+                        height: 24,
+                        width: 24,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )),
+                    ),
+                  ),
+              ],
             ),
           );
         },
