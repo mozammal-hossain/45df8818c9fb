@@ -87,14 +87,22 @@ namespace device_vital_monitor_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int? pageSize = null)
         {
-            if (page < 1)
-                return BadRequest("Page must be greater than or equal to 1.");
-            if (pageSize < 1 || pageSize > 100)
-                return BadRequest("Page size must be between 1 and 100.");
+            // Default to 100 entries as per requirement: "Return historical logs (latest 100 entries)"
+            var effectivePageSize = pageSize ?? 100;
 
-            var history = await _vitalService.GetHistoryAsync(page, pageSize);
+            if (page < 1)
+            {
+                return BadRequest("Page must be greater than or equal to 1.");
+            }
+
+            if (effectivePageSize < 1 || effectivePageSize > 1000)
+            {
+                return BadRequest("Page size must be between 1 and 1000.");
+            }
+
+            var history = await _vitalService.GetHistoryAsync(page, effectivePageSize);
             return Ok(history);
         }
 

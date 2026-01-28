@@ -328,6 +328,112 @@ Comprehensive error handling for various scenarios:
 
 ---
 
+## Backend Setup Instructions
+
+### Prerequisites
+
+- **.NET SDK 10.0** or higher ([Download](https://dotnet.microsoft.com/download))
+- **SQLite** (included with .NET, no separate installation needed)
+
+### Installation Steps
+
+1. **Navigate to the backend directory:**
+   ```bash
+   cd device_vital_monitor_backend
+   ```
+
+2. **Restore dependencies:**
+   ```bash
+   dotnet restore
+   ```
+
+3. **Build the project:**
+   ```bash
+   dotnet build
+   ```
+
+4. **Run the backend:**
+   ```bash
+   dotnet run
+   ```
+
+   The backend will start and listen on:
+   - HTTP: `http://localhost:5265` (or the port specified in `launchSettings.json`)
+   - HTTPS: `https://localhost:5266` (if configured)
+
+### Database Setup
+
+The backend uses **SQLite** for persistent storage. The database file (`app.db`) is automatically created in the `device_vital_monitor_backend` directory when you first run the application.
+
+- **Database Location**: `device_vital_monitor_backend/app.db`
+- **Connection String**: Configured in `appsettings.json` as `Data Source=app.db`
+- **Auto-creation**: The database and tables are automatically created on first run via `context.Database.EnsureCreated()` in `Program.cs`
+
+### Configuration
+
+**Connection String** (`appsettings.json`):
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=app.db"
+  }
+}
+```
+
+**Development Settings** (`appsettings.Development.json`):
+- Logging levels and other development-specific configurations
+
+### API Endpoints
+
+Once running, the backend exposes the following endpoints:
+
+- **POST** `/api/vitals` - Log device vital data
+  - Request body: `{ "device_id": "string", "timestamp": "ISO8601", "thermal_value": 0-3, "battery_level": 0-100, "memory_usage": 0-100 }`
+  - Returns: Created vital log with ID
+
+- **GET** `/api/vitals` - Get historical logs (defaults to latest 100 entries)
+  - Query parameters (optional): `page` (default: 1), `pageSize` (default: 100)
+  - Example: `/api/vitals?page=1&pageSize=50`
+  - Returns: Paginated list of vital logs
+
+- **GET** `/api/vitals/analytics` - Get analytics data
+  - Returns: Rolling averages (last 100 logs), total logs count
+
+### Testing the Backend
+
+Run unit tests:
+```bash
+cd device_vital_monitor_backend.Tests
+dotnet test
+```
+
+### Troubleshooting
+
+**Port already in use:**
+- Change the port in `Properties/launchSettings.json` or use:
+  ```bash
+  dotnet run --urls "http://localhost:5000"
+  ```
+
+**Database issues:**
+- Delete `app.db` and restart the application to recreate the database
+- Ensure write permissions in the backend directory
+
+**CORS errors (when connecting from Flutter app):**
+- CORS is configured in `Program.cs` to allow requests from Flutter app
+- For Android emulator, use `http://10.0.2.2:5265` as the base URL
+- For iOS simulator, use `http://localhost:5265` as the base URL
+
+### Running in Production
+
+For production deployment:
+1. Update `appsettings.json` with production connection string
+2. Configure HTTPS certificates
+3. Set appropriate logging levels
+4. Consider using migrations instead of `EnsureCreated()` for database setup
+
+---
+
 ## Deployment Considerations
 
 ### Mobile Application
@@ -336,7 +442,8 @@ Comprehensive error handling for various scenarios:
 - **Configuration**: Backend URL configuration for different environments
 
 ### Backend API
-- **Development**: Local development server
+- **Development**: Local development server (as described above)
+- **Production**: Deploy to cloud service (Azure, AWS, etc.) with proper database configuration
 - **Production**: Cloud deployment (AWS, Azure, GCP, etc.)
 - **Scaling**: Horizontal scaling for high traffic
 - **Monitoring**: Logging and error tracking
