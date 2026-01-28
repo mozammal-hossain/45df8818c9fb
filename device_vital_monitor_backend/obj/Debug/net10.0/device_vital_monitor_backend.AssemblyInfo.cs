@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("device_vital_monitor_backend")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f5c1d208a6dc670a8e27bc241f17513c8530b8ca")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+b51f531d226511947ea42e74d055bfd2d584d9f2")]
 [assembly: System.Reflection.AssemblyProductAttribute("device_vital_monitor_backend")]
 [assembly: System.Reflection.AssemblyTitleAttribute("device_vital_monitor_backend")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
