@@ -20,7 +20,7 @@ This is a Flutter application that monitors device sensor data (thermal state, b
 - Must persist data (survive restart) - use SQLite, JSON file with locking, or embedded DB
 - Required endpoints:
   - `POST /api/vitals` - Accept vital logs with validation
-  - `GET /api/vitals` - Return latest 100 entries
+  - `GET /api/vitals` - Return historical logs with pagination (`page`, `pageSize`; default `pageSize` 20, max 100). History screen uses scroll-to-load-more.
   - `GET /api/vitals/analytics` - Return rolling average and insights
 - **Data Validation Rules:**
   - `thermal_value`: Must be 0-3 (reject otherwise)

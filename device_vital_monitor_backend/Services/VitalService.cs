@@ -1,85 +1,47 @@
-using device_vital_monitor_backend.Data;
 using device_vital_monitor_backend.DTOs;
 using device_vital_monitor_backend.Models;
-using Microsoft.EntityFrameworkCore;
+using device_vital_monitor_backend.Repositories;
 
 namespace device_vital_monitor_backend.Services
 {
     public class VitalService : IVitalService
     {
-        private readonly VitalContext _context;
+        private readonly IDeviceVitalRepository _repo;
 
-        public VitalService(VitalContext context)
+        public VitalService(IDeviceVitalRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
-        public async Task<(bool, string?)> LogVitalAsync(VitalLogRequest request)
+        public async Task<DeviceVital> LogVitalAsync(DeviceVital vital)
         {
-            if (request == null)
-                return (false, "Request body is required.");
+            return await _repo.AddAsync(vital);
+        }
 
-            // Treat null as missing required field
-            if (string.IsNullOrWhiteSpace(request.DeviceId))
-                return (false, "Device ID is required.");
+        public async Task<PagedResponse<DeviceVital>> GetHistoryAsync(int page, int pageSize)
+        {
+            var (items, totalCount) = await _repo.GetPagedAsync(page, pageSize);
 
-            if (!request.Timestamp.HasValue)
-                return (false, "Timestamp is required.");
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
 
-            if (!request.ThermalValue.HasValue)
-                return (false, "Thermal value is required.");
-
-            if (!request.BatteryLevel.HasValue)
-                return (false, "Battery level is required.");
-
-            if (!request.MemoryUsage.HasValue)
-                return (false, "Memory usage is required.");
-
-            // When value is present, validate range
-            if (request.ThermalValue.Value < 0 || request.ThermalValue.Value > 3)
-                return (false, "Thermal value must be between 0 and 3.");
-
-            if (request.BatteryLevel.Value < 0 || request.BatteryLevel.Value > 100)
-                return (false, "Battery level must be between 0 and 100.");
-
-            if (request.MemoryUsage.Value < 0 || request.MemoryUsage.Value > 100)
-                return (false, "Memory usage must be between 0 and 100.");
-
-            if (request.Timestamp.Value > DateTime.UtcNow.AddMinutes(5)) // Allow 5 mins clock skew
-                return (false, "Timestamp cannot be in the future.");
-
-            var vital = new DeviceVital
+            return new PagedResponse<DeviceVital>
             {
-                DeviceId = request.DeviceId,
-                Timestamp = request.Timestamp.Value,
-                ThermalValue = request.ThermalValue.Value,
-                BatteryLevel = request.BatteryLevel.Value,
-                MemoryUsage = request.MemoryUsage.Value
+                Data = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                HasNextPage = page < totalPages,
+                HasPreviousPage = page > 1
             };
-
-            _context.DeviceVitals.Add(vital);
-            await _context.SaveChangesAsync();
-
-            return (true, null);
-        }
-
-        public async Task<IEnumerable<DeviceVital>> GetHistoryAsync()
-        {
-            return await _context.DeviceVitals
-                .OrderByDescending(v => v.Timestamp)
-                .Take(100)
-                .ToListAsync();
         }
 
         public const int RollingWindowSize = 100;
 
         public async Task<AnalyticsResult> GetAnalyticsAsync()
         {
-            var totalCount = await _context.DeviceVitals.CountAsync();
-            var rollingVitals = await _context.DeviceVitals
-                .OrderByDescending(v => v.Timestamp)
-                .Take(RollingWindowSize)
-                .ToListAsync();
+            var totalCount = await _repo.CountAsync();
+            var rollingVitals = await _repo.GetLatestAsync(RollingWindowSize);
 
             if (rollingVitals.Count == 0)
             {
@@ -89,9 +51,24 @@ namespace device_vital_monitor_backend.Services
                     AverageThermal = 0,
                     AverageBattery = 0,
                     AverageMemory = 0,
+                    MinThermal = 0,
+                    MaxThermal = 0,
+                    MinBattery = 0,
+                    MaxBattery = 0,
+                    MinMemory = 0,
+                    MaxMemory = 0,
+                    TrendThermal = "insufficient_data",
+                    TrendBattery = "insufficient_data",
+                    TrendMemory = "insufficient_data",
                     TotalLogs = 0
                 };
             }
+
+            var thermalValues = rollingVitals.Select(v => v.ThermalValue).ToList();
+            var batteryValues = rollingVitals.Select(v => v.BatteryLevel).ToList();
+            var memoryValues = rollingVitals.Select(v => v.MemoryUsage).ToList();
+
+            (string trendThermal, string trendBattery, string trendMemory) = ComputeTrends(rollingVitals);
 
             return new AnalyticsResult
             {
@@ -99,8 +76,47 @@ namespace device_vital_monitor_backend.Services
                 AverageThermal = rollingVitals.Average(v => v.ThermalValue),
                 AverageBattery = rollingVitals.Average(v => v.BatteryLevel),
                 AverageMemory = rollingVitals.Average(v => v.MemoryUsage),
+                MinThermal = thermalValues.Min(),
+                MaxThermal = thermalValues.Max(),
+                MinBattery = batteryValues.Min(),
+                MaxBattery = batteryValues.Max(),
+                MinMemory = memoryValues.Min(),
+                MaxMemory = memoryValues.Max(),
+                TrendThermal = trendThermal,
+                TrendBattery = trendBattery,
+                TrendMemory = trendMemory,
                 TotalLogs = totalCount
             };
+        }
+
+        /// <summary>
+        /// Computes trend by comparing recent half (newest) vs older half of the rolling window.
+        /// List is ordered newest first (index 0 = most recent).
+        /// </summary>
+        private static (string thermal, string battery, string memory) ComputeTrends(List<DeviceVital> vitals)
+        {
+            if (vitals.Count < 2)
+            {
+                return ("insufficient_data", "insufficient_data", "insufficient_data");
+            }
+
+            int half = vitals.Count / 2;
+            var recent = vitals.Take(half).ToList();
+            var older = vitals.Skip(half).ToList();
+
+            string Trend(double recentAvg, double olderAvg)
+            {
+                const double epsilon = 0.0001;
+                var diff = recentAvg - olderAvg;
+                if (Math.Abs(diff) < epsilon) return "stable";
+                return diff > 0 ? "increasing" : "decreasing";
+            }
+
+            var trendThermal = Trend(recent.Average(v => v.ThermalValue), older.Average(v => v.ThermalValue));
+            var trendBattery = Trend(recent.Average(v => v.BatteryLevel), older.Average(v => v.BatteryLevel));
+            var trendMemory = Trend(recent.Average(v => v.MemoryUsage), older.Average(v => v.MemoryUsage));
+
+            return (trendThermal, trendBattery, trendMemory);
         }
     }
 }

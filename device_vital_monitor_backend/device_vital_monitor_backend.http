@@ -1,6 +1,11 @@
 @device_vital_monitor_backend_HostAddress = http://localhost:5265
 
-GET {{device_vital_monitor_backend_HostAddress}}/weatherforecast/
+GET {{device_vital_monitor_backend_HostAddress}}/api/vitals?page=1&pageSize=20
+Accept: application/json
+
+###
+
+GET {{device_vital_monitor_backend_HostAddress}}/api/vitals
 Accept: application/json
 
 ###
