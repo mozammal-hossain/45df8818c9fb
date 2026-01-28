@@ -391,9 +391,9 @@ Once running, the backend exposes the following endpoints:
   - Request body: `{ "device_id": "string", "timestamp": "ISO8601", "thermal_value": 0-3, "battery_level": 0-100, "memory_usage": 0-100 }`
   - Returns: Created vital log with ID
 
-- **GET** `/api/vitals` - Get historical logs (defaults to latest 100 entries)
-  - Query parameters (optional): `page` (default: 1), `pageSize` (default: 100)
-  - Example: `/api/vitals?page=1&pageSize=50`
+- **GET** `/api/vitals` - Get historical logs with pagination
+  - Query parameters (optional): `page` (default: 1), `pageSize` (default: 20, max: 100)
+  - Example: `/api/vitals?page=1&pageSize=20`
   - Returns: Paginated list of vital logs
 
 - **GET** `/api/vitals/analytics` - Get analytics data

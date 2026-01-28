@@ -66,7 +66,9 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("Invalid request", badRequestResult.Value!.ToString()!, StringComparison.OrdinalIgnoreCase);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Invalid request", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("INVALID_REQUEST", errorResponse.Code);
     }
 
     [Fact]
@@ -81,7 +83,10 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("Device ID", badRequestResult.Value!.ToString()!, StringComparison.OrdinalIgnoreCase);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Device ID", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("device_id", errorResponse.Field);
+        Assert.Equal("MISSING_FIELD", errorResponse.Code);
         _mockService.Verify(s => s.LogVitalAsync(It.IsAny<DeviceVital>()), Times.Never);
     }
 
@@ -97,7 +102,28 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("Device ID", badRequestResult.Value!.ToString()!, StringComparison.OrdinalIgnoreCase);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Device ID", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("device_id", errorResponse.Field);
+        Assert.Equal("MISSING_FIELD", errorResponse.Code);
+    }
+
+    [Fact]
+    public async Task POST_LogVital_With_EmptyString_DeviceId_Returns_BadRequest()
+    {
+        // Arrange
+        var request = CreateValidRequest();
+        request.DeviceId = string.Empty;
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Device ID", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("device_id", errorResponse.Field);
+        Assert.Equal("MISSING_FIELD", errorResponse.Code);
     }
 
     [Fact]
@@ -174,7 +200,39 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("0 and 3", badRequestResult.Value!.ToString()!);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("0 and 3", errorResponse.Error);
+        Assert.Equal("thermal_value", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(3)]
+    public async Task POST_LogVital_With_ThermalValue_BoundaryValues_Returns_Created(int thermalValue)
+    {
+        // Arrange
+        var request = CreateValidRequest();
+        request.ThermalValue = thermalValue;
+        var savedVital = new DeviceVital
+        {
+            Id = 1,
+            DeviceId = request.DeviceId!,
+            Timestamp = request.Timestamp!.Value,
+            ThermalValue = request.ThermalValue!.Value,
+            BatteryLevel = request.BatteryLevel!.Value,
+            MemoryUsage = request.MemoryUsage!.Value
+        };
+
+        _mockService.Setup(s => s.LogVitalAsync(It.IsAny<DeviceVital>()))
+            .ReturnsAsync(savedVital);
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var createdAtResult = Assert.IsType<CreatedResult>(result);
+        Assert.Equal($"/api/vitals/{savedVital.Id}", createdAtResult.Location);
     }
 
     [Theory]
@@ -191,7 +249,39 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("0 and 100", badRequestResult.Value!.ToString()!);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("0 and 100", errorResponse.Error);
+        Assert.Equal("battery_level", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(100.0)]
+    public async Task POST_LogVital_With_BatteryLevel_BoundaryValues_Returns_Created(double batteryLevel)
+    {
+        // Arrange
+        var request = CreateValidRequest();
+        request.BatteryLevel = batteryLevel;
+        var savedVital = new DeviceVital
+        {
+            Id = 1,
+            DeviceId = request.DeviceId!,
+            Timestamp = request.Timestamp!.Value,
+            ThermalValue = request.ThermalValue!.Value,
+            BatteryLevel = request.BatteryLevel!.Value,
+            MemoryUsage = request.MemoryUsage!.Value
+        };
+
+        _mockService.Setup(s => s.LogVitalAsync(It.IsAny<DeviceVital>()))
+            .ReturnsAsync(savedVital);
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var createdAtResult = Assert.IsType<CreatedResult>(result);
+        Assert.Equal($"/api/vitals/{savedVital.Id}", createdAtResult.Location);
     }
 
     [Theory]
@@ -208,7 +298,39 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("0 and 100", badRequestResult.Value!.ToString()!);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("0 and 100", errorResponse.Error);
+        Assert.Equal("memory_usage", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
+    }
+
+    [Theory]
+    [InlineData(0.0)]
+    [InlineData(100.0)]
+    public async Task POST_LogVital_With_MemoryUsage_BoundaryValues_Returns_Created(double memoryUsage)
+    {
+        // Arrange
+        var request = CreateValidRequest();
+        request.MemoryUsage = memoryUsage;
+        var savedVital = new DeviceVital
+        {
+            Id = 1,
+            DeviceId = request.DeviceId!,
+            Timestamp = request.Timestamp!.Value,
+            ThermalValue = request.ThermalValue!.Value,
+            BatteryLevel = request.BatteryLevel!.Value,
+            MemoryUsage = request.MemoryUsage!.Value
+        };
+
+        _mockService.Setup(s => s.LogVitalAsync(It.IsAny<DeviceVital>()))
+            .ReturnsAsync(savedVital);
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var createdAtResult = Assert.IsType<CreatedResult>(result);
+        Assert.Equal($"/api/vitals/{savedVital.Id}", createdAtResult.Location);
     }
 
     [Fact]
@@ -222,11 +344,57 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("future", badRequestResult.Value!.ToString()!, StringComparison.OrdinalIgnoreCase);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("future", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("timestamp", errorResponse.Field);
+        Assert.Equal("INVALID_TIMESTAMP", errorResponse.Code);
     }
 
     [Fact]
-    public async Task GET_GetHistory_Without_PageSize_Defaults_To_100()
+    public async Task POST_LogVital_With_Timestamp_Exactly_5_Minutes_In_Future_Returns_Created()
+    {
+        // Arrange - Exactly 5 minutes in future should pass (clock skew tolerance)
+        var request = CreateValidRequest(DateTime.UtcNow.AddMinutes(5));
+        var savedVital = new DeviceVital
+        {
+            Id = 1,
+            DeviceId = request.DeviceId!,
+            Timestamp = request.Timestamp!.Value,
+            ThermalValue = request.ThermalValue!.Value,
+            BatteryLevel = request.BatteryLevel!.Value,
+            MemoryUsage = request.MemoryUsage!.Value
+        };
+
+        _mockService.Setup(s => s.LogVitalAsync(It.IsAny<DeviceVital>()))
+            .ReturnsAsync(savedVital);
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var createdAtResult = Assert.IsType<CreatedResult>(result);
+        Assert.Equal($"/api/vitals/{savedVital.Id}", createdAtResult.Location);
+    }
+
+    [Fact]
+    public async Task POST_LogVital_With_Timestamp_5_Minutes_1_Second_In_Future_Returns_BadRequest()
+    {
+        // Arrange - 5 minutes + 1 second should fail
+        var request = CreateValidRequest(DateTime.UtcNow.AddMinutes(5).AddSeconds(1));
+
+        // Act
+        var result = await _controller.LogVital(request);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("future", errorResponse.Error, StringComparison.OrdinalIgnoreCase);
+        Assert.Equal("timestamp", errorResponse.Field);
+        Assert.Equal("INVALID_TIMESTAMP", errorResponse.Code);
+    }
+
+    [Fact]
+    public async Task GET_GetHistory_Without_PageSize_Defaults_To_20()
     {
         // Arrange
         var vitals = new List<DeviceVital>
@@ -237,14 +405,14 @@ public class VitalsControllerTests
         {
             Data = vitals,
             Page = 1,
-            PageSize = 100,
+            PageSize = 20,
             TotalCount = 1,
             TotalPages = 1,
             HasNextPage = false,
             HasPreviousPage = false
         };
 
-        _mockService.Setup(s => s.GetHistoryAsync(1, 100))
+        _mockService.Setup(s => s.GetHistoryAsync(1, 20))
             .ReturnsAsync(pagedResponse);
 
         // Act
@@ -253,8 +421,8 @@ public class VitalsControllerTests
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         var response = Assert.IsType<PagedResponse<DeviceVital>>(okResult.Value);
-        Assert.Equal(100, response.PageSize);
-        _mockService.Verify(s => s.GetHistoryAsync(1, 100), Times.Once);
+        Assert.Equal(20, response.PageSize);
+        _mockService.Verify(s => s.GetHistoryAsync(1, 20), Times.Once);
     }
 
     [Fact]
@@ -293,18 +461,66 @@ public class VitalsControllerTests
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("Page must be greater than or equal to 1", badRequestResult.Value!.ToString()!);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Page must be greater than or equal to 1", errorResponse.Error);
+        Assert.Equal("page", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
     }
 
     [Fact]
-    public async Task GET_GetHistory_With_Invalid_PageSize_Returns_BadRequest()
+    public async Task GET_GetHistory_With_Invalid_PageSize_TooSmall_Returns_BadRequest()
     {
         // Act
         var result = await _controller.GetHistory(pageSize: 0);
 
         // Assert
         var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-        Assert.Contains("Page size must be between 1 and 1000", badRequestResult.Value!.ToString()!);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Page size must be between 1 and 100", errorResponse.Error);
+        Assert.Equal("pageSize", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
+    }
+
+    [Fact]
+    public async Task GET_GetHistory_With_Invalid_PageSize_TooLarge_Returns_BadRequest()
+    {
+        // Act
+        var result = await _controller.GetHistory(pageSize: 101);
+
+        // Assert
+        var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
+        var errorResponse = Assert.IsType<ErrorResponse>(badRequestResult.Value);
+        Assert.Contains("Page size must be between 1 and 100", errorResponse.Error);
+        Assert.Equal("pageSize", errorResponse.Field);
+        Assert.Equal("INVALID_RANGE", errorResponse.Code);
+    }
+
+    [Fact]
+    public async Task GET_GetHistory_With_PageSize_At_Maximum_100_Returns_Ok()
+    {
+        // Arrange
+        var pagedResponse = new PagedResponse<DeviceVital>
+        {
+            Data = new List<DeviceVital>(),
+            Page = 1,
+            PageSize = 100,
+            TotalCount = 0,
+            TotalPages = 0,
+            HasNextPage = false,
+            HasPreviousPage = false
+        };
+
+        _mockService.Setup(s => s.GetHistoryAsync(1, 100))
+            .ReturnsAsync(pagedResponse);
+
+        // Act
+        var result = await _controller.GetHistory(pageSize: 100);
+
+        // Assert
+        var okResult = Assert.IsType<OkObjectResult>(result);
+        var response = Assert.IsType<PagedResponse<DeviceVital>>(okResult.Value);
+        Assert.Equal(100, response.PageSize);
+        _mockService.Verify(s => s.GetHistoryAsync(1, 100), Times.Once);
     }
 
     [Fact]

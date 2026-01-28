@@ -21,54 +21,54 @@ namespace device_vital_monitor_backend.Controllers
         {
             if (request == null)
             {
-                return BadRequest("Invalid request.");
+                return BadRequest(new ErrorResponse("Invalid request.", null, "INVALID_REQUEST"));
             }
 
             // Validate required fields
             if (string.IsNullOrWhiteSpace(request.DeviceId))
             {
-                return BadRequest("Device ID is required.");
+                return BadRequest(new ErrorResponse("Device ID is required.", "device_id", "MISSING_FIELD"));
             }
 
             if (!request.Timestamp.HasValue)
             {
-                return BadRequest("Timestamp is required.");
+                return BadRequest(new ErrorResponse("Timestamp is required.", "timestamp", "MISSING_FIELD"));
             }
 
             if (!request.ThermalValue.HasValue)
             {
-                return BadRequest("Thermal value is required.");
+                return BadRequest(new ErrorResponse("Thermal value is required.", "thermal_value", "MISSING_FIELD"));
             }
 
             if (!request.BatteryLevel.HasValue)
             {
-                return BadRequest("Battery level is required.");
+                return BadRequest(new ErrorResponse("Battery level is required.", "battery_level", "MISSING_FIELD"));
             }
 
             if (!request.MemoryUsage.HasValue)
             {
-                return BadRequest("Memory usage is required.");
+                return BadRequest(new ErrorResponse("Memory usage is required.", "memory_usage", "MISSING_FIELD"));
             }
 
             // Validate value ranges
             if (request.ThermalValue.Value < 0 || request.ThermalValue.Value > 3)
             {
-                return BadRequest("Thermal value must be between 0 and 3.");
+                return BadRequest(new ErrorResponse("Thermal value must be between 0 and 3.", "thermal_value", "INVALID_RANGE"));
             }
 
             if (request.BatteryLevel.Value < 0 || request.BatteryLevel.Value > 100)
             {
-                return BadRequest("Battery level must be between 0 and 100.");
+                return BadRequest(new ErrorResponse("Battery level must be between 0 and 100.", "battery_level", "INVALID_RANGE"));
             }
 
             if (request.MemoryUsage.Value < 0 || request.MemoryUsage.Value > 100)
             {
-                return BadRequest("Memory usage must be between 0 and 100.");
+                return BadRequest(new ErrorResponse("Memory usage must be between 0 and 100.", "memory_usage", "INVALID_RANGE"));
             }
 
             if (request.Timestamp.Value > DateTime.UtcNow.AddMinutes(5)) // Allow 5 mins clock skew
             {
-                return BadRequest("Timestamp cannot be in the future.");
+                return BadRequest(new ErrorResponse("Timestamp cannot be in the future.", "timestamp", "INVALID_TIMESTAMP"));
             }
 
             // Convert DTO to model
@@ -89,17 +89,17 @@ namespace device_vital_monitor_backend.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int? pageSize = null)
         {
-            // Default to 100 entries as per requirement: "Return historical logs (latest 100 entries)"
-            var effectivePageSize = pageSize ?? 100;
+            // Default to 20 entries per DECISIONS.md for scroll-to-load-more UX
+            var effectivePageSize = pageSize ?? 20;
 
             if (page < 1)
             {
-                return BadRequest("Page must be greater than or equal to 1.");
+                return BadRequest(new ErrorResponse("Page must be greater than or equal to 1.", "page", "INVALID_RANGE"));
             }
 
-            if (effectivePageSize < 1 || effectivePageSize > 1000)
+            if (effectivePageSize < 1 || effectivePageSize > 100)
             {
-                return BadRequest("Page size must be between 1 and 1000.");
+                return BadRequest(new ErrorResponse("Page size must be between 1 and 100.", "pageSize", "INVALID_RANGE"));
             }
 
             var history = await _vitalService.GetHistoryAsync(page, effectivePageSize);
