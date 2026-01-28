@@ -33,6 +33,21 @@ namespace device_vital_monitor_backend.Repositories
                 .Take(count)
                 .ToListAsync(ct);
         }
+
+        public async Task<(List<DeviceVital> items, int totalCount)> GetPagedAsync(int page, int pageSize, CancellationToken ct = default)
+        {
+            var query = _context.DeviceVitals
+                .AsNoTracking()
+                .OrderByDescending(v => v.Timestamp);
+
+            var totalCount = await query.CountAsync(ct);
+            var items = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(ct);
+
+            return (items, totalCount);
+        }
     }
 }
 

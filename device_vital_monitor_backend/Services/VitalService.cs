@@ -18,9 +18,22 @@ namespace device_vital_monitor_backend.Services
             return await _repo.AddAsync(vital);
         }
 
-        public async Task<IEnumerable<DeviceVital>> GetHistoryAsync()
+        public async Task<PagedResponse<DeviceVital>> GetHistoryAsync(int page, int pageSize)
         {
-            return await _repo.GetLatestAsync(100);
+            var (items, totalCount) = await _repo.GetPagedAsync(page, pageSize);
+
+            var totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+
+            return new PagedResponse<DeviceVital>
+            {
+                Data = items,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                HasNextPage = page < totalPages,
+                HasPreviousPage = page > 1
+            };
         }
 
         public const int RollingWindowSize = 100;

@@ -87,9 +87,20 @@ namespace device_vital_monitor_backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetHistory()
+        public async Task<IActionResult> GetHistory([FromQuery] int page = 1, [FromQuery] int? pageSize = null)
         {
-            var history = await _vitalService.GetHistoryAsync();
+            // Validate pagination parameters
+            if (page < 1)
+            {
+                return BadRequest("Page must be greater than or equal to 1.");
+            }
+
+            if (!pageSize.HasValue || pageSize.Value < 1)
+            {
+                return BadRequest("Page size is required and must be greater than 0.");
+            }
+
+            var history = await _vitalService.GetHistoryAsync(page, pageSize.Value);
             return Ok(history);
         }
 
