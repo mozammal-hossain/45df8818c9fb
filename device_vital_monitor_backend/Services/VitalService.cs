@@ -13,9 +13,9 @@ namespace device_vital_monitor_backend.Services
             _repo = repo;
         }
 
-        public async Task LogVitalAsync(DeviceVital vital)
+        public async Task<DeviceVital> LogVitalAsync(DeviceVital vital)
         {
-            await _repo.AddAsync(vital);
+            return await _repo.AddAsync(vital);
         }
 
         public async Task<IEnumerable<DeviceVital>> GetHistoryAsync()

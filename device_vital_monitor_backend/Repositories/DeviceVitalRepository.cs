@@ -13,10 +13,11 @@ namespace device_vital_monitor_backend.Repositories
             _context = context;
         }
 
-        public async Task AddAsync(DeviceVital vital, CancellationToken ct = default)
+        public async Task<DeviceVital> AddAsync(DeviceVital vital, CancellationToken ct = default)
         {
             _context.DeviceVitals.Add(vital);
             await _context.SaveChangesAsync(ct);
+            return vital;
         }
 
         public Task<int> CountAsync(CancellationToken ct = default)

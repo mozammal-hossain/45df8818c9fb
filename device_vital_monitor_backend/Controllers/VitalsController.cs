@@ -81,9 +81,9 @@ namespace device_vital_monitor_backend.Controllers
                 MemoryUsage = request.MemoryUsage.Value
             };
 
-            await _vitalService.LogVitalAsync(vital);
+            var createdVital = await _vitalService.LogVitalAsync(vital);
 
-            return Ok(new { message = "Vital logged successfully.", timestamp = DateTime.UtcNow });
+            return Created($"/api/vitals/{createdVital.Id}", createdVital);
         }
 
         [HttpGet]

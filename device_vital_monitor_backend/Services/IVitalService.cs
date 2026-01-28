@@ -5,7 +5,7 @@ namespace device_vital_monitor_backend.Services
 {
     public interface IVitalService
     {
-        Task LogVitalAsync(DeviceVital vital);
+        Task<DeviceVital> LogVitalAsync(DeviceVital vital);
         Task<IEnumerable<DeviceVital>> GetHistoryAsync();
         Task<AnalyticsResult> GetAnalyticsAsync();
     }
