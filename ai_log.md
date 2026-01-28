@@ -233,3 +233,64 @@ MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCall
 5. Flutter's Future completes with the value or throws PlatformException
 
 This pattern allows Flutter apps to access platform-specific APIs that aren't available through standard Flutter packages, which was a core requirement of this assignment.
+
+---
+
+## Android ADPF Thermal API – Alignment and Gaps
+
+**Context:** The [Android ADPF Thermal API](https://developer.android.com/games/optimize/adpf/thermal) doc describes how to monitor device thermal state so apps (e.g. games) can avoid throttling by reducing workload in time. The question is whether this behavior is **maintained** in the Device Vital Monitor Flutter app.
+
+### What the app does today
+
+- **Android (MainActivity.kt):** Uses `PowerManager.getCurrentThermalStatus()` on API 30+ and maps `THERMAL_STATUS_*` to 0–3. There is an explicit comment referencing the thermal doc. On API &lt; 30 the app returns `0` (NONE) and does not call any other thermal API.
+- **Flutter:** `DeviceSensorService.getThermalState()` calls the `getThermalState` method channel; the dashboard requests it when the user refreshes or when sensor data is first loaded. There is no special throttling or caching for thermal reads.
+
+### What the ADPF thermal doc recommends
+
+| Capability | Doc | In this app |
+|------------|-----|-------------|
+| **getCurrentThermalStatus()** | Use for a simple status (NONE / LIGHT / MODERATE / SEVERE / …). | ✅ Used on API 30+ and mapped to 0–3. |
+| **getThermalHeadroom(seconds)** | Forecast thermal headroom in X seconds (0.0–1.0). Do **not** call more than once per 10 seconds; otherwise returns NaN. | ❌ Not used. |
+| **ThermalStatusChangedListener** | Register for status changes instead of polling. | ❌ Not used. |
+| **Device-limitation heuristics** | If `getThermalHeadroom()` is NaN/0 on first call, treat API as unsupported. If status is always NONE but headroom is high, use headroom-based heuristics (e.g. &gt; 1.0 → severe, &gt; 0.95 → moderate, &gt; 0.85 → light). | ❌ Not implemented. |
+| **Fallback for “older” APIs** | Brief asks for `getCurrentThermalStatus()` (API 29+) or `getThermalHeadroom()` for older versions; ADPF describes headroom as the main forecasting tool on supported devices. | ❌ No headroom path; below API 30 the app always returns 0. |
+
+### Conclusion
+
+- **Thermal *status* is maintained** in the sense that the app uses the same API and mapping as the ADPF thermal doc: `getCurrentThermalStatus()` and the 0–3 scale (NONE/LIGHT/MODERATE/SEVERE).
+- **The full “thermal testing” behavior from the doc is not maintained:** there is no use of `getThermalHeadroom()`, no thermal status listener, no 10‑second headroom polling discipline, and no device-limitation heuristics. The app also does not implement the brief’s “or getThermalHeadroom() for older versions” path.
+
+### Recommendations (if aligning further with ADPF)
+
+1. **Optional headroom path (API 30+):** Add a method channel method that calls `PowerManager.getThermalHeadroom(10)` (or similar). In Dart, throttle calls to at most once every 10 seconds and handle NaN as “unsupported.” This supports “forecast in X seconds” and devices where status lags.
+2. **Heuristics when status is always NONE:** Where headroom is supported, if `getCurrentThermalStatus()` stays NONE but `getThermalHeadroom()` is high (e.g. &gt; 0.85), use the doc’s heuristics to derive a synthetic severity for display or logging.
+3. **Leave listener as future work:** `OnThermalStatusChangedListener` is useful to avoid polling; it could be added later if the app needs to react immediately to thermal changes without waiting for a refresh.
+
+For the current assignment scope (display thermal state 0–3 and log it to the backend), the existing use of `getCurrentThermalStatus()` is sufficient and matches the doc’s status semantics. The gaps above matter if the product goal shifts toward “thermal testing” or proactive thermal-aware behavior as described in the full ADPF thermal page.
+
+### Implementation of “Missing from the app” (per candidate brief)
+
+The following were implemented so the app aligns with the ADPF thermal doc and the candidate_project_brief.md (“Use `getCurrentThermalStatus()` (API 29+) or `getThermalHeadroom()` for older versions”, “Handle devices that don't support these APIs”):
+
+1. **getThermalHeadroom(forecastSeconds)**  
+   - **Android:** New method-channel call `getThermalHeadroom` invokes `PowerManager.getThermalHeadroom(forecastSeconds)` on API 30+. A 10‑second throttle is enforced (ADPF: calling more than once per 10s returns NaN). NaN and invalid values are treated as “unsupported” and not surfaced as valid headroom.  
+   - **Flutter:** `DeviceSensorService.getThermalHeadroom({int forecastSeconds = 10})` returns `Future<double?>`. Used for heuristics and optional UI/telemetry.
+
+2. **Device-limitation heuristics in getThermalState()**  
+   - On API 29+, `getCurrentThermalStatus()` is used first.  
+   - When status is `THERMAL_STATUS_NONE` and API ≥ 30, `getThermalHeadroom(10)` is used (subject to the 10s throttle). If headroom &gt; 1.0 → 3, &gt; 0.95 → 2, &gt; 0.85 → 1; otherwise 0.  
+   - Covers devices that keep reporting NONE even when headroom indicates throttling.
+
+3. **ThermalStatusChangedListener + EventChannel**  
+   - **Android:** `PowerManager.addThermalStatusListener(mainExecutor, listener)` is registered when the Flutter side listens to the thermal event stream. The listener maps status to 0–3 and sends it over `EventChannel("device_vital_monitor/thermal_events")`. The listener is removed in `onCancel`.  
+   - **Flutter:** `DeviceSensorService.thermalStatusChangeStream` returns a broadcast stream of `int?` (0–3). Errors (e.g. no native handler on iOS/tests) are handled so the stream does not break the app.
+
+4. **Dashboard reaction to thermal changes**  
+   - `DashboardBloc` subscribes to `thermalStatusChangeStream` and handles `DashboardThermalStatusChanged(thermalState)`, updating `state.thermalState` so the UI reflects thermal changes without a manual refresh. The subscription is cancelled in `close()`.
+
+5. **API level behavior**  
+   - **API 29 (Q):** `getCurrentThermalStatus()` only (no headroom; headroom is API 30+).  
+   - **API 30+ (R):** Status + headroom heuristics when status is NONE, plus optional `getThermalHeadroom` and thermal event stream.  
+   - **API &lt; 29:** Thermal state remains 0 (NONE); no thermal APIs on stock Android.
+
+Tests were updated so `DashboardBloc` is constructed with the three required dependencies (`DeviceSensorService`, `VitalsRepository`, `DeviceIdService`), including `SharedPreferences.setMockInitialValues` and a shared `DashboardBloc` in `setUpAll` for the dashboard screen memory tests.

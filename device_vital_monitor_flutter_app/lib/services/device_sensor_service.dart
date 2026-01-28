@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
@@ -10,6 +12,7 @@ import '../models/storage_info.dart';
 class DeviceSensorService {
   DeviceSensorService();
   static const _channel = MethodChannel('device_vital_monitor/sensors');
+  static const _thermalEventChannel = EventChannel('device_vital_monitor/thermal_events');
 
   /// Returns thermal state 0-3, or null if unavailable / error.
   /// 0 = NONE, 1 = LIGHT, 2 = MODERATE, 3 = SEVERE
@@ -26,6 +29,40 @@ class DeviceSensorService {
       return null;
     }
   }
+
+  /// Returns thermal headroom 0.0–1.0+ (1.0 = severe throttling), or null if unsupported/NaN.
+  /// Android: uses PowerManager.getThermalHeadroom; native side throttles to at most once per 10s (ADPF).
+  /// iOS: not implemented, returns null.
+  Future<double?> getThermalHeadroom({int forecastSeconds = 10}) async {
+    try {
+      final result = await _channel.invokeMethod<Object?>(
+        'getThermalHeadroom',
+        forecastSeconds.clamp(0, 60),
+      );
+      if (result == null) return null;
+      if (result is double) return result;
+      if (result is int) return result.toDouble();
+      return double.tryParse(result.toString());
+    } on PlatformException catch (e) {
+      debugPrint(
+        'DeviceSensorService.getThermalHeadroom PlatformException: ${e.code} ${e.message}',
+      );
+      return null;
+    } on MissingPluginException {
+      return null;
+    }
+  }
+
+  /// Stream of thermal status changes (0–3). Android-only; uses PowerManager thermal status listener.
+  /// On iOS or in tests (no native handler), errors are swallowed and the stream yields nothing.
+  Stream<int?> get thermalStatusChangeStream =>
+      _thermalEventChannel.receiveBroadcastStream().map<int?>((e) {
+        if (e == null) return null;
+        if (e is int) return e;
+        return int.tryParse(e.toString());
+      }).handleError((Object _, StackTrace __) {
+        // No native handler (e.g. iOS, tests); ignore so bloc does not crash.
+      });
 
   /// Returns battery level 0-100, or null if unavailable / error.
   Future<int?> getBatteryLevel() async {

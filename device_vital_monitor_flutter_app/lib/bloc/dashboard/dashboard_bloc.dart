@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -25,11 +27,31 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   ) : super(const DashboardState()) {
     on<DashboardSensorDataRequested>(_onSensorDataRequested);
     on<DashboardLogStatusRequested>(_onLogStatusRequested);
+    on<DashboardThermalStatusChanged>(_onThermalStatusChanged);
+    _thermalSubscription =
+        _deviceSensorService.thermalStatusChangeStream.listen(
+      (state) => add(DashboardThermalStatusChanged(state)),
+      onError: (e, st) => debugPrint('DashboardBloc thermal stream error: $e'),
+    );
   }
 
   final DeviceSensorService _deviceSensorService;
   final VitalsRepository _vitalsRepository;
   final DeviceIdService _deviceIdService;
+  StreamSubscription<int?>? _thermalSubscription;
+
+  @override
+  Future<void> close() {
+    _thermalSubscription?.cancel();
+    return super.close();
+  }
+
+  void _onThermalStatusChanged(
+    DashboardThermalStatusChanged event,
+    Emitter<DashboardState> emit,
+  ) {
+    emit(state.copyWith(thermalState: event.thermalState));
+  }
 
   Future<void> _onLogStatusRequested(
     DashboardLogStatusRequested event,

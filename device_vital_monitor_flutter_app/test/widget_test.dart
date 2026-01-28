@@ -3,11 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:device_vital_monitor_flutter_app/bloc/dashboard/dashboard_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/bloc/theme/theme_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/core/injection/injection.dart';
 import 'package:device_vital_monitor_flutter_app/main.dart';
+import 'package:device_vital_monitor_flutter_app/repositories/vitals_repository.dart';
+import 'package:device_vital_monitor_flutter_app/services/device_id_service.dart';
 import 'package:device_vital_monitor_flutter_app/services/device_sensor_service.dart';
 
 void main() {
@@ -52,9 +55,15 @@ void main() {
   });
 
   testWidgets('app smoke test', (WidgetTester tester) async {
+    SharedPreferences.setMockInitialValues({});
+    final prefs = await SharedPreferences.getInstance();
     final themeBloc = ThemeBloc(initial: ThemeMode.system);
     final deviceSensorService = getIt<DeviceSensorService>();
-    final dashboardBloc = DashboardBloc(deviceSensorService);
+    final dashboardBloc = DashboardBloc(
+      deviceSensorService,
+      VitalsRepository(),
+      DeviceIdService(prefs),
+    );
     await tester.pumpWidget(MyApp(
       themeBloc: themeBloc,
       dashboardBloc: dashboardBloc,

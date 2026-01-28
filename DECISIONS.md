@@ -173,6 +173,7 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ### Flutter App
 
+- **Thermal API:** Android thermal state uses `PowerManager.getCurrentThermalStatus()` (API 29+) and, on API 30+, `getThermalHeadroom()` with a 10s throttle, device-limitation heuristics when status is NONE, and `OnThermalStatusChangedListener` via an EventChannel. See **ai_log.md** sections “Android ADPF Thermal API – Alignment and Gaps” and “Implementation of ‘Missing from the app’” for details.
 - Users may want to override system theme preference for this monitoring app.
 - Dark theme is important for battery-sensitive scenarios (reducing OLED power consumption).
 - Users expect theme preference to persist across app sessions.

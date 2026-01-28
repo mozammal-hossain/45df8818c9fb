@@ -26,3 +26,16 @@ final class DashboardLogStatusRequested extends DashboardEvent {
   /// {@macro dashboard_log_status_requested}
   const DashboardLogStatusRequested();
 }
+
+/// {@template dashboard_thermal_status_changed}
+/// Event when native thermal status changes (Android thermal status listener).
+/// {@endtemplate}
+final class DashboardThermalStatusChanged extends DashboardEvent {
+  /// {@macro dashboard_thermal_status_changed}
+  const DashboardThermalStatusChanged(this.thermalState);
+
+  final int? thermalState;
+
+  @override
+  List<Object?> get props => [thermalState];
+}

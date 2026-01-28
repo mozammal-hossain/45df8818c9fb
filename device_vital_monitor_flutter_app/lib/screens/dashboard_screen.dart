@@ -87,12 +87,7 @@ class DashboardScreen extends StatelessWidget {
       ),
       body: BlocConsumer<DashboardBloc, DashboardState>(
         listener: (context, state) {
-          // Trigger initial fetch when screen loads (only once)
-          if (state.status == DashboardStatus.initial) {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _fetchSensorData(context);
-            });
-          }
+          // Listener runs only on state *changes*; initial fetch is triggered from builder below.
           if (state.status == DashboardStatus.failure) {
             debugPrint('Dashboard error: ${state.error}');
           }
@@ -117,6 +112,15 @@ class DashboardScreen extends StatelessWidget {
           }
         },
         builder: (context, state) {
+          // Trigger initial fetch once. BlocConsumer's listener is not called for the
+          // initial state, so we schedule the fetch here when we see initial.
+          if (state.status == DashboardStatus.initial) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (context.mounted) {
+                _fetchSensorData(context);
+              }
+            });
+          }
           return RefreshIndicator(
             onRefresh: () async {
               _fetchSensorData(context);

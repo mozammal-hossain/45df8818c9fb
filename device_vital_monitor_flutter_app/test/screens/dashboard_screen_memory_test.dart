@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'package:device_vital_monitor_flutter_app/bloc/dashboard/dashboard_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/bloc/theme/theme_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/core/injection/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
+import 'package:device_vital_monitor_flutter_app/repositories/vitals_repository.dart';
 import 'package:device_vital_monitor_flutter_app/screens/dashboard_screen.dart';
+import 'package:device_vital_monitor_flutter_app/services/device_id_service.dart';
 import 'package:device_vital_monitor_flutter_app/services/device_sensor_service.dart';
 import 'package:device_vital_monitor_flutter_app/widgets/loading_shimmer.dart';
 
@@ -35,10 +39,11 @@ extension WidgetTesterX on WidgetTester {
   }
 }
 
+DashboardBloc? _cachedDashboardBloc;
+
 Widget _localizedMaterialApp({Widget? home}) {
   final themeBloc = ThemeBloc(initial: ThemeMode.system);
-  final deviceSensorService = getIt<DeviceSensorService>();
-  final dashboardBloc = DashboardBloc(deviceSensorService);
+  final dashboardBloc = _cachedDashboardBloc!;
   return MultiBlocProvider(
     providers: [
       BlocProvider<ThemeBloc>.value(value: themeBloc),
@@ -65,13 +70,22 @@ void main() {
 
   const MethodChannel channel = MethodChannel('device_vital_monitor/sensors');
 
-  setUp(() {
-    // Initialize GetIt and register DeviceSensorService for tests
+  setUpAll(() async {
+    SharedPreferences.setMockInitialValues({});
     if (!getIt.isRegistered<DeviceSensorService>()) {
       getIt.registerLazySingleton<DeviceSensorService>(
         () => DeviceSensorService(),
       );
     }
+    final prefs = await SharedPreferences.getInstance();
+    _cachedDashboardBloc = DashboardBloc(
+      getIt<DeviceSensorService>(),
+      VitalsRepository(),
+      DeviceIdService(prefs),
+    );
+  });
+
+  setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, null);
   });
