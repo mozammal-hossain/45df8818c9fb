@@ -1,4 +1,5 @@
 using device_vital_monitor_backend.Data;
+using device_vital_monitor_backend.Middleware;
 using device_vital_monitor_backend.Repositories;
 using device_vital_monitor_backend.Services;
 using Microsoft.EntityFrameworkCore;
@@ -37,6 +38,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors();
 

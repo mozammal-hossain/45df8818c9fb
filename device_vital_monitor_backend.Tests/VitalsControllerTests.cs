@@ -317,7 +317,16 @@ public class VitalsControllerTests
             RollingWindowLogs = 5,
             AverageThermal = 1.4,
             AverageBattery = 30.0,
-            AverageMemory = 40.0
+            AverageMemory = 40.0,
+            MinThermal = 0,
+            MaxThermal = 3,
+            MinBattery = 10.0,
+            MaxBattery = 50.0,
+            MinMemory = 20.0,
+            MaxMemory = 60.0,
+            TrendThermal = "stable",
+            TrendBattery = "increasing",
+            TrendMemory = "decreasing"
         };
 
         _mockService.Setup(s => s.GetAnalyticsAsync())
