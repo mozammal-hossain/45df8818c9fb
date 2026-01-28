@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/platform/method_channels.dart';
-import 'package:device_vital_monitor_flutter_app/data/models/local/storage_info.dart';
 
 @lazySingleton
 class SensorPlatformDatasource {
@@ -123,30 +122,6 @@ class SensorPlatformDatasource {
       );
       return null;
     } on MissingPluginException {
-      return null;
-    }
-  }
-
-  Future<StorageInfo?> getStorageInfo() async {
-    try {
-      final result =
-          await _channel.invokeMethod<Map<Object?, Object?>>(SensorMethods.getStorageInfo);
-      if (result == null) return null;
-      final jsonMap = <String, dynamic>{};
-      for (final entry in result.entries) {
-        final key = entry.key?.toString();
-        if (key != null) jsonMap[key] = entry.value;
-      }
-      return StorageInfo.fromJson(jsonMap);
-    } on PlatformException catch (e) {
-      debugPrint(
-        'SensorPlatformDatasource.getStorageInfo: ${e.code} ${e.message}',
-      );
-      return null;
-    } on MissingPluginException {
-      return null;
-    } catch (e) {
-      debugPrint('SensorPlatformDatasource.getStorageInfo: $e');
       return null;
     }
   }

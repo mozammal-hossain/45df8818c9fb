@@ -1,6 +1,5 @@
 // Basic Flutter widget smoke test for Device Vital Monitor.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -26,14 +25,6 @@ void main() {
       if (call.method == 'getChargerConnection') return 'NONE';
       if (call.method == 'getBatteryStatus') return 'DISCHARGING';
       if (call.method == 'getMemoryUsage') return 50;
-      if (call.method == 'getStorageInfo') {
-        return <String, int>{
-          'total': 64 * 1024 * 1024 * 1024,
-          'used': 32 * 1024 * 1024 * 1024,
-          'available': 32 * 1024 * 1024 * 1024,
-          'usagePercent': 50,
-        };
-      }
       return null;
     });
   });

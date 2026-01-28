@@ -2,7 +2,7 @@
 abstract final class MethodChannels {
   MethodChannels._();
 
-  /// Main sensor channel: thermal, battery, memory, storage.
+  /// Main sensor channel: thermal, battery, memory.
   static const String sensors = 'device_vital_monitor/sensors';
 
   /// Thermal status change stream (Android).
@@ -20,5 +20,4 @@ abstract final class SensorMethods {
   static const String getChargerConnection = 'getChargerConnection';
   static const String getBatteryStatus = 'getBatteryStatus';
   static const String getMemoryUsage = 'getMemoryUsage';
-  static const String getStorageInfo = 'getStorageInfo';
 }

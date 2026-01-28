@@ -9,7 +9,6 @@ import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/das
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/history/history_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/battery_level_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/disk_space_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/log_status_button.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/memory_usage_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/thermal_state_card.dart';
@@ -132,8 +131,6 @@ class DashboardScreen extends StatelessWidget {
                   const BatteryLevelCard(),
                   const SizedBox(height: 16),
                   const MemoryUsageCard(),
-                  const SizedBox(height: 16),
-                  const DiskSpaceCard(),
                   const SizedBox(height: 24),
                   const LogStatusButton(),
                 ],

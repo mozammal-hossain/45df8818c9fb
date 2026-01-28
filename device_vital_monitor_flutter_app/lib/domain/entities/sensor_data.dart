@@ -1,6 +1,4 @@
-import 'storage_info.dart';
-
-/// Domain entity: snapshot of device sensor readings (thermal, battery, memory, storage).
+/// Domain entity: snapshot of device sensor readings (thermal, battery, memory).
 class SensorData {
   const SensorData({
     this.thermalState,
@@ -10,7 +8,6 @@ class SensorData {
     this.chargerConnection,
     this.batteryStatus,
     this.memoryUsage,
-    this.storageInfo,
   });
 
   final int? thermalState;
@@ -20,7 +17,6 @@ class SensorData {
   final String? chargerConnection;
   final String? batteryStatus;
   final int? memoryUsage;
-  final StorageInfo? storageInfo;
 
   SensorData copyWith({
     int? thermalState,
@@ -30,7 +26,6 @@ class SensorData {
     String? chargerConnection,
     String? batteryStatus,
     int? memoryUsage,
-    StorageInfo? storageInfo,
   }) =>
       SensorData(
         thermalState: thermalState ?? this.thermalState,
@@ -40,6 +35,5 @@ class SensorData {
         chargerConnection: chargerConnection ?? this.chargerConnection,
         batteryStatus: batteryStatus ?? this.batteryStatus,
         memoryUsage: memoryUsage ?? this.memoryUsage,
-        storageInfo: storageInfo ?? this.storageInfo,
       );
 }

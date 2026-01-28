@@ -119,7 +119,9 @@ class _SelectOptionTile<T> extends StatelessWidget {
               ),
               Radio<T>(
                 value: value,
+                // ignore: deprecated_member_use
                 groupValue: groupValue,
+                // ignore: deprecated_member_use
                 onChanged: onChanged,
                 activeColor: scheme.primary,
                 fillColor: WidgetStateProperty.resolveWith((states) {

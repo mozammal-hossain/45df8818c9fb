@@ -394,77 +394,11 @@ abstract class AppLocalizations {
   /// **'—'**
   String get dash;
 
-  /// No description provided for @diskSpace.
-  ///
-  /// In en, this message translates to:
-  /// **'Disk Space'**
-  String get diskSpace;
-
-  /// No description provided for @total.
-  ///
-  /// In en, this message translates to:
-  /// **'total'**
-  String get total;
-
-  /// No description provided for @usedFormatted.
-  ///
-  /// In en, this message translates to:
-  /// **'Used: {formatted}'**
-  String usedFormatted(String formatted);
-
-  /// No description provided for @availableFormatted.
-  ///
-  /// In en, this message translates to:
-  /// **'Available: {formatted}'**
-  String availableFormatted(String formatted);
-
-  /// No description provided for @storageUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'Storage information unavailable'**
-  String get storageUnavailable;
-
   /// No description provided for @logStatusSnapshot.
   ///
   /// In en, this message translates to:
   /// **'Log Status Snapshot'**
   String get logStatusSnapshot;
-
-  /// No description provided for @unitB.
-  ///
-  /// In en, this message translates to:
-  /// **'B'**
-  String get unitB;
-
-  /// No description provided for @unitKB.
-  ///
-  /// In en, this message translates to:
-  /// **'KB'**
-  String get unitKB;
-
-  /// No description provided for @unitMB.
-  ///
-  /// In en, this message translates to:
-  /// **'MB'**
-  String get unitMB;
-
-  /// No description provided for @unitGB.
-  ///
-  /// In en, this message translates to:
-  /// **'GB'**
-  String get unitGB;
-
-  /// No description provided for @unitTB.
-  ///
-  /// In en, this message translates to:
-  /// **'TB'**
-  String get unitTB;
-
-  /// No description provided for @zeroBytes.
-  ///
-  /// In en, this message translates to:
-  /// **'0 B'**
-  String get zeroBytes;
 
   /// No description provided for @historyTitle.
   ///
