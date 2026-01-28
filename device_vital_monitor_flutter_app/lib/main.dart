@@ -1,50 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'bloc/dashboard/dashboard_bloc.dart';
+import 'bloc/theme/theme_bloc.dart';
+import 'core/bloc/app_bloc_observer.dart';
+import 'core/injection/injection.dart';
 import 'core/theme/app_theme.dart';
 import 'l10n/app_localizations.dart';
-import 'providers/theme_provider.dart';
-import 'providers/theme_provider_scope.dart';
 import 'screens/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final mode = await ThemeProvider.loadThemeMode();
-  runApp(MyApp(initialThemeMode: mode));
+
+  // Set up BlocObserver for logging
+  Bloc.observer = const AppBlocObserver();
+
+  // Initialize dependency injection
+  configureDependencies();
+
+  // Load theme mode and create bloc
+  final mode = await ThemeBloc.loadThemeMode();
+  final themeBloc = ThemeBloc(initial: mode);
+
+  // Get DashboardBloc from dependency injection
+  final dashboardBloc = getIt<DashboardBloc>();
+
+  runApp(MyApp(
+    themeBloc: themeBloc,
+    dashboardBloc: dashboardBloc,
+  ));
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key, required this.initialThemeMode});
+class MyApp extends StatelessWidget {
+  const MyApp({
+    super.key,
+    required this.themeBloc,
+    required this.dashboardBloc,
+  });
 
-  final ThemeMode initialThemeMode;
-
-  @override
-  State<MyApp> createState() => _MyAppState();
-}
-
-class _MyAppState extends State<MyApp> {
-  late final ThemeProvider _themeProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    _themeProvider = ThemeProvider(initial: widget.initialThemeMode);
-  }
+  final ThemeBloc themeBloc;
+  final DashboardBloc dashboardBloc;
 
   @override
   Widget build(BuildContext context) {
-    return ThemeProviderScope(
-      provider: _themeProvider,
-      child: ListenableBuilder(
-        listenable: _themeProvider,
-        builder: (context, _) => MaterialApp(
-          title: 'Device Vital Monitor',
-          theme: AppTheme.buildLightTheme(),
-          darkTheme: AppTheme.buildDarkTheme(),
-          themeMode: _themeProvider.mode,
-          localizationsDelegates: AppLocalizations.localizationsDelegates,
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: const DashboardScreen(),
-        ),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ThemeBloc>.value(value: themeBloc),
+        BlocProvider<DashboardBloc>.value(value: dashboardBloc),
+      ],
+      child: BlocBuilder<ThemeBloc, ThemeState>(
+        builder: (context, state) {
+          return MaterialApp(
+            title: 'Device Vital Monitor',
+            theme: AppTheme.buildLightTheme(),
+            darkTheme: AppTheme.buildDarkTheme(),
+            themeMode: state.mode,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: const DashboardScreen(),
+          );
+        },
       ),
     );
   }
