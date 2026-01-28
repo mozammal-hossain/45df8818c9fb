@@ -9,18 +9,30 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.StatFs
 import android.os.Environment
+import android.os.SystemClock
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "device_vital_monitor/sensors"
+    private val THERMAL_EVENT_CHANNEL = "device_vital_monitor/thermal_events"
+
+    // ADPF: getThermalHeadroom must not be called more than once per 10 seconds (returns NaN otherwise)
+    private val MIN_HEADROOM_INTERVAL_MS = 10_000L
+    private var lastThermalHeadroomTimeMs: Long = 0
+    private var lastThermalHeadroomValue: Float? = null
+
+    private var thermalEventSink: EventChannel.EventSink? = null
+    private var thermalStatusListener: PowerManager.OnThermalStatusChangedListener? = null
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        
-        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCallHandler { call, result ->
+        val messenger = flutterEngine.dartExecutor.binaryMessenger
+
+        MethodChannel(messenger, CHANNEL).setMethodCallHandler { call, result ->
             when (call.method) {
                 "getThermalState" -> {
                     try {
@@ -28,6 +40,15 @@ class MainActivity : FlutterActivity() {
                         result.success(thermalState)
                     } catch (e: Exception) {
                         result.error("THERMAL_ERROR", "Failed to get thermal state: ${e.message}", null)
+                    }
+                }
+                "getThermalHeadroom" -> {
+                    try {
+                        val forecastSeconds = (call.arguments as? Number)?.toInt() ?: 10
+                        val headroom = getThermalHeadroom(forecastSeconds)
+                        result.success(headroom)
+                    } catch (e: Exception) {
+                        result.error("THERMAL_ERROR", "Failed to get thermal headroom: ${e.message}", null)
                     }
                 }
                 "getBatteryLevel" -> {
@@ -83,6 +104,44 @@ class MainActivity : FlutterActivity() {
                 }
             }
         }
+
+        EventChannel(messenger, THERMAL_EVENT_CHANNEL).setStreamHandler(
+            object : EventChannel.StreamHandler {
+                override fun onListen(arguments: Any?, events: EventChannel.EventSink?) {
+                    thermalEventSink = events
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+                        thermalStatusListener = PowerManager.OnThermalStatusChangedListener { status ->
+                            val mapped = thermalStatusToMappedValue(status)
+                            runOnUiThread {
+                                thermalEventSink?.success(mapped)
+                            }
+                        }
+                        powerManager.addThermalStatusListener(mainExecutor, thermalStatusListener!!)
+                    }
+                }
+
+                override fun onCancel(arguments: Any?) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && thermalStatusListener != null) {
+                        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+                        powerManager.removeThermalStatusListener(thermalStatusListener!!)
+                    }
+                    thermalStatusListener = null
+                    thermalEventSink = null
+                }
+            }
+        )
+    }
+
+    private fun thermalStatusToMappedValue(thermalStatus: Int): Int = when (thermalStatus) {
+        PowerManager.THERMAL_STATUS_NONE -> 0
+        PowerManager.THERMAL_STATUS_LIGHT -> 1
+        PowerManager.THERMAL_STATUS_MODERATE -> 2
+        PowerManager.THERMAL_STATUS_SEVERE,
+        PowerManager.THERMAL_STATUS_CRITICAL,
+        PowerManager.THERMAL_STATUS_EMERGENCY,
+        PowerManager.THERMAL_STATUS_SHUTDOWN -> 3
+        else -> 0
     }
 
     private fun getBatteryLevel(): Int {
@@ -159,32 +218,64 @@ class MainActivity : FlutterActivity() {
         return result
     }
 
+    /**
+     * Returns thermal headroom (0.0–1.0+, 1.0 = severe throttling). Null if unsupported or NaN.
+     * Must not be called more than once per 10 seconds (ADPF requirement).
+     */
+    private fun getThermalHeadroom(forecastSeconds: Int): Float? {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return null
+        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastThermalHeadroomTimeMs < MIN_HEADROOM_INTERVAL_MS) {
+            return lastThermalHeadroomValue
+        }
+        val headroom = powerManager.getThermalHeadroom(forecastSeconds.coerceIn(0, 60))
+        lastThermalHeadroomTimeMs = now
+        when {
+            headroom.isNaN() -> {
+                lastThermalHeadroomValue = null
+                Log.w(TAG, "getThermalHeadroom: NaN (throttled or unsupported)")
+                return null
+            }
+            else -> {
+                lastThermalHeadroomValue = headroom
+                Log.d(TAG, "getThermalHeadroom: $headroom (forecast=${forecastSeconds}s)")
+                return headroom
+            }
+        }
+    }
+
     private fun getThermalState(): Int {
         val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            // API 30+ (Android 11+) - Thermal API officially released
-            // Using PowerManager.getCurrentThermalStatus() as per Android Thermal API
-            // Reference: https://developer.android.com/games/optimize/adpf/thermal
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // API 29+: getCurrentThermalStatus per brief and ADPF
             val thermalStatus = powerManager.currentThermalStatus
-            val result = when (thermalStatus) {
-                PowerManager.THERMAL_STATUS_NONE -> 0
-                PowerManager.THERMAL_STATUS_LIGHT -> 1
-                PowerManager.THERMAL_STATUS_MODERATE -> 2
-                PowerManager.THERMAL_STATUS_SEVERE -> 3
-                PowerManager.THERMAL_STATUS_CRITICAL -> 3
-                PowerManager.THERMAL_STATUS_EMERGENCY -> 3
-                PowerManager.THERMAL_STATUS_SHUTDOWN -> 3
-                else -> 0
+            var result = thermalStatusToMappedValue(thermalStatus)
+
+            // ADPF device-limitation heuristics: when status is NONE, some devices don't update
+            // getCurrentThermalStatus; use getThermalHeadroom (API 30+) to infer throttling.
+            if (thermalStatus == PowerManager.THERMAL_STATUS_NONE && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val headroom = getThermalHeadroom(10)
+                if (headroom != null && !headroom.isNaN()) {
+                    when {
+                        headroom > 1.0f -> result = 3   // could be SEVERE or higher
+                        headroom > 0.95f -> result = 2  // could be MODERATE or higher
+                        headroom > 0.85f -> result = 1  // could be LIGHT
+                    }
+                    if (result != 0) {
+                        Log.d(TAG, "getThermalState: status=NONE, headroom=$headroom -> heuristic $result")
+                    }
+                }
+            } else if (result != 0) {
+                Log.d(TAG, "getThermalState: raw=$thermalStatus -> $result")
             }
-            Log.d(TAG, "getThermalState: raw=$thermalStatus -> $result")
-            result
-        } else {
-            // Older versions: return default (NONE)
-            // Thermal API requires Android 11 (API 30+) as per official documentation
-            Log.w(TAG, "getThermalState: API level ${Build.VERSION.SDK_INT} doesn't support Thermal API (requires API 30+), returning 0")
-            0
+            return result
         }
+
+        // API < 29: no thermal API (brief allows getThermalHeadroom for "older" – headroom is API 30+, so no fallback)
+        Log.w(TAG, "getThermalState: API ${Build.VERSION.SDK_INT} < 29, returning 0")
+        return 0
     }
 
     companion object {

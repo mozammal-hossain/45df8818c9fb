@@ -1,32 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-import 'bloc/dashboard/dashboard_bloc.dart';
-import 'bloc/theme/theme_bloc.dart';
-import 'core/bloc/app_bloc_observer.dart';
-import 'core/injection/injection.dart';
-import 'core/theme/app_theme.dart';
-import 'l10n/app_localizations.dart';
-import 'screens/dashboard_screen.dart';
+import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
+import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
+import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/common/app_bloc_observer.dart';
+import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Set up BlocObserver for logging
   Bloc.observer = const AppBlocObserver();
 
-  // Initialize dependency injection
+  final prefs = await SharedPreferences.getInstance();
+  getIt.registerSingleton<SharedPreferences>(prefs);
+
   configureDependencies();
 
-  // Load theme mode and create bloc
-  final mode = await ThemeBloc.loadThemeMode();
-  final themeBloc = ThemeBloc(initial: mode);
+  final preferencesRepo = getIt<PreferencesRepository>();
+  final mode = await ThemeBloc.loadThemeMode(preferencesRepo);
+  final themeBloc = ThemeBloc(preferencesRepo, initial: mode);
+  final locale = await LocaleBloc.loadLocale(preferencesRepo);
+  final localeBloc = LocaleBloc(preferencesRepo, initial: locale);
 
-  // Get DashboardBloc from dependency injection
   final dashboardBloc = getIt<DashboardBloc>();
 
   runApp(MyApp(
     themeBloc: themeBloc,
+    localeBloc: localeBloc,
     dashboardBloc: dashboardBloc,
   ));
 }
@@ -35,10 +41,12 @@ class MyApp extends StatelessWidget {
   const MyApp({
     super.key,
     required this.themeBloc,
+    required this.localeBloc,
     required this.dashboardBloc,
   });
 
   final ThemeBloc themeBloc;
+  final LocaleBloc localeBloc;
   final DashboardBloc dashboardBloc;
 
   @override
@@ -46,18 +54,25 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ThemeBloc>.value(value: themeBloc),
+        BlocProvider<LocaleBloc>.value(value: localeBloc),
         BlocProvider<DashboardBloc>.value(value: dashboardBloc),
       ],
       child: BlocBuilder<ThemeBloc, ThemeState>(
-        builder: (context, state) {
-          return MaterialApp(
-            title: 'Device Vital Monitor',
-            theme: AppTheme.buildLightTheme(),
-            darkTheme: AppTheme.buildDarkTheme(),
-            themeMode: state.mode,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: const DashboardScreen(),
+        builder: (context, themeState) {
+          return BlocBuilder<LocaleBloc, LocaleState>(
+            builder: (context, localeState) {
+              return MaterialApp(
+                title: 'Device Vital Monitor',
+                theme: AppTheme.buildLightTheme(),
+                darkTheme: AppTheme.buildDarkTheme(),
+                themeMode: themeState.mode,
+                locale: localeState.locale,
+                localizationsDelegates:
+                    AppLocalizations.localizationsDelegates,
+                supportedLocales: AppLocalizations.supportedLocales,
+                home: const DashboardScreen(),
+              );
+            },
           );
         },
       ),
