@@ -1,444 +1,209 @@
-# Device Vital Monitor
+# Device Vital Monitor – Flutter App
 
-A comprehensive Flutter mobile application that monitors and tracks device vitals in real-time, including thermal state, battery level, and memory usage. The app seamlessly integrates with native platform APIs (Android/iOS) and communicates with a backend service for data persistence, analytics, and historical tracking.
-
-## Overview
-
-Device Vital Monitor is a full-stack mobile monitoring solution that demonstrates:
-- **Cross-platform mobile development** with Flutter
-- **Native platform integration** using MethodChannels for Android and iOS
-- **Backend API integration** for data logging and analytics
-- **Real-time monitoring** of critical device metrics
-- **Data persistence** and historical analysis
-
-This project showcases modern mobile development practices, including proper error handling, data validation, and a clean architecture pattern.
-
-## Features
-
-- **Real-time Sensor Monitoring**: Displays current thermal state, battery level, and memory usage
-- **Native Platform Integration**: Uses Flutter MethodChannels to communicate with native Android/iOS code
-- **Backend API**: RESTful API for logging and retrieving device vitals with analytics
-- **Data Persistence**: Backend stores data persistently and survives restarts
-- **Error Handling**: Graceful handling of network errors, platform exceptions, and invalid data
-- **History & Analytics**: View historical logs and analytics including rolling averages
-
-## Project Structure
-
-```
-device_vital_monitor/
-├── lib/                    # Flutter application code
-├── android/                # Android native implementation
-├── ios/                    # iOS native implementation
-├── backend/                # Backend API server (Node.js or .NET)
-├── test/                   # Unit tests
-├── README.md              # This file
-├── DECISIONS.md           # Design decisions and ambiguity handling
-└── ai_log.md              # AI collaboration log
-```
-
-## Prerequisites
-
-### For Flutter App
-
-- **Flutter SDK**: Version 3.10.4 or higher
-  - Install from [flutter.dev](https://flutter.dev/docs/get-started/install)
-  - Verify installation: `flutter doctor`
-- **Dart SDK**: Included with Flutter
-- **Android Studio** (for Android development)
-  - Android SDK (API level 29+ recommended)
-  - Android SDK Platform-Tools
-- **Xcode** (for iOS development, macOS only)
-  - Xcode 14.0 or higher
-  - CocoaPods: `sudo gem install cocoapods`
-
-### For Backend
-
-**If using Node.js:**
-- **Node.js**: Version 18.0 or higher
-- **npm**: Included with Node.js
-
-**If using .NET:**
-- **.NET SDK**: Version 6.0 or higher
-- Install from [dotnet.microsoft.com](https://dotnet.microsoft.com/download)
-
-## Setup Instructions
-
-### 1. Clone the Repository
-
-```bash
-git clone <repository-url>
-cd device_vital_monitor
-```
-
-### 2. Backend Setup
-
-#### Option A: Node.js Backend
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
-3. Configure the backend (if needed):
-   - Update `backend/.env` or `backend/config.js` with your preferred port (default: 3000)
-   - Database/storage location will be configured automatically
-
-4. Start the backend server:
-   ```bash
-   npm start
-   # Or for development with auto-reload:
-   npm run dev
-   ```
-
-   The backend will start on `http://localhost:3000` (or your configured port).
-
-#### Option B: .NET Backend
-
-1. Navigate to the backend directory:
-   ```bash
-   cd backend
-   ```
-
-2. Restore dependencies:
-   ```bash
-   dotnet restore
-   ```
-
-3. Build the project:
-   ```bash
-   dotnet build
-   ```
-
-4. Run the backend:
-   ```bash
-   dotnet run
-   ```
-
-   The backend will start on `http://localhost:5000` (or your configured port).
-
-**Verify Backend is Running:**
-- Open your browser and navigate to `http://localhost:3000/api/vitals` (Node.js) or `http://localhost:5000/api/vitals` (.NET)
-- You should see an empty array `[]` or a JSON response
-
-### 3. Flutter App Setup
-
-1. Navigate back to the project root:
-   ```bash
-   cd ..
-   ```
-
-2. Install Flutter dependencies:
-   ```bash
-   flutter pub get
-   ```
-
-3. Configure Backend URL (if needed):
-   - Open `lib/config/api_config.dart` (or similar config file)
-   - Update the `baseUrl` to match your backend URL:
-     ```dart
-     static const String baseUrl = 'http://localhost:3000'; // Node.js
-     // or
-     static const String baseUrl = 'http://localhost:5000'; // .NET
-     ```
-   - **For Android Emulator**: Use `http://10.0.2.2:3000` instead of `localhost`
-   - **For iOS Simulator**: Use `http://localhost:3000`
-   - **For Physical Device**: Use your computer's local IP address (e.g., `http://192.168.1.100:3000`)
-
-4. Verify Flutter setup:
-   ```bash
-   flutter doctor
-   ```
-
-### 4. Platform-Specific Setup
-
-#### Android
-
-1. Ensure Android SDK is properly configured
-2. Create an Android Virtual Device (AVD) or connect a physical device:
-   ```bash
-   flutter emulators --launch <emulator_name>
-   # Or list available emulators:
-   flutter emulators
-   ```
-
-3. For physical devices, enable USB debugging:
-   - Settings → About Phone → Tap "Build Number" 7 times
-   - Settings → Developer Options → Enable "USB Debugging"
-
-#### iOS (macOS only)
-
-1. Install CocoaPods dependencies:
-   ```bash
-   cd ios
-   pod install
-   cd ..
-   ```
-
-2. Open the project in Xcode to configure signing:
-   ```bash
-   open ios/Runner.xcworkspace
-   ```
-   - Select your development team in Signing & Capabilities
-   - Close Xcode
-
-## Running the Application
-
-### Start the Backend First
-
-**Important**: Always start the backend server before running the Flutter app.
-
-```bash
-# In backend directory
-npm start  # Node.js
-# or
-dotnet run  # .NET
-```
-
-Keep this terminal window open.
-
-### Run the Flutter App
-
-1. **List available devices:**
-   ```bash
-   flutter devices
-   ```
-
-2. **Run on a specific device:**
-   ```bash
-   # Android
-   flutter run -d <device-id>
-   
-   # iOS
-   flutter run -d <device-id>
-   
-   # Or let Flutter choose
-   flutter run
-   ```
-
-3. **For hot reload**: Press `r` in the terminal where Flutter is running
-4. **For hot restart**: Press `R` in the terminal
-
-### Alternative: Using IDE
-
-- **VS Code**: Press `F5` or use the Run/Debug panel
-- **Android Studio**: Click the green "Run" button or press `Shift+F10`
-
-## Platform Support
-
-- ✅ **Android**: Fully implemented with MethodChannels
-- ✅ **iOS**: Fully implemented with MethodChannels (or specify if only one is done)
-
-*Note: Update this section based on which platform(s) you've implemented.*
-
-## API Endpoints
-
-The backend provides the following endpoints:
-
-### POST /api/vitals
-Log device vital data to the backend.
-
-**Request Body:**
-```json
-{
-  "device_id": "string",
-  "timestamp": "2024-01-15T10:30:00Z",
-  "thermal_value": 1,
-  "battery_level": 85,
-  "memory_usage": 45
-}
-```
-
-**Response:** `201 Created` with the saved vital record
-
-### GET /api/vitals
-Retrieve the latest 100 historical logs.
-
-**Response:**
-```json
-[
-  {
-    "id": 1,
-    "device_id": "string",
-    "timestamp": "2024-01-15T10:30:00Z",
-    "thermal_value": 1,
-    "battery_level": 85,
-    "memory_usage": 45
-  }
-]
-```
-
-### GET /api/vitals/analytics
-Get analytics data including rolling averages.
-
-**Response:**
-```json
-{
-  "rolling_average": {
-    "thermal_value": 1.2,
-    "battery_level": 78.5,
-    "memory_usage": 52.3
-  },
-  "total_logs": 150,
-  "time_range": {
-    "from": "2024-01-15T08:00:00Z",
-    "to": "2024-01-15T10:30:00Z"
-  }
-}
-```
-
-## Testing
-
-### Run Unit Tests
-
-```bash
-# Flutter tests
-flutter test
-
-# Backend tests (Node.js)
-cd backend
-npm test
-
-# Backend tests (.NET)
-cd backend
-dotnet test
-```
-
-### Test Coverage
-
-- Backend: Rolling average calculation, data validation
-- Flutter: Repository/Service layer logic
-
-## Troubleshooting
-
-### Backend Issues
-
-**Problem**: Backend won't start
-- **Solution**: Check if the port is already in use. Change the port in your backend configuration.
-
-**Problem**: "Cannot connect to backend" error in Flutter app
-- **Solution**: 
-  - Ensure backend is running
-  - Check the API URL in Flutter config matches your backend URL
-  - For Android emulator, use `10.0.2.2` instead of `localhost`
-  - For physical devices, ensure device and computer are on the same network
-
-**Problem**: Data not persisting after restart
-- **Solution**: Check that your database/storage file is being created in the correct location and not in a temporary directory.
-
-### Flutter App Issues
-
-**Problem**: "PlatformException" when reading sensors
-- **Solution**: 
-  - Ensure you're running on a physical device or emulator (not web)
-  - Check that MethodChannels are properly implemented in native code
-  - Verify platform permissions are set (battery access, etc.)
-
-**Problem**: Build errors on Android
-- **Solution**: 
-  ```bash
-  cd android
-  ./gradlew clean
-  cd ..
-  flutter clean
-  flutter pub get
-  ```
-
-**Problem**: Build errors on iOS
-- **Solution**: 
-  ```bash
-  cd ios
-  pod deintegrate
-  pod install
-  cd ..
-  flutter clean
-  flutter pub get
-  ```
-
-**Problem**: "No devices found"
-- **Solution**: 
-  - For Android: Start an emulator or connect a device with USB debugging enabled
-  - For iOS: Start the iOS Simulator from Xcode or connect a physical device
-
-### Network Issues
-
-**Problem**: CORS errors (if testing backend in browser)
-- **Solution**: Ensure CORS is properly configured in your backend to allow requests from your Flutter app origin.
-
-## Architecture
-
-### Flutter App
-- **State Management**: [Provider/Riverpod/Bloc - specify which]
-- **Architecture Pattern**: Repository pattern for data layer separation
-- **Native Communication**: MethodChannels for platform-specific sensor access
-
-### Backend
-- **Tech Stack**: [Node.js/.NET - specify which]
-- **Storage**: [SQLite/JSON file/LiteDB - specify which]
-- **Architecture**: RESTful API with validation and persistence layer
-
-## Data Validation
-
-The backend validates all incoming data:
-
-- **thermal_value**: Must be between 0-3 (inclusive)
-- **battery_level**: Must be between 0-100 (inclusive)
-- **memory_usage**: Must be between 0-100 (inclusive)
-- **timestamp**: Must be a valid ISO8601 datetime and not in the future
-- **device_id**: Required string field
-
-Invalid data will be rejected with appropriate error messages.
-
-## Error Handling
-
-The application handles various error scenarios:
-
-- **Network Errors**: Shows user-friendly error messages when backend is unreachable
-- **Platform Exceptions**: Handles cases where native sensors are unavailable
-- **Validation Errors**: Displays specific error messages for invalid data
-- **Timeout Errors**: Gracefully handles network timeouts
-
-## Additional Documentation
-
-- **[DECISIONS.md](DECISIONS.md)**: Design decisions and how ambiguities were handled
-- **[ai_log.md](ai_log.md)**: AI collaboration log and workflow
-
-## Development Notes
-
-### MethodChannel Implementation
-
-The app uses Flutter MethodChannels to communicate with native code:
-
-- **Channel Name**: `device_vital_monitor/sensors`
-- **Methods**:
-  - `getThermalState()`: Returns thermal state (0-3)
-  - `getBatteryLevel()`: Returns battery percentage (0-100)
-  - `getMemoryUsage()`: Returns memory usage percentage (0-100)
-
-### Native Implementation Details
-
-**Android (Kotlin)**:
-- Uses `PowerManager.getCurrentThermalStatus()` for thermal state
-- Uses `BatteryManager.BATTERY_PROPERTY_CAPACITY` for battery level
-- Uses `ActivityManager.MemoryInfo` for memory usage
-
-**iOS (Swift)**:
-- Uses `ProcessInfo.processInfo.thermalState` for thermal state
-- Uses `UIDevice.current.batteryLevel` for battery level
-- Uses `mach_task_basic_info` for memory usage
-
-## License
-
-[Specify your license or "Private project for assessment purposes"]
-
-## Contact
-
-[Your contact information or repository maintainer]
+A Flutter application that monitors device vitals (thermal state, battery, memory, disk) in real time, logs snapshots to a backend API, and displays history and analytics. It uses **MethodChannels** for native Android/iOS sensor access (no third‑party sensor plugins) and follows **Clean Architecture** with **Bloc** for state and **get_it + injectable** for dependency injection.
 
 ---
 
-**Note**: This project was created as a take-home assignment. For questions about implementation decisions, please refer to `DECISIONS.md`.
+## App functionality overview
+
+### What the app does
+
+- **Dashboard**: Shows live thermal state, battery level/health/charger/status, memory usage, and disk space. Pull-to-refresh updates readings. A “Log Status Snapshot” button sends the current vitals to the backend.
+- **History**: Loads the latest vital logs from the API and shows analytics (rolling averages, total logs). Supports pull-to-refresh.
+- **Settings**: App language (Bangla / English), theme (Light / Dark / System), and app version/build.
+
+All sensor data is read via a single **MethodChannel** (`device_vital_monitor/sensors`) from native Android or iOS code. The app talks to a .NET backend (default `http://10.0.2.2:5265` on Android, `http://localhost:5265` on iOS/macOS).
+
+---
+
+## Screens and user flows
+
+### 1. Dashboard (home)
+
+- **Entry**: App starts on the dashboard. Sensor data is fetched once on load; thermal updates can also arrive via an **EventChannel** (`device_vital_monitor/thermal_events`) on Android.
+- **Navigation**: Drawer for Dashboard / History / Settings. App bar: theme cycle (light ↔ dark ↔ system), overflow menu.
+- **Content**:
+  - **Thermal state**  
+    Numeric 0–3 and label (NONE / LIGHT / MODERATE / SEVERE). Optional thermal headroom (Android). Shimmer while loading.
+  - **Battery**  
+    Level %, health (Good, Overheat, etc.), charger (AC/USB/Wireless/None), status (Charging/Discharging/Full/Not charging). Shimmer while loading.
+  - **Memory usage**  
+    Percentage and qualitative label (Optimized / Normal / Moderate / High / Critical). Shimmer while loading.
+  - **Disk space**  
+    Used / available (formatted), usage %. Shimmer while loading.
+- **Actions**:
+  - Pull-to-refresh: re-fetches all sensor data.
+  - “Log Status Snapshot”: builds a `VitalLogRequest` (device_id, timestamp, thermal_value, battery_level, memory_usage), POSTs to `/api/vitals`, shows Snackbar on success or error. Button shows loading state while submitting.
+- **Feedback**: Success/error Snackbars for log action; loading/shimmer for sensor cards.
+
+### 2. History
+
+- **Entry**: From drawer → “History”. Pushing the route creates a `HistoryBloc` and dispatches `HistoryRequested`.
+- **Data**: Fetches in parallel:
+  - `GET /api/vitals` → list of `VitalLog` (latest 100),
+  - `GET /api/vitals/analytics` → `AnalyticsResult` (rolling-window averages, total logs).
+- **UI**:
+  - **Analytics card** (if available): average thermal, average battery %, average memory %, total logs, “logs in window”.
+  - **List**: One tile per log with formatted time and “Thermal · Battery · Memory”.
+- **States**: Loading spinner; empty state message when no logs; error Snackbar and message when the backend is unreachable or request fails. Pull-to-refresh re-dispatches `HistoryRequested`.
+
+### 3. Settings
+
+- **Entry**: From drawer → “Settings”.
+- **Sections**:
+  - **Branding**: App title, short subtitle, icon.
+  - **Language**: Bangla / English. Choice is stored and applied via `LocaleBloc` and `supportedLocales` / `locale` in `MaterialApp`.
+  - **Theme**: Light / Dark / System. Choice is stored and applied via `ThemeBloc` and `themeMode` in `MaterialApp`.
+  - **Footer**: “DEVICE VITAL MONITOR”, version and build (e.g. “Version 1.0.0 (Build 1)”).
+
+Theme and locale are persisted (e.g. `SharedPreferences`) and restored on next launch.
+
+---
+
+## Architecture and layers
+
+The app uses **Clean Architecture**: **domain** (entities, repository interfaces, use cases), **data** (datasources, models, mappers, repository implementations), and **presentation** (Bloc, screens, widgets). Dependency direction: presentation → domain ← data.
+
+### State management (Bloc)
+
+- **DashboardBloc**: Sealed states — `DashboardInitial`, `DashboardLoading`, `DashboardLoaded(sensorData, logStatus, logStatusMessage)`, `DashboardError(message, lastKnownData)`. Uses `GetSensorDataUsecase` (returns `Result<SensorData>`), `LogVitalSnapshotUsecase`, and `DeviceRepository.thermalStatusChangeStream`. Handles `DashboardSensorDataRequested`, `DashboardLogStatusRequested`, `DashboardThermalStatusChanged`.
+- **HistoryBloc**: Log list, analytics, loading/failure. Handles `HistoryRequested`; uses `GetHistoryUsecase` and `GetAnalyticsUsecase`.
+- **ThemeBloc**: `ThemeMode` (light/dark/system), persisted via `PreferencesRepository`.
+- **LocaleBloc**: `Locale?` (e.g. `bn`, `en`), persisted via `PreferencesRepository`.
+
+Blocs are provided at app or screen level. Dependency injection uses **get_it** + **injectable** (`configureDependencies()` in `main.dart`).
+
+### Domain and data
+
+- **Repositories** (interfaces in `domain/repositories/`, implementations in `data/repositories/`):
+  - **VitalsRepository**: `logVital(...)`, `getHistory()` → `List<VitalLog>`, `getAnalytics()` → `AnalyticsResult`. Implemented with `VitalsRemoteDatasource` (Dio, base URL from `ApiConfig`).
+  - **DeviceRepository**: `getDeviceInfo()`, `getSensorData()` → `SensorData`, `thermalStatusChangeStream`. Implemented with `DeviceIdLocalDatasource` and `SensorPlatformDatasource`.
+  - **PreferencesRepository**: theme/locale persistence (e.g. SharedPreferences).
+- **Use cases** (`domain/usecases/`): `GetSensorDataUsecase` (returns `Result<SensorData>`), `LogVitalSnapshotUsecase`, `GetHistoryUsecase`, `GetAnalyticsUsecase`.
+- **Mappers** (`data/mappers/`): e.g. `VitalLogResponse.toDomain()`, `AnalyticsResponse.toDomain()`; repositories use these to map API models to domain entities.
+- **Error/result**: `core/error/result.dart` defines sealed `Result<T>` (`Success<T>`, `Error<T>`); failures include `PlatformFailure`, `UnexpectedFailure`, `ServerFailure`, `NetworkFailure`.
+
+### Native integration (MethodChannel)
+
+- **Channels** (`core/platform/method_channels.dart`): `MethodChannels.sensors` = `device_vital_monitor/sensors`; `MethodChannels.thermalEvents` = `device_vital_monitor/thermal_events`.
+- **Method names** (`SensorMethods`): `getThermalState`, `getThermalHeadroom`, `getBatteryLevel`, `getBatteryHealth`, `getChargerConnection`, `getBatteryStatus`, `getMemoryUsage`, `getStorageInfo`. Platform returns values or null when unsupported.
+- **EventChannel**: `device_vital_monitor/thermal_events` (Android) streams thermal changes; `DashboardBloc` subscribes via `DeviceRepository.thermalStatusChangeStream`.
+
+Device id for log requests comes from `DeviceIdLocalDatasource` (e.g. persistent store or UUID).
+
+### Domain entities and data models
+
+- **Entities** (`domain/entities/`): `VitalLog`, `AnalyticsResult`, `SensorData`, `StorageInfo`, `DeviceInfo`.
+- **Request/response** (`data/models/`): `VitalLogRequest`, `VitalLogResponse`, `AnalyticsResponse`, local `StorageInfo`; mappers convert to/from domain.
+
+### Configuration
+
+- **ApiConfig**: `baseUrl` (defaults: Android `http://10.0.2.2:5265`, else `http://localhost:5265`), `vitalsPath` → `/api/vitals`, `vitalsAnalyticsPath` → `/api/vitals/analytics`.
+
+---
+
+## Localization (l10n)
+
+- **Mechanism**: Flutter `gen-l10n` from ARB files (`app_en.arb`, `app_bn.arb`, etc.).
+- **Scope**: All user-visible strings (dashboard labels, thermal/battery/memory/disk copy, history, settings, theme/language options, errors, etc.).
+- **Locales**: English (en), Bangla (bn), and any others defined in ARB + `supportedLocales`.
+
+---
+
+## Theming
+
+- **AppTheme**: Light and dark themes (e.g. `ColorScheme.fromSeed`), set via `MaterialApp.theme` / `darkTheme` / `themeMode`.
+- **ThemeBloc** drives `themeMode` and persistence; Settings and app bar allow switching.
+
+---
+
+## Error handling
+
+- **Sensor load failures**: `GetSensorDataUsecase` returns `Result<SensorData>`; on `PlatformException` or other errors it returns `Error(PlatformFailure(...))` or `Error(UnexpectedFailure(...))`. `DashboardBloc` emits `DashboardError(message)` and shows an error Snackbar.
+- **Backend unreachable / timeouts**: `VitalsRepository` throws `VitalsRepositoryException` on log or history/analytics calls; Dashboard shows log-failure Snackbar; History shows Snackbar and optional full-screen message.
+- **Platform sensor errors**: `SensorPlatformDatasource` catches `PlatformException` / `MissingPluginException` and returns `null` per method; `DeviceRepository` still returns a `SensorData` with nullable fields, so UI can show “—” or equivalent without crashing.
+- **Validation/HTTP errors from API**: Message from server is shown in Snackbar when logging fails.
+
+---
+
+## Project structure
+
+```
+lib/
+├── main.dart                     # Bloc setup, MultiBlocProvider, MaterialApp
+├── core/
+│   ├── config/                   # ApiConfig, AppConfig, logger
+│   ├── di/                       # get_it + injectable (injection.dart, injection.config.dart)
+│   ├── error/                    # exceptions, failures, Result<T>
+│   ├── platform/                 # MethodChannels, SensorMethods, platform_dispatcher
+│   ├── theme/                    # AppTheme, app_colors, text_styles
+│   └── utils/                    # constants, extensions, logger
+│       └── formatters/           # battery, memory, storage formatters, status_colors
+├── data/
+│   ├── datasources/
+│   │   ├── local/                # device_id, preferences
+│   │   ├── platform/             # sensor_platform_datasource (MethodChannel)
+│   │   └── remote/               # vitals_remote_datasource (Dio)
+│   ├── mappers/                  # vital_log_mapper, analytics_mapper
+│   ├── models/                   # request/, response/, local/ (VitalLogRequest, etc.)
+│   └── repositories/             # vitals, device, preferences implementations
+├── domain/
+│   ├── entities/                 # VitalLog, SensorData, AnalyticsResult, StorageInfo, DeviceInfo
+│   ├── repositories/             # VitalsRepository, DeviceRepository, PreferencesRepository
+│   └── usecases/                 # get_sensor_data, log_vital_snapshot, get_history, get_analytics
+├── l10n/                         # ARB files + generated AppLocalizations
+└── presentation/
+    ├── bloc/
+    │   ├── common/               # AppBlocObserver
+    │   ├── dashboard/            # DashboardBloc, events, sealed state
+    │   ├── history/              # HistoryBloc, events, state
+    │   └── settings/
+    │       ├── locale/           # LocaleBloc
+    │       └── theme/            # ThemeBloc
+    ├── screens/
+    │   ├── dashboard/            # DashboardScreen + widgets (thermal, battery, memory, disk, log button)
+    │   ├── history/              # HistoryScreen + widgets (analytics_card, vital_log_item)
+    │   └── settings/             # SettingsScreen + language_selector, theme_selector
+    └── widgets/
+        ├── cards/                # VitalCard
+        └── common/               # AppDrawer, LoadingShimmer, ErrorView, EmptyState
+```
+
+---
+
+## Setup and run
+
+### Prerequisites
+
+- Flutter SDK (e.g. 3.10+), Android SDK (API 29+ for thermal APIs), Xcode/CocoaPods for iOS.
+- Backend: .NET backend in repo root (e.g. `device_vital_monitor_backend`) listening on port **5265**.
+
+### Steps
+
+1. **Backend**  
+   From repo root, run the .NET backend so it serves `http://localhost:5265` (and is reachable as `http://10.0.2.2:5265` from Android emulator).
+
+2. **Flutter app**  
+   From `device_vital_monitor_flutter_app/`:
+   - `flutter pub get`
+   - `dart run build_runner build` (if you change injectable registrations)
+   - `flutter run` (or run on a chosen device/emulator)
+
+3. **API base URL**  
+   To point at another host/port, provide a custom `baseUrl` where `ApiConfig` is constructed (or inject a config that overrides the default).
+
+---
+
+## Tests
+
+- **Flutter**: Tests under `test/` include `widget_test.dart` (app smoke), `screens/dashboard_screen_memory_test.dart` (dashboard/memory display, using `ensureDashboardLoaded` to wait for sealed dashboard state), and `services/device_sensor_service_test.dart` (platform datasource). Run with `flutter test`.
+- **Backend**: See the backend project for validation and rolling-average tests.
+
+---
+
+## Platform support
+
+- **Android**: Implemented via MethodChannel (and thermal EventChannel) in the Android project.
+- **iOS**: Implemented via MethodChannel in the iOS project where applicable; thermal events may be no-op.
+
+For detailed design choices, ambiguities, and trade-offs, see the repository’s **DECISIONS.md**.

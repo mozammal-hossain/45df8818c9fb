@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'bloc/dashboard/dashboard_bloc.dart';
-import 'bloc/locale/locale_bloc.dart';
-import 'bloc/theme/theme_bloc.dart';
-import 'core/bloc/app_bloc_observer.dart';
-import 'core/injection/injection.dart';
-import 'core/theme/app_theme.dart';
-import 'l10n/app_localizations.dart';
-import 'screens/dashboard_screen.dart';
+import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
+import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
+import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/bloc/common/app_bloc_observer.dart';
+import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/dashboard_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,10 +22,11 @@ void main() async {
 
   configureDependencies();
 
-  final mode = await ThemeBloc.loadThemeMode();
-  final themeBloc = ThemeBloc(initial: mode);
-  final locale = await LocaleBloc.loadLocale();
-  final localeBloc = LocaleBloc(initial: locale);
+  final preferencesRepo = getIt<PreferencesRepository>();
+  final mode = await ThemeBloc.loadThemeMode(preferencesRepo);
+  final themeBloc = ThemeBloc(preferencesRepo, initial: mode);
+  final locale = await LocaleBloc.loadLocale(preferencesRepo);
+  final localeBloc = LocaleBloc(preferencesRepo, initial: locale);
 
   final dashboardBloc = getIt<DashboardBloc>();
 
@@ -65,7 +67,8 @@ class MyApp extends StatelessWidget {
                 darkTheme: AppTheme.buildDarkTheme(),
                 themeMode: themeState.mode,
                 locale: localeState.locale,
-                localizationsDelegates: AppLocalizations.localizationsDelegates,
+                localizationsDelegates:
+                    AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: const DashboardScreen(),
               );

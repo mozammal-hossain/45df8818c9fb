@@ -1,16 +1,16 @@
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:device_vital_monitor_flutter_app/services/device_sensor_service.dart';
+import 'package:device_vital_monitor_flutter_app/data/datasources/platform/sensor_platform_datasource.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  group('DeviceSensorService - Memory Usage Tests', () {
+  group('SensorPlatformDatasource - Memory Usage Tests', () {
     const MethodChannel channel = MethodChannel('device_vital_monitor/sensors');
-    late DeviceSensorService service;
+    late SensorPlatformDatasource service;
 
     setUp(() {
-      service = DeviceSensorService();
+      service = SensorPlatformDatasource();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(channel, null);
     });
@@ -400,7 +400,7 @@ void main() {
               return null;
             });
 
-        final futures = List.generate(
+        final futures = List<Future<int?>>.generate(
           5,
           (_) => service.getMemoryUsage(),
         );
@@ -481,7 +481,7 @@ void main() {
               return null;
             });
 
-        final futures = List.generate(
+        final futures = List<Future<int?>>.generate(
           10,
           (_) => service.getMemoryUsage(),
         );

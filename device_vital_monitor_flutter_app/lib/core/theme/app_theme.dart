@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
+import 'text_styles.dart';
 
 /// Centralized theme configuration.
 ///
@@ -51,7 +52,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: _buildTextTheme(AppColors.light.iconTint),
+      textTheme: TextStyles.buildTextTheme(AppColors.light.iconTint),
     );
   }
 
@@ -95,36 +96,8 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: _buildTextTheme(AppColors.dark.iconTint),
+      textTheme: TextStyles.buildTextTheme(AppColors.dark.iconTint),
     );
   }
 
-  static TextTheme _buildTextTheme(Color baseColor) {
-    final onSurfaceVariant = baseColor.withValues(alpha: 0.7);
-    return TextTheme(
-      displayLarge: TextStyle(
-        fontSize: 32,
-        fontWeight: FontWeight.bold,
-        color: baseColor,
-      ),
-      displayMedium: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.bold,
-        color: baseColor,
-      ),
-      titleLarge: TextStyle(
-        fontSize: 18,
-        fontWeight: FontWeight.bold,
-        color: baseColor,
-      ),
-      bodyLarge: TextStyle(fontSize: 16, color: baseColor, height: 1.4),
-      bodyMedium: TextStyle(fontSize: 14, color: baseColor, height: 1.4),
-      bodySmall: TextStyle(fontSize: 13, color: onSurfaceVariant, height: 1.4),
-      labelLarge: TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.bold,
-        color: baseColor,
-      ),
-    );
-  }
 }
