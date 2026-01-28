@@ -70,5 +70,16 @@
   "totalLogsLabel": "Total registros",
   "rollingWindowLogsLabel": "Registros en ventana",
   "dashboardTitle": "Panel",
-  "loggingEllipsis": "Registrando…"
+  "loggingEllipsis": "Registrando…",
+  "appSettingsTitle": "Configuración",
+  "settingsSubtitle": "Administra tus preferencias",
+  "languageLabel": "Idioma",
+  "languageBangla": "Bengalí",
+  "languageEnglish": "Inglés",
+  "themeLabel": "Tema",
+  "themeLight": "Claro",
+  "themeDark": "Oscuro",
+  "themeSystemDefault": "Predeterminado del sistema",
+  "settingsTitle": "Ajustes",
+  "versionBuild": "Versión {version} (Compilación {build})"
 }

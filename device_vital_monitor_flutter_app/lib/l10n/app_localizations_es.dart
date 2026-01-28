@@ -238,4 +238,39 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loggingEllipsis => 'Registrando…';
+
+  @override
+  String get appSettingsTitle => 'Configuración';
+
+  @override
+  String get settingsSubtitle => 'Administra tus preferencias';
+
+  @override
+  String get languageLabel => 'Idioma';
+
+  @override
+  String get languageBangla => 'Bengalí';
+
+  @override
+  String get languageEnglish => 'Inglés';
+
+  @override
+  String get themeLabel => 'Tema';
+
+  @override
+  String get themeLight => 'Claro';
+
+  @override
+  String get themeDark => 'Oscuro';
+
+  @override
+  String get themeSystemDefault => 'Predeterminado del sistema';
+
+  @override
+  String get settingsTitle => 'Ajustes';
+
+  @override
+  String versionBuild(String version, String build) {
+    return 'Versión $version (Compilación $build)';
+  }
 }

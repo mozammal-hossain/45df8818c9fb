@@ -112,5 +112,22 @@
   "totalLogsLabel": "Total logs",
   "rollingWindowLogsLabel": "Logs in window",
   "dashboardTitle": "Dashboard",
-  "loggingEllipsis": "Logging…"
+  "loggingEllipsis": "Logging…",
+  "appSettingsTitle": "App Settings",
+  "settingsSubtitle": "Manage your preferences",
+  "languageLabel": "Language",
+  "languageBangla": "Bangla",
+  "languageEnglish": "English",
+  "themeLabel": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "themeSystemDefault": "System Default",
+  "settingsTitle": "Settings",
+  "versionBuild": "Version {version} (Build {build})",
+  "@versionBuild": {
+    "placeholders": {
+      "version": {"type": "String"},
+      "build": {"type": "String"}
+    }
+  }
 }

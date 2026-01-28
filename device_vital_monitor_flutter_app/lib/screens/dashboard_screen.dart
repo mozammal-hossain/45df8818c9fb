@@ -6,6 +6,7 @@ import '../bloc/theme/theme_bloc.dart';
 import '../core/injection/injection.dart';
 import '../l10n/app_localizations.dart';
 import '../screens/history_screen.dart';
+import '../screens/setting_screen.dart';
 import '../bloc/history/history_bloc.dart';
 import '../widgets/battery_level_card.dart';
 import '../widgets/disk_space_card.dart';
@@ -27,6 +28,15 @@ class DashboardScreen extends StatelessWidget {
           create: (_) => getIt<HistoryBloc>()..add(const HistoryRequested()),
           child: const HistoryScreen(),
         ),
+      ),
+    );
+  }
+
+  void _openSettings(BuildContext context) {
+    Navigator.of(context).pop(); // close drawer
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (context) => const SettingScreen(),
       ),
     );
   }
@@ -58,6 +68,11 @@ class DashboardScreen extends StatelessWidget {
               leading: const Icon(Icons.history),
               title: Text(l10n.historyTitle),
               onTap: () => _openHistory(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings),
+              title: Text(l10n.settingsTitle),
+              onTap: () => _openSettings(context),
             ),
           ],
         ),
