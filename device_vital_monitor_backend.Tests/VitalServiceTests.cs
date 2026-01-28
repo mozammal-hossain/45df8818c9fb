@@ -1,5 +1,6 @@
 using device_vital_monitor_backend.Data;
 using device_vital_monitor_backend.DTOs;
+using device_vital_monitor_backend.Repositories;
 using device_vital_monitor_backend.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,7 +18,8 @@ public class VitalServiceTests : IDisposable
             .Options;
         _context = new VitalContext(options);
         _context.Database.EnsureCreated();
-        _sut = new VitalService(_context);
+        var repo = new DeviceVitalRepository(_context);
+        _sut = new VitalService(repo);
     }
 
     public void Dispose() => _context.Dispose();

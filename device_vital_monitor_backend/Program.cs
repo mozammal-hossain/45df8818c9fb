@@ -1,4 +1,5 @@
 using device_vital_monitor_backend.Data;
+using device_vital_monitor_backend.Repositories;
 using device_vital_monitor_backend.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +13,7 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<VitalContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.AddScoped<IDeviceVitalRepository, DeviceVitalRepository>();
 builder.Services.AddScoped<IVitalService, VitalService>();
 
 

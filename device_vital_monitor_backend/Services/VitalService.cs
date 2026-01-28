@@ -1,17 +1,16 @@
-using device_vital_monitor_backend.Data;
 using device_vital_monitor_backend.DTOs;
 using device_vital_monitor_backend.Models;
-using Microsoft.EntityFrameworkCore;
+using device_vital_monitor_backend.Repositories;
 
 namespace device_vital_monitor_backend.Services
 {
     public class VitalService : IVitalService
     {
-        private readonly VitalContext _context;
+        private readonly IDeviceVitalRepository _repo;
 
-        public VitalService(VitalContext context)
+        public VitalService(IDeviceVitalRepository repo)
         {
-            _context = context;
+            _repo = repo;
         }
 
         public async Task<(bool, string?)> LogVitalAsync(VitalLogRequest request)
@@ -57,29 +56,22 @@ namespace device_vital_monitor_backend.Services
                 MemoryUsage = request.MemoryUsage.Value
             };
 
-            _context.DeviceVitals.Add(vital);
-            await _context.SaveChangesAsync();
+            await _repo.AddAsync(vital);
 
             return (true, null);
         }
 
         public async Task<IEnumerable<DeviceVital>> GetHistoryAsync()
         {
-            return await _context.DeviceVitals
-                .OrderByDescending(v => v.Timestamp)
-                .Take(100)
-                .ToListAsync();
+            return await _repo.GetLatestAsync(100);
         }
 
         public const int RollingWindowSize = 100;
 
         public async Task<AnalyticsResult> GetAnalyticsAsync()
         {
-            var totalCount = await _context.DeviceVitals.CountAsync();
-            var rollingVitals = await _context.DeviceVitals
-                .OrderByDescending(v => v.Timestamp)
-                .Take(RollingWindowSize)
-                .ToListAsync();
+            var totalCount = await _repo.CountAsync();
+            var rollingVitals = await _repo.GetLatestAsync(RollingWindowSize);
 
             if (rollingVitals.Count == 0)
             {
