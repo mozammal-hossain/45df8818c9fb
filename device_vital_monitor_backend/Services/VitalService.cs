@@ -13,52 +13,9 @@ namespace device_vital_monitor_backend.Services
             _repo = repo;
         }
 
-        public async Task<(bool, string?)> LogVitalAsync(VitalLogRequest request)
+        public async Task LogVitalAsync(DeviceVital vital)
         {
-            if (request == null)
-                return (false, "Request body is required.");
-
-            // Treat null as missing required field
-            if (string.IsNullOrWhiteSpace(request.DeviceId))
-                return (false, "Device ID is required.");
-
-            if (!request.Timestamp.HasValue)
-                return (false, "Timestamp is required.");
-
-            if (!request.ThermalValue.HasValue)
-                return (false, "Thermal value is required.");
-
-            if (!request.BatteryLevel.HasValue)
-                return (false, "Battery level is required.");
-
-            if (!request.MemoryUsage.HasValue)
-                return (false, "Memory usage is required.");
-
-            // When value is present, validate range
-            if (request.ThermalValue.Value < 0 || request.ThermalValue.Value > 3)
-                return (false, "Thermal value must be between 0 and 3.");
-
-            if (request.BatteryLevel.Value < 0 || request.BatteryLevel.Value > 100)
-                return (false, "Battery level must be between 0 and 100.");
-
-            if (request.MemoryUsage.Value < 0 || request.MemoryUsage.Value > 100)
-                return (false, "Memory usage must be between 0 and 100.");
-
-            if (request.Timestamp.Value > DateTime.UtcNow.AddMinutes(5)) // Allow 5 mins clock skew
-                return (false, "Timestamp cannot be in the future.");
-
-            var vital = new DeviceVital
-            {
-                DeviceId = request.DeviceId,
-                Timestamp = request.Timestamp.Value,
-                ThermalValue = request.ThermalValue.Value,
-                BatteryLevel = request.BatteryLevel.Value,
-                MemoryUsage = request.MemoryUsage.Value
-            };
-
             await _repo.AddAsync(vital);
-
-            return (true, null);
         }
 
         public async Task<IEnumerable<DeviceVital>> GetHistoryAsync()
