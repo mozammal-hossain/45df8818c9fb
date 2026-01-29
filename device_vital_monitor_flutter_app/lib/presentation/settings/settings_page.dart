@@ -3,16 +3,55 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/assets/assets.dart';
 import 'package:device_vital_monitor_flutter_app/core/config/app_config.dart';
+import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
+import 'package:device_vital_monitor_flutter_app/core/services/auto_logging_scheduler.dart';
+import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/language_selector.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/theme_selector.dart';
 
 final _packageInfoFuture = PackageInfo.fromPlatform();
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _autoLoggingEnabled = false;
+  bool _autoLoggingLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadAutoLogging();
+  }
+
+  Future<void> _loadAutoLogging() async {
+    final enabled = await getIt<PreferencesRepository>()
+        .getAutoLoggingEnabled();
+    if (mounted) {
+      setState(() {
+        _autoLoggingEnabled = enabled;
+        _autoLoggingLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onAutoLoggingChanged(bool value) async {
+    setState(() => _autoLoggingEnabled = value);
+    await getIt<PreferencesRepository>().setAutoLoggingEnabled(value);
+    final scheduler = getIt<AutoLoggingScheduler>();
+    if (value) {
+      await scheduler.start();
+    } else {
+      await scheduler.stop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +69,8 @@ class SettingsPage extends StatelessWidget {
         _buildLanguageSection(context, scheme, l10n),
         SizedBox(height: AppInsets.spacingL(context)),
         _buildThemeSection(context, scheme, l10n),
+        SizedBox(height: AppInsets.spacingL(context)),
+        _buildAutoLoggingSection(context, scheme, l10n),
         SizedBox(height: AppInsets.spacingXXL(context)),
         _buildFooter(context, scheme, l10n),
       ],
@@ -163,6 +204,59 @@ class SettingsPage extends StatelessWidget {
         ),
         SizedBox(height: sSM),
         const ThemeSelector(),
+      ],
+    );
+  }
+
+  Widget _buildAutoLoggingSection(
+    BuildContext context,
+    ColorScheme scheme,
+    AppLocalizations l10n,
+  ) {
+    final sS = AppInsets.spacingS(context);
+    final sSM = AppInsets.spacingSM(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.schedule, color: scheme.primary, size: 22),
+            SizedBox(width: sS),
+            Expanded(
+              child: Text(
+                l10n.autoLoggingLabel,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurface,
+                ),
+              ),
+            ),
+            if (_autoLoggingLoading)
+              SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: scheme.primary,
+                ),
+              )
+            else
+              Switch(
+                value: _autoLoggingEnabled,
+                onChanged: _onAutoLoggingChanged,
+              ),
+          ],
+        ),
+        SizedBox(height: sSM),
+        Padding(
+          padding: EdgeInsets.only(left: sS + 22 + sS),
+          child: Text(
+            l10n.autoLoggingDescription,
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+          ),
+        ),
       ],
     );
   }

@@ -21,63 +21,72 @@ class _MainShellPageState extends State<MainShellPage> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    final l10n = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: [
-          const DashboardPage(),
-          BlocProvider(
-            create: (_) => getIt<HistoryBloc>()..add(const HistoryRequested()),
-            child: const HistoryPage(),
-          ),
-          const SettingsPage(),
-        ],
-      ),
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: scheme.surface,
-          boxShadow: [
-            BoxShadow(
-              color: scheme.shadow.withValues(alpha: 0.08),
-              blurRadius: 8,
-              offset: const Offset(0, -2),
+    return BlocProvider(
+      create: (_) => getIt<HistoryBloc>()..add(const HistoryRequested()),
+      child: Builder(
+        builder: (context) {
+          final scheme = Theme.of(context).colorScheme;
+          final l10n = AppLocalizations.of(context)!;
+          return Scaffold(
+            body: IndexedStack(
+              index: _currentIndex,
+              children: const [DashboardPage(), HistoryPage(), SettingsPage()],
             ),
-          ],
-        ),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _NavItem(
-                  icon: Icons.grid_view_rounded,
-                  label: l10n.dashboardTitle,
-                  selected: _currentIndex == 0,
-                  onTap: () => setState(() => _currentIndex = 0),
-                  scheme: scheme,
+            bottomNavigationBar: Container(
+              decoration: BoxDecoration(
+                color: scheme.surface,
+                boxShadow: [
+                  BoxShadow(
+                    color: scheme.shadow.withValues(alpha: 0.08),
+                    blurRadius: 8,
+                    offset: const Offset(0, -2),
+                  ),
+                ],
+              ),
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 4,
+                    vertical: 4,
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _NavItem(
+                        icon: Icons.grid_view_rounded,
+                        label: l10n.dashboardTitle,
+                        selected: _currentIndex == 0,
+                        onTap: () => setState(() => _currentIndex = 0),
+                        scheme: scheme,
+                      ),
+                      _NavItem(
+                        icon: Icons.history_rounded,
+                        label: l10n.historyTitle,
+                        selected: _currentIndex == 1,
+                        onTap: () {
+                          if (_currentIndex != 1) {
+                            context.read<HistoryBloc>().add(
+                              const HistoryRequested(),
+                            );
+                          }
+                          setState(() => _currentIndex = 1);
+                        },
+                        scheme: scheme,
+                      ),
+                      _NavItem(
+                        icon: Icons.settings_rounded,
+                        label: l10n.settingsTitle,
+                        selected: _currentIndex == 2,
+                        onTap: () => setState(() => _currentIndex = 2),
+                        scheme: scheme,
+                      ),
+                    ],
+                  ),
                 ),
-                _NavItem(
-                  icon: Icons.history_rounded,
-                  label: l10n.historyTitle,
-                  selected: _currentIndex == 1,
-                  onTap: () => setState(() => _currentIndex = 1),
-                  scheme: scheme,
-                ),
-                _NavItem(
-                  icon: Icons.settings_rounded,
-                  label: l10n.settingsTitle,
-                  selected: _currentIndex == 2,
-                  onTap: () => setState(() => _currentIndex = 2),
-                  scheme: scheme,
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
+          );
+        },
       ),
     );
   }

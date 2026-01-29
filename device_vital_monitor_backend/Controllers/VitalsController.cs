@@ -71,11 +71,16 @@ namespace device_vital_monitor_backend.Controllers
                 return BadRequest(new ErrorResponse("Timestamp cannot be in the future.", "timestamp", "INVALID_TIMESTAMP"));
             }
 
+            // API contract: timestamps are UTC. Normalize to UTC for storage.
+            var utcTimestamp = request.Timestamp.Value.Kind == DateTimeKind.Utc
+                ? request.Timestamp.Value
+                : DateTime.SpecifyKind(request.Timestamp.Value, DateTimeKind.Utc);
+
             // Convert DTO to model
             var vital = new DeviceVital
             {
                 DeviceId = request.DeviceId,
-                Timestamp = request.Timestamp.Value,
+                Timestamp = utcTimestamp,
                 ThermalValue = request.ThermalValue.Value,
                 BatteryLevel = request.BatteryLevel.Value,
                 MemoryUsage = request.MemoryUsage.Value

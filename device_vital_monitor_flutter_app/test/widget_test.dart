@@ -1,9 +1,11 @@
 // Basic Flutter widget smoke test for Device Vital Monitor.
 
+import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/config/api_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/main.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
@@ -19,14 +21,14 @@ void main() {
   setUp(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
-      if (call.method == 'getThermalState') return 0;
-      if (call.method == 'getBatteryLevel') return 80;
-      if (call.method == 'getBatteryHealth') return 'GOOD';
-      if (call.method == 'getChargerConnection') return 'NONE';
-      if (call.method == 'getBatteryStatus') return 'DISCHARGING';
-      if (call.method == 'getMemoryUsage') return 50;
-      return null;
-    });
+          if (call.method == 'getThermalState') return 0;
+          if (call.method == 'getBatteryLevel') return 80;
+          if (call.method == 'getBatteryHealth') return 'GOOD';
+          if (call.method == 'getChargerConnection') return 'NONE';
+          if (call.method == 'getBatteryStatus') return 'DISCHARGING';
+          if (call.method == 'getMemoryUsage') return 50;
+          return null;
+        });
   });
 
   tearDown(() {
@@ -38,6 +40,19 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     getIt.registerSingleton<SharedPreferences>(prefs);
+    final apiConfig = ApiConfig();
+    getIt.registerSingleton<ApiConfig>(apiConfig);
+    getIt.registerSingleton<Dio>(
+      Dio(
+        BaseOptions(
+          baseUrl: apiConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
+          contentType: Headers.jsonContentType,
+        ),
+      ),
+    );
     configureDependencies();
 
     final preferencesRepo = getIt<PreferencesRepository>();
@@ -47,11 +62,13 @@ void main() {
     final localeBloc = LocaleBloc(preferencesRepo, initial: locale);
     final dashboardBloc = getIt<DashboardBloc>();
 
-    await tester.pumpWidget(MyApp(
-      themeBloc: themeBloc,
-      localeBloc: localeBloc,
-      dashboardBloc: dashboardBloc,
-    ));
+    await tester.pumpWidget(
+      MyApp(
+        themeBloc: themeBloc,
+        localeBloc: localeBloc,
+        dashboardBloc: dashboardBloc,
+      ),
+    );
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(const Duration(milliseconds: 100));

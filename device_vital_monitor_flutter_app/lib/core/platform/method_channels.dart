@@ -21,3 +21,16 @@ abstract final class SensorMethods {
   static const String getBatteryStatus = 'getBatteryStatus';
   static const String getMemoryUsage = 'getMemoryUsage';
 }
+
+/// Channel for scheduling/cancelling background auto-logging (WorkManager / BGAppRefresh).
+abstract final class AutoLoggingChannel {
+  AutoLoggingChannel._();
+
+  static const String name = 'device_vital_monitor/auto_logging';
+
+  /// Schedule background work. Arguments: [baseUrl], [deviceId].
+  static const String scheduleBackground = 'scheduleBackgroundAutoLog';
+
+  /// Cancel background work.
+  static const String cancelBackground = 'cancelBackgroundAutoLog';
+}

@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/config/api_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
+import 'package:device_vital_monitor_flutter_app/core/services/auto_logging_scheduler.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
@@ -19,6 +22,19 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
   getIt.registerSingleton<SharedPreferences>(prefs);
+  final apiConfig = ApiConfig();
+  getIt.registerSingleton<ApiConfig>(apiConfig);
+  getIt.registerSingleton<Dio>(
+    Dio(
+      BaseOptions(
+        baseUrl: apiConfig.baseUrl,
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
+        contentType: Headers.jsonContentType,
+      ),
+    ),
+  );
 
   configureDependencies();
 
@@ -27,6 +43,11 @@ void main() async {
   final themeBloc = ThemeBloc(preferencesRepo, initial: mode);
   final locale = await LocaleBloc.loadLocale(preferencesRepo);
   final localeBloc = LocaleBloc(preferencesRepo, initial: locale);
+
+  final autoLoggingEnabled = await preferencesRepo.getAutoLoggingEnabled();
+  if (autoLoggingEnabled) {
+    await getIt<AutoLoggingScheduler>().start();
+  }
 
   final dashboardBloc = getIt<DashboardBloc>();
 

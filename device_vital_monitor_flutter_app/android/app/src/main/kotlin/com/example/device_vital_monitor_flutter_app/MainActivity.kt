@@ -9,14 +9,19 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.SystemClock
 import android.util.Log
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.MethodChannel
+import java.util.concurrent.TimeUnit
 
 class MainActivity : FlutterActivity() {
     private val CHANNEL = "device_vital_monitor/sensors"
     private val THERMAL_EVENT_CHANNEL = "device_vital_monitor/thermal_events"
+    private val AUTO_LOGGING_CHANNEL = "device_vital_monitor/auto_logging"
 
     // ADPF: getThermalHeadroom must not be called more than once per 10 seconds (returns NaN otherwise)
     private val MIN_HEADROOM_INTERVAL_MS = 10_000L
@@ -92,6 +97,49 @@ class MainActivity : FlutterActivity() {
                 else -> {
                     result.notImplemented()
                 }
+            }
+        }
+
+        MethodChannel(messenger, AUTO_LOGGING_CHANNEL).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "scheduleBackgroundAutoLog" -> {
+                    try {
+                        @Suppress("UNCHECKED_CAST")
+                        val args = call.arguments as? Map<String, Any>
+                        val baseUrl = args?.get("baseUrl") as? String
+                        val deviceId = args?.get("deviceId") as? String
+                        if (!baseUrl.isNullOrBlank() && !deviceId.isNullOrBlank()) {
+                            val prefs = getSharedPreferences(VitalsLogWorker.PREFS_NAME, Context.MODE_PRIVATE)
+                            prefs.edit()
+                                .putString(VitalsLogWorker.KEY_BASE_URL, baseUrl.trimEnd('/'))
+                                .putString(VitalsLogWorker.KEY_DEVICE_ID, deviceId)
+                                .apply()
+                            val request = PeriodicWorkRequestBuilder<VitalsLogWorker>(15, TimeUnit.MINUTES)
+                                .build()
+                            WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+                                VitalsLogWorker.WORK_NAME,
+                                ExistingPeriodicWorkPolicy.KEEP,
+                                request,
+                            )
+                            Log.d(TAG, "scheduleBackgroundAutoLog: scheduled every 15 min")
+                            result.success(null)
+                        } else {
+                            result.error("INVALID_ARGS", "baseUrl and deviceId required", null)
+                        }
+                    } catch (e: Exception) {
+                        result.error("SCHEDULE_ERROR", e.message, null)
+                    }
+                }
+                "cancelBackgroundAutoLog" -> {
+                    try {
+                        WorkManager.getInstance(this).cancelUniqueWork(VitalsLogWorker.WORK_NAME)
+                        Log.d(TAG, "cancelBackgroundAutoLog: cancelled")
+                        result.success(null)
+                    } catch (e: Exception) {
+                        result.error("CANCEL_ERROR", e.message, null)
+                    }
+                }
+                else -> result.notImplemented()
             }
         }
 

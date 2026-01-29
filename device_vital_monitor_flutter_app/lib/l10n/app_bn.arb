@@ -55,8 +55,19 @@
   "dash": "—",
   "logStatusSnapshot": "লগ স্ট্যাটাস স্ন্যাপশট",
   "historyTitle": "ইতিহাস",
+  "detailedHistoryTitle": "বিস্তারিত ইতিহাস",
   "historyEmpty": "এখনও কোনো ভাইটাল লগ নেই। ড্যাশবোর্ডে \"লগ স্ট্যাটাস\" ব্যবহার করুন।",
-  "analyticsTitle": "বিশ্লেষণ (রোলিং উইন্ডো)",
+  "analyticsTitle": "বিশ্লেষণ",
+  "analyticsSubtitleRolling24h": "১০০ ডেটার রোলিং গড়",
+  "sectionToday": "আজ",
+  "sectionYesterday": "গতকাল",
+  "statusOptimal": "অপটিমাল",
+  "statusNormal": "স্বাভাবিক",
+  "statusSpace": "স্পেস",
+  "statusCritical": "সমালোচনামূলক",
+  "thermalLabelShort": "তাপীয়",
+  "batteryLabelShort": "ব্যাটারি",
+  "memoryLabelShort": "মেমরি",
   "averageThermalLabel": "গড় তাপীয়",
   "averageBatteryLabel": "গড় ব্যাটারি",
   "averageMemoryLabel": "গড় মেমরি",
@@ -80,5 +91,7 @@
       "version": {"type": "String"},
       "build": {"type": "String"}
     }
-  }
+  },
+  "autoLoggingLabel": "অটো-লগিং",
+  "autoLoggingDescription": "প্রতি ১৫ মিনিটে ব্যাকএন্ডে ভাইটাল লগ করুন (অ্যাপ এবং ব্যাকগ্রাউন্ডে)।"
 }

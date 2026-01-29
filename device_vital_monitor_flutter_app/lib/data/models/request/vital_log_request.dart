@@ -1,4 +1,6 @@
 /// Request body for POST /api/vitals.
+///
+/// API contract: timestamps are sent in UTC (ISO8601 with Z).
 class VitalLogRequest {
   const VitalLogRequest({
     required this.deviceId,
@@ -9,6 +11,8 @@ class VitalLogRequest {
   });
 
   final String deviceId;
+
+  /// UTC timestamp; serialized as ISO8601 with Z.
   final DateTime timestamp;
   final int thermalValue;
   final double batteryLevel;

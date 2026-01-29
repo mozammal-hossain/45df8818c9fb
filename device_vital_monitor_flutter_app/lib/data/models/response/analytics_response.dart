@@ -1,6 +1,6 @@
 import 'package:device_vital_monitor_flutter_app/domain/entities/analytics_result.dart';
 
-/// API response model for vitals analytics.
+/// API response model for vitals analytics (backend returns snake_case).
 class AnalyticsResponse {
   const AnalyticsResponse({
     required this.rollingWindowLogs,
@@ -8,6 +8,9 @@ class AnalyticsResponse {
     required this.averageBattery,
     required this.averageMemory,
     required this.totalLogs,
+    this.trendThermal = 'insufficient_data',
+    this.trendBattery = 'insufficient_data',
+    this.trendMemory = 'insufficient_data',
   });
 
   final int rollingWindowLogs;
@@ -15,17 +18,24 @@ class AnalyticsResponse {
   final double averageBattery;
   final double averageMemory;
   final int totalLogs;
+  final String trendThermal;
+  final String trendBattery;
+  final String trendMemory;
 
   factory AnalyticsResponse.fromJson(Map<String, dynamic> json) {
     int toInt(Object? v) => (v is int) ? v : (v is num ? v.toInt() : 0);
     double toDouble(Object? v) =>
         (v is num) ? v.toDouble() : (double.tryParse('$v') ?? 0);
+    String str(Object? v) => (v is String) ? v : 'insufficient_data';
     return AnalyticsResponse(
-      rollingWindowLogs: toInt(json['rollingWindowLogs']),
-      averageThermal: toDouble(json['averageThermal']),
-      averageBattery: toDouble(json['averageBattery']),
-      averageMemory: toDouble(json['averageMemory']),
-      totalLogs: toInt(json['totalLogs']),
+      rollingWindowLogs: toInt(json['rolling_window_logs']),
+      averageThermal: toDouble(json['average_thermal']),
+      averageBattery: toDouble(json['average_battery']),
+      averageMemory: toDouble(json['average_memory']),
+      totalLogs: toInt(json['total_logs']),
+      trendThermal: str(json['trend_thermal']),
+      trendBattery: str(json['trend_battery']),
+      trendMemory: str(json['trend_memory']),
     );
   }
 
@@ -35,5 +45,8 @@ class AnalyticsResponse {
     averageBattery: averageBattery,
     averageMemory: averageMemory,
     totalLogs: totalLogs,
+    trendThermal: trendThermal,
+    trendBattery: trendBattery,
+    trendMemory: trendMemory,
   );
 }

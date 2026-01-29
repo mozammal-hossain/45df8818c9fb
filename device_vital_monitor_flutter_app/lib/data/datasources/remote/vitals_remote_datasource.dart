@@ -9,20 +9,22 @@ import 'package:device_vital_monitor_flutter_app/data/models/response/paged_vita
 
 @lazySingleton
 class VitalsRemoteDatasource {
-  VitalsRemoteDatasource() : _config = ApiConfig() {
-    _dio = Dio(
-      BaseOptions(
-        baseUrl: _config.baseUrl,
-        connectTimeout: const Duration(seconds: 10),
-        receiveTimeout: const Duration(seconds: 10),
-        sendTimeout: const Duration(seconds: 10),
-        contentType: Headers.jsonContentType,
-      ),
-    );
-  }
+  VitalsRemoteDatasource({Dio? dio, ApiConfig? apiConfig})
+    : _config = apiConfig ?? ApiConfig(),
+      _dio =
+          dio ??
+          Dio(
+            BaseOptions(
+              baseUrl: (apiConfig ?? ApiConfig()).baseUrl,
+              connectTimeout: const Duration(seconds: 10),
+              receiveTimeout: const Duration(seconds: 10),
+              sendTimeout: const Duration(seconds: 10),
+              contentType: Headers.jsonContentType,
+            ),
+          );
 
   final ApiConfig _config;
-  late final Dio _dio;
+  final Dio _dio;
 
   Future<void> logVital(VitalLogRequest request) async {
     try {
