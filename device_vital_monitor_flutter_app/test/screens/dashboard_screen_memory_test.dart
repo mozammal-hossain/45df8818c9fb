@@ -13,7 +13,7 @@ import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vit
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
     show DashboardBloc, DashboardSensorDataRequested, DashboardLoaded,
         DashboardError;
-import 'package:device_vital_monitor_flutter_app/presentation/dashboard/dashboard_screen.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/dashboard_page.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
@@ -53,7 +53,7 @@ Widget _localizedMaterialApp({Widget? home}) {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: home ?? const DashboardScreen(),
+          home: home ?? const DashboardPage(),
         );
       },
     ),
@@ -133,7 +133,7 @@ void main() {
     await tester.pumpAndSettleSafe();
   }
 
-  group('DashboardScreen - Memory Usage Display Tests', () {
+  group('DashboardPage - Memory Usage Display Tests', () {
     group('Memory Usage Card - Initial State', () {
       testWidgets('should show loading shimmer initially', (
         WidgetTester tester,

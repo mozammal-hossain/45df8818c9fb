@@ -7,8 +7,8 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/language_selector.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/theme_selector.dart';
 
-class SettingsScreen extends StatelessWidget {
-  const SettingsScreen({super.key});
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {

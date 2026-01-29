@@ -8,14 +8,14 @@ import 'package:device_vital_monitor_flutter_app/presentation/history/bloc/histo
 import 'package:device_vital_monitor_flutter_app/presentation/history/widgets/analytics_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/history/widgets/vital_log_item.dart';
 
-class HistoryScreen extends StatefulWidget {
-  const HistoryScreen({super.key});
+class HistoryPage extends StatefulWidget {
+  const HistoryPage({super.key});
 
   @override
-  State<HistoryScreen> createState() => _HistoryScreenState();
+  State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryScreenState extends State<HistoryScreen> {
+class _HistoryPageState extends State<HistoryPage> {
   final _scrollController = ScrollController();
   double _loadMoreThreshold = 200;
 

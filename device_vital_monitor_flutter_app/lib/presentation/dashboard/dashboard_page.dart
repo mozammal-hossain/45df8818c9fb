@@ -13,13 +13,13 @@ import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/log_status_button.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/memory_usage_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/thermal_state_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/history/history_screen.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/history/bloc/history_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/settings/settings_screen.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/history_page.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/settings_page.dart';
 
-class DashboardScreen extends StatelessWidget {
-  const DashboardScreen({super.key});
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
 
   void _fetchSensorData(BuildContext context) {
     context.read<DashboardBloc>().add(const DashboardSensorDataRequested());
@@ -31,7 +31,7 @@ class DashboardScreen extends StatelessWidget {
       MaterialPageRoute<void>(
         builder: (context) => BlocProvider(
           create: (_) => getIt<HistoryBloc>()..add(const HistoryRequested()),
-          child: const HistoryScreen(),
+          child: const HistoryPage(),
         ),
       ),
     );
@@ -41,7 +41,7 @@ class DashboardScreen extends StatelessWidget {
     Navigator.of(context).pop();
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (context) => const SettingsScreen(),
+        builder: (context) => const SettingsPage(),
       ),
     );
   }
