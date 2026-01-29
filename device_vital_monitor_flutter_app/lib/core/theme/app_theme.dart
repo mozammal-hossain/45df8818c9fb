@@ -18,21 +18,19 @@ abstract final class AppTheme {
       seedColor: _seedColor,
       brightness: Brightness.light,
     );
+    final textTheme = TextStyles.buildTextTheme(AppColors.light.iconTint);
+    final iconTint = AppColors.light.iconTint;
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       extensions: const <ThemeExtension<dynamic>>[AppColors.light],
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
-        foregroundColor: AppColors.light.iconTint,
+        foregroundColor: iconTint,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          color: AppColors.light.iconTint,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-        iconTheme: IconThemeData(color: AppColors.light.iconTint),
+        titleTextStyle: textTheme.titleLarge!.copyWith(color: iconTint),
+        iconTheme: IconThemeData(color: iconTint),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -43,7 +41,10 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: textTheme.bodyLarge!.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onPrimary,
+          ),
         ),
       ),
       cardTheme: CardThemeData(
@@ -52,7 +53,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: TextStyles.buildTextTheme(AppColors.light.iconTint),
+      textTheme: textTheme,
     );
   }
 
@@ -62,21 +63,19 @@ abstract final class AppTheme {
       seedColor: _seedColor,
       brightness: Brightness.dark,
     );
+    final textTheme = TextStyles.buildTextTheme(AppColors.dark.iconTint);
+    final iconTint = AppColors.dark.iconTint;
     return ThemeData(
       useMaterial3: true,
       colorScheme: colorScheme,
       extensions: const <ThemeExtension<dynamic>>[AppColors.dark],
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.surface,
-        foregroundColor: AppColors.dark.iconTint,
+        foregroundColor: iconTint,
         elevation: 0,
         centerTitle: true,
-        titleTextStyle: TextStyle(
-          color: AppColors.dark.iconTint,
-          fontWeight: FontWeight.bold,
-          fontSize: 18,
-        ),
-        iconTheme: IconThemeData(color: AppColors.dark.iconTint),
+        titleTextStyle: textTheme.titleLarge!.copyWith(color: iconTint),
+        iconTheme: IconThemeData(color: iconTint),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -87,7 +86,10 @@ abstract final class AppTheme {
             borderRadius: BorderRadius.circular(12),
           ),
           elevation: 2,
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          textStyle: textTheme.bodyLarge!.copyWith(
+            fontWeight: FontWeight.bold,
+            color: colorScheme.onPrimary,
+          ),
         ),
       ),
       cardTheme: CardThemeData(
@@ -96,7 +98,7 @@ abstract final class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
       ),
-      textTheme: TextStyles.buildTextTheme(AppColors.dark.iconTint),
+      textTheme: textTheme,
     );
   }
 

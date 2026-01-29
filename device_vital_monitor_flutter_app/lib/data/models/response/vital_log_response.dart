@@ -29,6 +29,7 @@ class VitalLogResponse {
       }
       return DateTime.now().toUtc();
     }
+
     return VitalLogResponse(
       id: toInt(json['id']),
       deviceId: json['deviceId'] as String? ?? '',
@@ -40,11 +41,11 @@ class VitalLogResponse {
   }
 
   VitalLog toEntity() => VitalLog(
-        id: id,
-        deviceId: deviceId,
-        timestamp: timestamp,
-        thermalValue: thermalValue,
-        batteryLevel: batteryLevel,
-        memoryUsage: memoryUsage,
-      );
+    id: id,
+    deviceId: deviceId,
+    timestamp: timestamp,
+    thermalValue: thermalValue,
+    batteryLevel: batteryLevel,
+    memoryUsage: memoryUsage,
+  );
 }

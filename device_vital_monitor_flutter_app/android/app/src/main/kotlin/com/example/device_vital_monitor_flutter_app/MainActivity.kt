@@ -7,8 +7,6 @@ import android.content.IntentFilter
 import android.os.BatteryManager
 import android.os.Build
 import android.os.PowerManager
-import android.os.StatFs
-import android.os.Environment
 import android.os.SystemClock
 import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
@@ -89,14 +87,6 @@ class MainActivity : FlutterActivity() {
                         result.success(usage)
                     } catch (e: Exception) {
                         result.error("MEMORY_ERROR", "Failed to get memory usage: ${e.message}", null)
-                    }
-                }
-                "getStorageInfo" -> {
-                    try {
-                        val storageInfo = getStorageInfo()
-                        result.success(storageInfo)
-                    } catch (e: Exception) {
-                        result.error("STORAGE_ERROR", "Failed to get storage info: ${e.message}", null)
                     }
                 }
                 else -> {
@@ -302,31 +292,5 @@ class MainActivity : FlutterActivity() {
         return registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
     }
 
-    private fun getStorageInfo(): Map<String, Any> {
-        val stat = StatFs(Environment.getDataDirectory().path)
-        val blockSize = stat.blockSizeLong
-        val totalBlocks = stat.blockCountLong
-        val availableBlocks = stat.availableBlocksLong
-        
-        val totalBytes = totalBlocks * blockSize
-        val availableBytes = availableBlocks * blockSize
-        val usedBytes = totalBytes - availableBytes
-        
-        val usagePercent = if (totalBytes > 0) {
-            ((usedBytes * 100) / totalBytes).toInt().coerceIn(0, 100)
-        } else {
-            0
-        }
-        
-        Log.d(TAG, "getStorageInfo: total=$totalBytes used=$usedBytes available=$availableBytes percent=$usagePercent%")
-        
-        // Return as Map<String, Any> to handle Long values (bytes) and Int (percentage)
-        // Flutter will convert Long to int automatically if within int range
-        return mapOf(
-            "total" to totalBytes,
-            "used" to usedBytes,
-            "available" to availableBytes,
-            "usagePercent" to usagePercent
-        )
-    }
+    
 }

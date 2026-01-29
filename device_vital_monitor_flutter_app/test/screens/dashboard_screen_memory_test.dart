@@ -8,13 +8,14 @@ import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
-    show DashboardBloc, DashboardSensorDataRequested, DashboardState,
-        DashboardLoaded, DashboardError, DashboardLoading;
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/dashboard_screen.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/widgets/common/loading_shimmer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
+    show DashboardBloc, DashboardSensorDataRequested, DashboardLoaded,
+        DashboardError;
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/dashboard_page.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
 extension WidgetTesterX on WidgetTester {
   Future<void> pumpAndSettleSafe() async {
@@ -52,7 +53,7 @@ Widget _localizedMaterialApp({Widget? home}) {
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           locale: const Locale('en'),
-          home: home ?? const DashboardScreen(),
+          home: home ?? const DashboardPage(),
         );
       },
     ),
@@ -111,15 +112,6 @@ void main() {
           if (methodCall.method == 'getBatteryHealth') return 'GOOD';
           if (methodCall.method == 'getChargerConnection') return 'NONE';
           if (methodCall.method == 'getBatteryStatus') return 'DISCHARGING';
-          if (methodCall.method == 'getStorageInfo') {
-            return <Object?, Object?>{
-              // Matches DeviceSensorService invokeMethod type
-              'total': 64 * 1024 * 1024 * 1024,
-              'used': 32 * 1024 * 1024 * 1024,
-              'available': 32 * 1024 * 1024 * 1024,
-              'usagePercent': 50,
-            };
-          }
           return null;
         });
   }
@@ -141,7 +133,7 @@ void main() {
     await tester.pumpAndSettleSafe();
   }
 
-  group('DashboardScreen - Memory Usage Display Tests', () {
+  group('DashboardPage - Memory Usage Display Tests', () {
     group('Memory Usage Card - Initial State', () {
       testWidgets('should show loading shimmer initially', (
         WidgetTester tester,
@@ -412,7 +404,7 @@ void main() {
     });
 
     group('Memory Usage Card - Error Handling', () {
-      testWidgets('should display "unavailable" when memory usage is null', (
+      testWidgets('should display dash when memory usage is null', (
         WidgetTester tester,
       ) async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
@@ -426,15 +418,12 @@ void main() {
             });
 
         await tester.pumpWidget(_localizedMaterialApp());
+        await ensureDashboardLoaded(tester);
 
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
-
-        expect(find.text('unavailable'), findsOneWidget);
         expect(
           find.text('—'),
           findsAtLeastNWidgets(2),
-        ); // Status label and percentage (may be more from other cards)
+        ); // Status label and percentage in memory card (may be more from other cards)
       });
 
       testWidgets('should handle PlatformException gracefully', (
@@ -453,11 +442,9 @@ void main() {
         );
 
         await tester.pumpWidget(_localizedMaterialApp());
+        await ensureDashboardLoaded(tester);
 
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
-
-        expect(find.text('unavailable'), findsOneWidget);
+        expect(find.text('—'), findsAtLeastNWidgets(2));
         expect(find.text('Memory Usage'), findsOneWidget);
       });
 
@@ -474,11 +461,9 @@ void main() {
         );
 
         await tester.pumpWidget(_localizedMaterialApp());
+        await ensureDashboardLoaded(tester);
 
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
-
-        expect(find.text('unavailable'), findsOneWidget);
+        expect(find.text('—'), findsAtLeastNWidgets(2));
         expect(find.text('Memory Usage'), findsOneWidget);
       });
     });
@@ -501,8 +486,15 @@ void main() {
           await tester.pumpWidget(_localizedMaterialApp());
           await ensureDashboardLoaded(tester);
 
+          final memoryCard = find.ancestor(
+            of: find.text('Memory Usage'),
+            matching: find.byType(VitalCard),
+          );
           final circularProgress = tester.widget<CircularProgressIndicator>(
-            find.byType(CircularProgressIndicator).last,
+            find.descendant(
+              of: memoryCard,
+              matching: find.byType(CircularProgressIndicator),
+            ),
           );
 
           expect(circularProgress.value, equals(0.75));
@@ -517,8 +509,15 @@ void main() {
           await tester.pumpWidget(_localizedMaterialApp());
           await ensureDashboardLoaded(tester);
 
+          final memoryCard = find.ancestor(
+            of: find.text('Memory Usage'),
+            matching: find.byType(VitalCard),
+          );
           final circularProgress = tester.widget<CircularProgressIndicator>(
-            find.byType(CircularProgressIndicator).last,
+            find.descendant(
+              of: memoryCard,
+              matching: find.byType(CircularProgressIndicator),
+            ),
           );
 
           expect(circularProgress.value, equals(1.0));
@@ -530,21 +529,30 @@ void main() {
         (WidgetTester tester) async {
           TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
               .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-                if (methodCall.method == 'getMemoryUsage')
+                if (methodCall.method == 'getMemoryUsage') {
                   return -10; // Invalid but test edge case
+                }
                 if (methodCall.method == 'getBatteryLevel') return 80;
                 if (methodCall.method == 'getBatteryHealth') return 'GOOD';
                 if (methodCall.method == 'getChargerConnection') return 'NONE';
-                if (methodCall.method == 'getBatteryStatus')
+                if (methodCall.method == 'getBatteryStatus') {
                   return 'DISCHARGING';
+                }
                 return null;
               });
 
           await tester.pumpWidget(_localizedMaterialApp());
           await ensureDashboardLoaded(tester);
 
+          final memoryCard = find.ancestor(
+            of: find.text('Memory Usage'),
+            matching: find.byType(VitalCard),
+          );
           final circularProgress = tester.widget<CircularProgressIndicator>(
-            find.byType(CircularProgressIndicator).last,
+            find.descendant(
+              of: memoryCard,
+              matching: find.byType(CircularProgressIndicator),
+            ),
           );
 
           expect(circularProgress.value, equals(0.0));
@@ -560,8 +568,9 @@ void main() {
                 if (methodCall.method == 'getBatteryLevel') return 80;
                 if (methodCall.method == 'getBatteryHealth') return 'GOOD';
                 if (methodCall.method == 'getChargerConnection') return 'NONE';
-                if (methodCall.method == 'getBatteryStatus')
+                if (methodCall.method == 'getBatteryStatus') {
                   return 'DISCHARGING';
+                }
                 return null;
               });
 
@@ -570,8 +579,16 @@ void main() {
           await tester.pump();
           await tester.pump(const Duration(seconds: 1));
 
+          // Find the memory card's CircularProgressIndicator by finding it within the card
+          final memoryCard = find.ancestor(
+            of: find.text('Memory Usage'),
+            matching: find.byType(VitalCard),
+          );
           final circularProgress = tester.widget<CircularProgressIndicator>(
-            find.byType(CircularProgressIndicator).last,
+            find.descendant(
+              of: memoryCard,
+              matching: find.byType(CircularProgressIndicator),
+            ),
           );
 
           expect(circularProgress.value, isNull);
@@ -652,8 +669,15 @@ void main() {
         await tester.pumpWidget(_localizedMaterialApp());
         await ensureDashboardLoaded(tester);
 
+        final memoryCard = find.ancestor(
+          of: find.text('Memory Usage'),
+          matching: find.byType(VitalCard),
+        );
         final circularProgress = tester.widget<CircularProgressIndicator>(
-          find.byType(CircularProgressIndicator).last,
+          find.descendant(
+            of: memoryCard,
+            matching: find.byType(CircularProgressIndicator),
+          ),
         );
         final colorAnimation =
             circularProgress.valueColor as AlwaysStoppedAnimation<Color>;
@@ -677,8 +701,15 @@ void main() {
         await tester.pumpWidget(_localizedMaterialApp());
         await ensureDashboardLoaded(tester);
 
+        final memoryCard = find.ancestor(
+          of: find.text('Memory Usage'),
+          matching: find.byType(VitalCard),
+        );
         final circularProgress = tester.widget<CircularProgressIndicator>(
-          find.byType(CircularProgressIndicator).last,
+          find.descendant(
+            of: memoryCard,
+            matching: find.byType(CircularProgressIndicator),
+          ),
         );
         final colorAnimation =
             circularProgress.valueColor as AlwaysStoppedAnimation<Color>;
@@ -702,8 +733,15 @@ void main() {
         await tester.pumpWidget(_localizedMaterialApp());
         await ensureDashboardLoaded(tester);
 
+        final memoryCard = find.ancestor(
+          of: find.text('Memory Usage'),
+          matching: find.byType(VitalCard),
+        );
         final circularProgress = tester.widget<CircularProgressIndicator>(
-          find.byType(CircularProgressIndicator).last,
+          find.descendant(
+            of: memoryCard,
+            matching: find.byType(CircularProgressIndicator),
+          ),
         );
         final colorAnimation =
             circularProgress.valueColor as AlwaysStoppedAnimation<Color>;
@@ -763,12 +801,14 @@ void main() {
         await tester.pumpWidget(_localizedMaterialApp());
         await ensureDashboardLoaded(tester);
 
+        // Memory card shows percentage twice: in the row and in the center
         expect(find.text('50%'), findsNWidgets(2));
 
         // Trigger pull to refresh
         await tester.drag(find.byType(RefreshIndicator), const Offset(0, 300));
         await tester.pumpAndSettleSafe();
 
+        // After refresh, should show new value
         expect(find.text('75%'), findsNWidgets(2));
         expect(callCount, equals(2));
       });
@@ -799,8 +839,9 @@ void main() {
                 if (methodCall.method == 'getBatteryLevel') return 80;
                 if (methodCall.method == 'getBatteryHealth') return 'GOOD';
                 if (methodCall.method == 'getChargerConnection') return 'NONE';
-                if (methodCall.method == 'getBatteryStatus')
+                if (methodCall.method == 'getBatteryStatus') {
                   return 'DISCHARGING';
+                }
                 return null;
               });
 
@@ -891,8 +932,8 @@ void main() {
 
         await tester.pump();
 
-        // Initially loading
-        expect(find.text('loading…'), findsOneWidget);
+        // Initially loading - should show shimmer
+        expect(find.byType(LoadingShimmer), findsWidgets);
 
         await tester.pump(const Duration(milliseconds: 150));
         await tester.pumpAndSettleSafe();
@@ -900,7 +941,7 @@ void main() {
         // After loading, should show data
         expect(find.text('50%'), findsNWidgets(2));
         expect(find.text('used'), findsOneWidget);
-        expect(find.text('loading…'), findsNothing);
+        expect(find.byType(LoadingShimmer), findsNothing);
       });
 
       testWidgets('should transition from loaded to loading on refresh', (
@@ -1044,11 +1085,11 @@ void main() {
 
         // Should show error state
         // Since state persists on error in some implementations, or goes to failure.
-        // If it goes to failure, it shows "unavailable".
+        // If it goes to failure, it shows dash.
         // Note: RefreshIndicator might still be settling.
         await tester.pumpAndSettleSafe();
 
-        expect(find.text('unavailable'), findsOneWidget);
+        expect(find.text('—'), findsAtLeastNWidgets(2));
         expect(find.text('50%'), findsNothing);
       });
     });
@@ -1075,8 +1116,8 @@ void main() {
         await tester.pumpAndSettleSafe();
 
         // Since the Bloc uses Future.wait, a single failure causes the whole state to be Failure.
-        // Therefore, we expect 'unavailable' instead of partial success.
-        expect(find.text('unavailable'), findsOneWidget);
+        // Therefore, we expect dash instead of partial success.
+        expect(find.text('—'), findsAtLeastNWidgets(2));
         // expect(find.text('50%'), findsNWidgets(2)); // This would be true if Future.wait handled partials
       });
 
@@ -1102,7 +1143,7 @@ void main() {
 
         // Memory should show error, battery should show success
         // Since Bloc fails on any error, battery level will also not be shown (it resets to failure state)
-        expect(find.text('unavailable'), findsOneWidget);
+        expect(find.text('—'), findsAtLeastNWidgets(2));
         // expect(find.text('80%'), findsOneWidget); // Block fails completely
       });
     });

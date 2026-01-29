@@ -2,13 +2,9 @@ import 'package:injectable/injectable.dart';
 
 import 'package:device_vital_monitor_flutter_app/domain/entities/device_info.dart';
 import 'package:device_vital_monitor_flutter_app/domain/entities/sensor_data.dart';
-import 'package:device_vital_monitor_flutter_app/domain/entities/storage_info.dart'
-    as domain;
 import 'package:device_vital_monitor_flutter_app/domain/repositories/device_repository.dart';
 import 'package:device_vital_monitor_flutter_app/data/datasources/local/device_id_local_datasource.dart';
 import 'package:device_vital_monitor_flutter_app/data/datasources/platform/sensor_platform_datasource.dart';
-import 'package:device_vital_monitor_flutter_app/data/models/local/storage_info.dart'
-    as local;
 
 @LazySingleton(as: DeviceRepository)
 class DeviceRepositoryImpl implements DeviceRepository {
@@ -33,13 +29,7 @@ class DeviceRepositoryImpl implements DeviceRepository {
       _sensorPlatform.getChargerConnection(),
       _sensorPlatform.getBatteryStatus(),
       _sensorPlatform.getMemoryUsage(),
-      _sensorPlatform.getStorageInfo(),
     ]);
-    domain.StorageInfo? storageEntity;
-    final s = results[7];
-    if (s != null && s is local.StorageInfo) {
-      storageEntity = s.toEntity();
-    }
     return SensorData(
       thermalState: results[0] as int?,
       thermalHeadroom: results[1] as double?,
@@ -48,7 +38,6 @@ class DeviceRepositoryImpl implements DeviceRepository {
       chargerConnection: results[4] as String?,
       batteryStatus: results[5] as String?,
       memoryUsage: results[6] as int?,
-      storageInfo: storageEntity,
     );
   }
 

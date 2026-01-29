@@ -1,6 +1,5 @@
 // Basic Flutter widget smoke test for Device Vital Monitor.
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,9 +7,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/main.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -26,14 +25,6 @@ void main() {
       if (call.method == 'getChargerConnection') return 'NONE';
       if (call.method == 'getBatteryStatus') return 'DISCHARGING';
       if (call.method == 'getMemoryUsage') return 50;
-      if (call.method == 'getStorageInfo') {
-        return <String, int>{
-          'total': 64 * 1024 * 1024 * 1024,
-          'used': 32 * 1024 * 1024 * 1024,
-          'available': 32 * 1024 * 1024 * 1024,
-          'usagePercent': 50,
-        };
-      }
       return null;
     });
   });

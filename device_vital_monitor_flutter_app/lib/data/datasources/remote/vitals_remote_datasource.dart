@@ -49,9 +49,10 @@ class VitalsRemoteDatasource {
           'Request timed out. Is the backend running at ${_config.baseUrl}?',
         DioExceptionType.connectionError =>
           'Cannot reach the backend. Check that the server is running.',
-        _ => e.response != null
-            ? _errorMessage(e.response!)
-            : (e.message ?? 'Network error'),
+        _ =>
+          e.response != null
+              ? _errorMessage(e.response!)
+              : (e.message ?? 'Network error'),
       };
       throw VitalsRepositoryException(msg, e.response?.statusCode, e);
     }
@@ -96,8 +97,8 @@ class VitalsRemoteDatasource {
                 e.type == DioExceptionType.connectionError
             ? 'Cannot reach the backend.'
             : (e.response != null
-                ? _errorMessage(e.response!)
-                : (e.message ?? 'Network error')),
+                  ? _errorMessage(e.response!)
+                  : (e.message ?? 'Network error')),
         e.response?.statusCode,
         e,
       );
@@ -136,8 +137,8 @@ class VitalsRemoteDatasource {
                 e.type == DioExceptionType.connectionError
             ? 'Cannot reach the backend.'
             : (e.response != null
-                ? _errorMessage(e.response!)
-                : (e.message ?? 'Network error')),
+                  ? _errorMessage(e.response!)
+                  : (e.message ?? 'Network error')),
         e.response?.statusCode,
         e,
       );
