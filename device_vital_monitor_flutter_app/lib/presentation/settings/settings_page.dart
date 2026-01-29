@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/assets/assets.dart';
 import 'package:device_vital_monitor_flutter_app/core/config/app_config.dart';
@@ -7,6 +8,8 @@ import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/language_selector.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/theme_selector.dart';
+
+final _packageInfoFuture = PackageInfo.fromPlatform();
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -180,11 +183,18 @@ class SettingsPage extends StatelessWidget {
           ),
         ),
         SizedBox(height: sX),
-        Text(
-          l10n.versionBuild(AppConfig.version, AppConfig.build),
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-          ),
+        FutureBuilder<PackageInfo>(
+          future: _packageInfoFuture,
+          builder: (context, snapshot) {
+            final version = snapshot.data?.version ?? AppConfig.version;
+            final build = snapshot.data?.buildNumber ?? AppConfig.build;
+            return Text(
+              l10n.versionBuild(version, build),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+              ),
+            );
+          },
         ),
       ],
     );
