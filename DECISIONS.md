@@ -10,6 +10,8 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 - **Ambiguity 1:** Should the app support dark and light themes, and how should theme preference be managed?
 - **Ambiguity 2:** Should the app support multiple languages, and how should locale be determined?
+- **Ambiguity 3:** How should the Flutter codebase be structured, and which state management / dependency injection approach should be used?
+- **Ambiguity 4:** Should the app include a dedicated Settings screen (e.g. for theme and language), or keep controls in the app bar only?
 
 ### Backend
 
@@ -20,7 +22,7 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ---
 
-## 2. Your Design Decisions
+## 2. My Design Decisions
 
 ### Flutter App
 
@@ -58,9 +60,9 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 **Implementation Approach:**
 
 - Use `ColorScheme.fromSeed()` for consistent color palette generation in both themes
-- Implement `ThemeMode` state management (Provider/Riverpod) for theme switching
-- Store theme preference using `shared_preferences` package
-- Provide theme toggle in app settings or app bar
+- Implement `ThemeMode` state management (Bloc: `ThemeBloc`) for theme switching
+- Store theme preference via `PreferencesRepository` / SharedPreferences
+- Provide theme toggle on a dedicated Settings screen (and optionally in shell/drawer)
 - Default to `ThemeMode.system` on first launch, then respect user's saved preference
 
 ---
@@ -75,28 +77,28 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 - Option B: Multiple locales with device/system locale detection only
 - Option C: Multiple locales with device locale + optional in-app language picker
 
-**Decision:** Option B. Implement localization using Flutter’s built-in `flutter_localizations` and `gen-l10n` (ARB files). Use the device locale by default; no in-app language picker for now.
+**Decision:** Evolved from Option B to **Option C** in implementation. Localization uses Flutter’s `flutter_localizations` and `gen-l10n` (ARB files). The app supports an **in-app language picker** on the Settings screen (Bangla, English, Spanish) and **persists** the user’s chosen locale via `LocaleBloc` and `PreferencesRepository`; device locale is used only as the initial value when no preference is saved.
 
 **Trade-offs:**
 
 - ARB files and generated code add some complexity and build steps
 - All user-facing strings must go through `AppLocalizations`
-- Tests must wrap widgets in `MaterialApp` with `localizationsDelegates` and `supportedLocales` (and `ThemeProviderScope` where the UI uses it)
-- Benefit: Spanish (and other locales) can be added by adding ARB files and translating keys
+- Tests must wrap widgets in `MaterialApp` with `localizationsDelegates` and `supportedLocales` (and BlocProviders where the UI uses theme/locale Blocs)
+- In-app picker and persistence add code (LocaleBloc, preferences) but improve usability
 
 **Assumptions:**
 
-- Initial locales: English (en) as default, Spanish (es) as second locale
-- App follows system locale when it’s supported; otherwise falls back to en
-- No requirement for persisting user-chosen locale (unlike theme)
+- Supported locales: English (en), Spanish (es), Bangla (bn); en as template ARB
+- If no saved locale, use device locale when supported; otherwise fall back to en
+- Persisting user-chosen locale (like theme) is desirable for consistency
 
 **Implementation Approach:**
 
 - Add `flutter_localizations` and `intl`; set `flutter.generate: true` in `pubspec.yaml`
-- Add `lib/l10n/app_en.arb` (template) and `lib/l10n/app_es.arb`
+- Add `lib/l10n/app_en.arb` (template), `app_es.arb`, `app_bn.arb`
 - Run `flutter gen-l10n` to generate `AppLocalizations`
-- Configure `MaterialApp` with `localizationsDelegates` and `supportedLocales`
-- Replace hardcoded strings in `main.dart` and `DashboardScreen` with `AppLocalizations.of(context)!` lookups
+- Configure `MaterialApp` with `localizationsDelegates`, `supportedLocales`, and `locale` from `LocaleBloc`
+- Settings screen includes `LanguageSelector` (`BlocBuilder<LocaleBloc>`) and persists via `PreferencesRepository`
 - Use `l10n.yaml` to configure `arb-dir` and `template-arb-file`
 
 ---
@@ -186,6 +188,36 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ---
 
+#### Ambiguity 3: Flutter App Structure and State Management
+
+**Question:** How should the Flutter codebase be organized, and which state management and dependency injection approach should be used?
+
+**Options Considered:**
+
+- Option A: Flat structure with `screens/`, `services/`, `repositories/` as in the brief; state management via Provider or Riverpod; no formal DI.
+- Option B: Clean/feature-style layout with `core/`, `data/`, `domain/`, `presentation/`; state management via Bloc; dependency injection via get_it + injectable.
+
+**Decision:** Option B. Use a layered structure: `core/` (theme, config, platform, error, layout), `data/` (datasources, mappers, repository implementations), `domain/` (entities, repository interfaces, use cases), `presentation/` (shell, dashboard, history, settings, each with bloc + page + widgets). State management is Bloc; DI is get_it with injectable for code generation.
+
+**Trade-offs:** More files and boilerplate than a minimal `screens/` layout, but clearer separation of concerns, testability (mock repositories/use cases), and alignment with common Flutter clean-architecture patterns.
+
+---
+
+#### Ambiguity 4: Settings Screen and Shell Navigation
+
+**Question:** Should the app include a dedicated Settings screen (e.g. for theme and language), or keep all controls in the app bar only?
+
+**Options Considered:**
+
+- Option A: Theme/locale toggles in app bar or drawer only; no dedicated Settings page.
+- Option B: Dedicated Settings screen with theme selector, language selector, and optional app info; shell (e.g. drawer or bottom nav) provides navigation to Dashboard, History, and Settings.
+
+**Decision:** Option B. Implement a shell (`MainShellPage`) with navigation to Dashboard, History, and Settings. Settings screen hosts theme selector (`ThemeBloc`), language selector (`LocaleBloc`), and app branding/version; preferences are persisted via `PreferencesRepository`.
+
+**Trade-offs:** Extra screen and navigation logic, but a single place for user preferences and better discoverability than app-bar-only toggles.
+
+---
+
 ## 3. Assumptions Made
 
 ### Flutter App
@@ -194,8 +226,8 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 - Users may want to override system theme preference for this monitoring app.
 - Dark theme is important for battery-sensitive scenarios (reducing OLED power consumption).
 - Users expect theme preference to persist across app sessions.
-- Initial locales: English (en) as default, Spanish (es) as second locale; app follows system locale when supported, otherwise falls back to en.
-- No requirement for persisting user-chosen locale (unlike theme).
+- Supported locales: English (en), Spanish (es), Bangla (bn); user can choose in Settings and preference is persisted; if none saved, app follows system locale when supported, otherwise falls back to en.
+- App structure: clean layers (core/data/domain/presentation), Bloc for UI state, get_it + injectable for DI; shell provides Dashboard, History, and Settings.
 
 ### Backend
 
@@ -208,7 +240,7 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ---
 
-## 4. Questions You Would Ask
+## 4. Questions I Would Ask
 
 ### Flutter App
 

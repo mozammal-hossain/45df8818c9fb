@@ -9,18 +9,21 @@ This document tracks my use of AI tools (Claude, ChatGPT, Copilot) during the de
 ### Prompt 1: MethodChannel Implementation for Android Battery Sensors
 
 **Prompt (verbatim):**
+
 ```
 Generate a Flutter MethodChannel implementation to retrieve battery level from Android using Kotlin. The channel should be named 'device_vital_monitor/sensors' and the method should be 'getBatteryLevel'. Handle both modern API (BatteryManager.BATTERY_PROPERTY_CAPACITY) and legacy API (Intent.ACTION_BATTERY_CHANGED) for backward compatibility. Include proper error handling.
 ```
 
 **Result:**
 The AI generated a complete MainActivity.kt implementation with MethodChannel setup, including:
+
 - MethodChannel configuration in `configureFlutterEngine`
 - `getBatteryLevel()` method with API level checks
 - Fallback to Intent-based approach for older Android versions
 - Basic error handling structure
 
 **My Changes:**
+
 - Added additional battery methods (`getBatteryHealth`, `getChargerConnection`, `getBatteryStatus`) beyond the initial prompt
 - Enhanced error handling with specific error codes and messages
 - Added logging for debugging battery state transitions
@@ -34,18 +37,21 @@ The MethodChannel uses Flutter's binary messaging system to bridge Dart and nati
 ### Prompt 2: Flutter Service Layer for Device Sensors
 
 **Prompt (verbatim):**
+
 ```
 Create a Flutter service class for DeviceSensorService that uses MethodChannel to call native Android methods. It should have a method getBatteryLevel() that returns Future<int?> and handles PlatformException and MissingPluginException gracefully by returning null.
 ```
 
 **Result:**
 The AI generated a clean service class with:
+
 - Singleton pattern using private constructor
 - Static MethodChannel instance
 - `getBatteryLevel()` method with try-catch for exceptions
 - Proper null handling
 
 **My Changes:**
+
 - Extended the service to include additional methods (battery health, charger connection, battery status)
 - Added debug logging for PlatformException details
 - Improved type safety by handling Object? return types and converting to String where needed
@@ -59,25 +65,27 @@ The service acts as an abstraction layer between the UI and native platform code
 ### Prompt 3: Theme Configuration with Dark Mode Support
 
 **Prompt (verbatim):**
+
 ```
 How do I implement dark and light theme support in Flutter using Material 3? I want to use ColorScheme.fromSeed() and allow users to toggle between light, dark, and system theme modes. Include state management approach.
 ```
 
 **Result:**
 The AI provided a comprehensive solution including:
+
 - Light and dark ThemeData definitions using `ColorScheme.fromSeed()`
 - ThemeMode state management using Provider
 - SharedPreferences for persistence
 - Theme toggle widget example
 
 **My Changes:**
-- Adapted the solution to use Riverpod instead of Provider (personal preference)
-- Integrated theme toggle into the app bar instead of a separate settings screen
-- Added theme persistence that loads on app startup
-- Customized color schemes to use blue as seed color for brand consistency
 
-**Why it works:**
-Material 3's `ColorScheme.fromSeed()` generates a harmonious color palette from a single seed color, automatically adjusting for light and dark modes. The `ThemeMode` enum (light, dark, system) allows the MaterialApp to switch themes dynamically. State management ensures the theme preference persists across app restarts, and the system mode respects the device's theme setting.
+- Adapted the solution to use Bloc (ThemeBloc) instead of Provider/Riverpod for consistency with the rest of the app
+- Theme and locale controls live on a dedicated Settings screen (ThemeSelector, LanguageSelector), with persistence via PreferencesRepository / SharedPreferences
+- Added theme and locale persistence that loads on app startup
+- Customized color schemes (e.g. seed color) in core theme
+
+**Implementation note (later evolution):** The app now uses clean architecture (core/data/domain/presentation), Bloc for all UI state (theme, locale, dashboard, history), and get_it + injectable for dependency injection. Theme and locale are persisted via PreferencesRepository; the Settings screen hosts both theme and language pickers (en, es, bn). No additional AI prompts were used for this refactor.
 
 ---
 
@@ -87,6 +95,7 @@ Material 3's `ColorScheme.fromSeed()` generates a harmonious color palette from 
 multiple languages (English and Spanish initially).
 
 **Approach:**
+
 - Added `flutter_localizations` (SDK) and `intl` to `pubspec.yaml`, and
   `flutter.generate: true` for `gen-l10n`
 - Created `lib/l10n/app_en.arb` (template) and `lib/l10n/app_es.arb` with all
@@ -146,6 +155,7 @@ The app uses the device locale when supported, otherwise falls back to English.
 
 **What happened:**
 The AI initially generated the Flutter service method with this signature:
+
 ```dart
 static Future<int> getBatteryLevel() async {
   final level = await _channel.invokeMethod<int>('getBatteryLevel');
@@ -157,6 +167,7 @@ static Future<int> getBatteryLevel() async {
 When the native method failed or wasn't available, it would return 0, which is a valid battery level. This made it impossible to distinguish between "battery is actually at 0%" and "sensor reading failed."
 
 **How I debugged it:**
+
 1. Tested on an emulator where battery APIs might behave differently
 2. Added logging and discovered that `PlatformException` was being thrown but caught silently
 3. Realized that returning a sentinel value (0) was masking errors
@@ -164,6 +175,7 @@ When the native method failed or wasn't available, it would return 0, which is a
 
 **The Fix:**
 Changed the return type to `Future<int?>` and return `null` on exceptions:
+
 ```dart
 static Future<int?> getBatteryLevel() async {
   try {
@@ -226,6 +238,7 @@ MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL).setMethodCall
 **Lines 8-10:** If the method name doesn't match any handler, we call `result.notImplemented()`, which tells Flutter that this method isn't supported. This is important for graceful degradation when adding new methods incrementally.
 
 **Overall Flow:**
+
 1. Flutter calls `_channel.invokeMethod('getBatteryLevel')`
 2. The binary messenger serializes the call and sends it to native code
 3. This handler receives the call, executes the native method
@@ -247,17 +260,17 @@ This pattern allows Flutter apps to access platform-specific APIs that aren't av
 
 ### What the ADPF thermal doc recommends
 
-| Capability | Doc | In this app |
-|------------|-----|-------------|
-| **getCurrentThermalStatus()** | Use for a simple status (NONE / LIGHT / MODERATE / SEVERE / …). | ✅ Used on API 30+ and mapped to 0–3. |
-| **getThermalHeadroom(seconds)** | Forecast thermal headroom in X seconds (0.0–1.0). Do **not** call more than once per 10 seconds; otherwise returns NaN. | ❌ Not used. |
-| **ThermalStatusChangedListener** | Register for status changes instead of polling. | ❌ Not used. |
-| **Device-limitation heuristics** | If `getThermalHeadroom()` is NaN/0 on first call, treat API as unsupported. If status is always NONE but headroom is high, use headroom-based heuristics (e.g. &gt; 1.0 → severe, &gt; 0.95 → moderate, &gt; 0.85 → light). | ❌ Not implemented. |
-| **Fallback for “older” APIs** | Brief asks for `getCurrentThermalStatus()` (API 29+) or `getThermalHeadroom()` for older versions; ADPF describes headroom as the main forecasting tool on supported devices. | ❌ No headroom path; below API 30 the app always returns 0. |
+| Capability                       | Doc                                                                                                                                                                                                                         | In this app                                                 |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- |
+| **getCurrentThermalStatus()**    | Use for a simple status (NONE / LIGHT / MODERATE / SEVERE / …).                                                                                                                                                             | ✅ Used on API 30+ and mapped to 0–3.                       |
+| **getThermalHeadroom(seconds)**  | Forecast thermal headroom in X seconds (0.0–1.0). Do **not** call more than once per 10 seconds; otherwise returns NaN.                                                                                                     | ❌ Not used.                                                |
+| **ThermalStatusChangedListener** | Register for status changes instead of polling.                                                                                                                                                                             | ❌ Not used.                                                |
+| **Device-limitation heuristics** | If `getThermalHeadroom()` is NaN/0 on first call, treat API as unsupported. If status is always NONE but headroom is high, use headroom-based heuristics (e.g. &gt; 1.0 → severe, &gt; 0.95 → moderate, &gt; 0.85 → light). | ❌ Not implemented.                                         |
+| **Fallback for “older” APIs**    | Brief asks for `getCurrentThermalStatus()` (API 29+) or `getThermalHeadroom()` for older versions; ADPF describes headroom as the main forecasting tool on supported devices.                                               | ❌ No headroom path; below API 30 the app always returns 0. |
 
 ### Conclusion
 
-- **Thermal *status* is maintained** in the sense that the app uses the same API and mapping as the ADPF thermal doc: `getCurrentThermalStatus()` and the 0–3 scale (NONE/LIGHT/MODERATE/SEVERE).
+- **Thermal _status_ is maintained** in the sense that the app uses the same API and mapping as the ADPF thermal doc: `getCurrentThermalStatus()` and the 0–3 scale (NONE/LIGHT/MODERATE/SEVERE).
 - **The full “thermal testing” behavior from the doc is not maintained:** there is no use of `getThermalHeadroom()`, no thermal status listener, no 10‑second headroom polling discipline, and no device-limitation heuristics. The app also does not implement the brief’s “or getThermalHeadroom() for older versions” path.
 
 ### Recommendations (if aligning further with ADPF)
@@ -272,25 +285,25 @@ For the current assignment scope (display thermal state 0–3 and log it to the 
 
 The following were implemented so the app aligns with the ADPF thermal doc and the candidate_project_brief.md (“Use `getCurrentThermalStatus()` (API 29+) or `getThermalHeadroom()` for older versions”, “Handle devices that don't support these APIs”):
 
-1. **getThermalHeadroom(forecastSeconds)**  
-   - **Android:** New method-channel call `getThermalHeadroom` invokes `PowerManager.getThermalHeadroom(forecastSeconds)` on API 30+. A 10‑second throttle is enforced (ADPF: calling more than once per 10s returns NaN). NaN and invalid values are treated as “unsupported” and not surfaced as valid headroom.  
+1. **getThermalHeadroom(forecastSeconds)**
+   - **Android:** New method-channel call `getThermalHeadroom` invokes `PowerManager.getThermalHeadroom(forecastSeconds)` on API 30+. A 10‑second throttle is enforced (ADPF: calling more than once per 10s returns NaN). NaN and invalid values are treated as “unsupported” and not surfaced as valid headroom.
    - **Flutter:** `DeviceSensorService.getThermalHeadroom({int forecastSeconds = 10})` returns `Future<double?>`. Used for heuristics and optional UI/telemetry.
 
-2. **Device-limitation heuristics in getThermalState()**  
-   - On API 29+, `getCurrentThermalStatus()` is used first.  
-   - When status is `THERMAL_STATUS_NONE` and API ≥ 30, `getThermalHeadroom(10)` is used (subject to the 10s throttle). If headroom &gt; 1.0 → 3, &gt; 0.95 → 2, &gt; 0.85 → 1; otherwise 0.  
+2. **Device-limitation heuristics in getThermalState()**
+   - On API 29+, `getCurrentThermalStatus()` is used first.
+   - When status is `THERMAL_STATUS_NONE` and API ≥ 30, `getThermalHeadroom(10)` is used (subject to the 10s throttle). If headroom &gt; 1.0 → 3, &gt; 0.95 → 2, &gt; 0.85 → 1; otherwise 0.
    - Covers devices that keep reporting NONE even when headroom indicates throttling.
 
-3. **ThermalStatusChangedListener + EventChannel**  
-   - **Android:** `PowerManager.addThermalStatusListener(mainExecutor, listener)` is registered when the Flutter side listens to the thermal event stream. The listener maps status to 0–3 and sends it over `EventChannel("device_vital_monitor/thermal_events")`. The listener is removed in `onCancel`.  
+3. **ThermalStatusChangedListener + EventChannel**
+   - **Android:** `PowerManager.addThermalStatusListener(mainExecutor, listener)` is registered when the Flutter side listens to the thermal event stream. The listener maps status to 0–3 and sends it over `EventChannel("device_vital_monitor/thermal_events")`. The listener is removed in `onCancel`.
    - **Flutter:** `DeviceSensorService.thermalStatusChangeStream` returns a broadcast stream of `int?` (0–3). Errors (e.g. no native handler on iOS/tests) are handled so the stream does not break the app.
 
-4. **Dashboard reaction to thermal changes**  
+4. **Dashboard reaction to thermal changes**
    - `DashboardBloc` subscribes to `thermalStatusChangeStream` and handles `DashboardThermalStatusChanged(thermalState)`, updating `state.thermalState` so the UI reflects thermal changes without a manual refresh. The subscription is cancelled in `close()`.
 
-5. **API level behavior**  
-   - **API 29 (Q):** `getCurrentThermalStatus()` only (no headroom; headroom is API 30+).  
-   - **API 30+ (R):** Status + headroom heuristics when status is NONE, plus optional `getThermalHeadroom` and thermal event stream.  
+5. **API level behavior**
+   - **API 29 (Q):** `getCurrentThermalStatus()` only (no headroom; headroom is API 30+).
+   - **API 30+ (R):** Status + headroom heuristics when status is NONE, plus optional `getThermalHeadroom` and thermal event stream.
    - **API &lt; 29:** Thermal state remains 0 (NONE); no thermal APIs on stock Android.
 
 Tests were updated so `DashboardBloc` is constructed with the three required dependencies (`DeviceSensorService`, `VitalsRepository`, `DeviceIdService`), including `SharedPreferences.setMockInitialValues` and a shared `DashboardBloc` in `setUpAll` for the dashboard screen memory tests.
