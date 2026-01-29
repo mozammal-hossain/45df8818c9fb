@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
     show DashboardBloc, DashboardState, DashboardLoaded, LogStatusState,
         DashboardLogStatusRequested;
 

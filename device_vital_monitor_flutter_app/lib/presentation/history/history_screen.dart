@@ -3,10 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/history/history_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/history/widgets/analytics_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/history/widgets/vital_log_item.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/widgets/common/error_view.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/error_view.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/bloc/history_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/widgets/analytics_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/widgets/vital_log_item.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});

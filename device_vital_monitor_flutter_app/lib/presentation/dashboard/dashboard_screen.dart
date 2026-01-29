@@ -5,18 +5,18 @@ import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/app_drawer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
     show DashboardBloc, DashboardState, DashboardInitial, DashboardError,
         DashboardLoaded, LogStatusState, DashboardSensorDataRequested;
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/history/history_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/battery_level_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/log_status_button.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/memory_usage_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/widgets/thermal_state_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/history/history_screen.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/settings/settings_screen.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/widgets/common/app_drawer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/battery_level_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/log_status_button.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/memory_usage_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/thermal_state_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/history_screen.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/history/bloc/history_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/settings_screen.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});

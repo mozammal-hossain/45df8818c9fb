@@ -4,8 +4,8 @@ import 'package:device_vital_monitor_flutter_app/core/config/app_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/settings/widgets/language_selector.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/settings/widgets/theme_selector.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/language_selector.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/widgets/theme_selector.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

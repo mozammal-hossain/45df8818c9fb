@@ -3,42 +3,69 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
-class LanguageSelector extends StatelessWidget {
-  const LanguageSelector({super.key});
+class ThemeSelector extends StatelessWidget {
+  const ThemeSelector({super.key});
 
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final iconSz = AppInsets.iconS(context);
     final gap = AppInsets.spacingS(context);
-    return BlocBuilder<LocaleBloc, LocaleState>(
+    return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
-        final current = state.locale?.languageCode ??
-            Localizations.localeOf(context).languageCode;
+        final mode = state.mode;
         return Column(
           children: [
-            _SelectOptionTile<String?>(
-              value: 'bn',
-              groupValue: current,
-              label: l10n.languageBangla,
+            _SelectOptionTile<ThemeMode>(
+              value: ThemeMode.light,
+              groupValue: mode,
+              label: l10n.themeLight,
+              leading: Icon(
+                Icons.light_mode_outlined,
+                size: iconSz,
+                color: scheme.onSurface,
+              ),
               onChanged: (_) {
                 context
-                    .read<LocaleBloc>()
-                    .add(LocaleChanged(const Locale('bn')));
+                    .read<ThemeBloc>()
+                    .add(ThemeModeChanged(ThemeMode.light));
               },
               scheme: scheme,
             ),
             SizedBox(height: gap),
-            _SelectOptionTile<String?>(
-              value: 'en',
-              groupValue: current,
-              label: l10n.languageEnglish,
+            _SelectOptionTile<ThemeMode>(
+              value: ThemeMode.dark,
+              groupValue: mode,
+              label: l10n.themeDark,
+              leading: Icon(
+                Icons.dark_mode_outlined,
+                size: iconSz,
+                color: scheme.onSurface,
+              ),
               onChanged: (_) {
                 context
-                    .read<LocaleBloc>()
-                    .add(LocaleChanged(const Locale('en')));
+                    .read<ThemeBloc>()
+                    .add(ThemeModeChanged(ThemeMode.dark));
+              },
+              scheme: scheme,
+            ),
+            SizedBox(height: gap),
+            _SelectOptionTile<ThemeMode>(
+              value: ThemeMode.system,
+              groupValue: mode,
+              label: l10n.themeSystemDefault,
+              leading: Icon(
+                Icons.settings_suggest_outlined,
+                size: iconSz,
+                color: scheme.onSurface,
+              ),
+              onChanged: (_) {
+                context
+                    .read<ThemeBloc>()
+                    .add(ThemeModeChanged(ThemeMode.system));
               },
               scheme: scheme,
             ),

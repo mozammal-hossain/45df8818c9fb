@@ -3,14 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_colors.dart';
-import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
-    show DashboardBloc, DashboardState, DashboardInitial, DashboardLoading,
-        DashboardLoaded, DashboardError;
-import 'package:device_vital_monitor_flutter_app/presentation/widgets/cards/vital_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/widgets/common/loading_shimmer.dart';
 import 'package:device_vital_monitor_flutter_app/core/utils/formatters/battery_formatters.dart';
 import 'package:device_vital_monitor_flutter_app/core/utils/formatters/status_colors.dart';
+import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
+    show DashboardBloc, DashboardState, DashboardInitial, DashboardLoading,
+        DashboardLoaded, DashboardError;
 
 class BatteryLevelCard extends StatelessWidget {
   const BatteryLevelCard({super.key});
