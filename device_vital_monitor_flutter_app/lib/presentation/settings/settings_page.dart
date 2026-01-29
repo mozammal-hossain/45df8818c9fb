@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/assets/assets.dart';
 import 'package:device_vital_monitor_flutter_app/core/config/app_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
@@ -73,19 +74,18 @@ class SettingsPage extends StatelessWidget {
   ) {
     final sz = AppInsets.chartSize(context);
     final r = AppInsets.radiusL(context);
-    final iconSize = AppInsets.iconM(context);
     final sSM = AppInsets.spacingSM(context);
     final sX = AppInsets.spacingXS(context);
     return Column(
       children: [
-        Container(
-          width: sz,
-          height: sz,
-          decoration: BoxDecoration(
-            color: scheme.primary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(r),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(r),
+          child: Image.asset(
+            Assets.logo,
+            width: sz,
+            height: sz,
+            fit: BoxFit.contain,
           ),
-          child: Icon(Icons.show_chart, size: iconSize, color: scheme.primary),
         ),
         SizedBox(height: sSM),
         Text(
