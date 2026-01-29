@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/history/history_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/history/widgets/analytics_card.dart';
@@ -16,7 +17,7 @@ class HistoryScreen extends StatefulWidget {
 
 class _HistoryScreenState extends State<HistoryScreen> {
   final _scrollController = ScrollController();
-  static const _loadMoreThreshold = 200.0;
+  double _loadMoreThreshold = 200;
 
   @override
   void initState() {
@@ -75,6 +76,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   context.read<HistoryBloc>().add(const HistoryRequested()),
             );
           }
+          _loadMoreThreshold = AppInsets.loadMoreThreshold(context);
+          final padding = AppInsets.pagePadding(context);
+          final sL = AppInsets.spacingL(context);
+          final sSM = AppInsets.spacingSM(context);
+          final loaderSize = AppInsets.iconS(context);
           return RefreshIndicator(
             onRefresh: () async {
               context.read<HistoryBloc>().add(const HistoryRequested());
@@ -84,7 +90,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               slivers: [
                 SliverPadding(
-                  padding: const EdgeInsets.all(16),
+                  padding: padding,
                   sliver: SliverToBoxAdapter(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -92,20 +98,20 @@ class _HistoryScreenState extends State<HistoryScreen> {
                       children: [
                         if (state.analytics != null) ...[
                           AnalyticsCard(analytics: state.analytics!),
-                          const SizedBox(height: 24),
+                          SizedBox(height: sL),
                         ],
                         Text(l10n.historyTitle, style: textTheme.titleLarge),
-                        const SizedBox(height: 12),
+                        SizedBox(height: sSM),
                       ],
                     ),
                   ),
                 ),
                 if (state.logs.isEmpty)
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.only(left: padding.left, right: padding.right),
                     sliver: SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        padding: EdgeInsets.symmetric(vertical: sL),
                         child: Text(
                           l10n.historyEmpty,
                           style: textTheme.bodyMedium?.copyWith(
@@ -117,7 +123,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                   )
                 else
                   SliverPadding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    padding: EdgeInsets.only(left: padding.left, right: padding.right),
                     sliver: SliverList.builder(
                       itemCount: state.logs.length,
                       itemBuilder: (context, index) =>
@@ -125,14 +131,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     ),
                   ),
                 if (state.isLoadingMore)
-                  const SliverToBoxAdapter(
+                  SliverToBoxAdapter(
                     child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: SizedBox(
-                        height: 24,
-                        width: 24,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )),
+                      padding: padding,
+                      child: Center(
+                        child: SizedBox(
+                          height: loaderSize,
+                          width: loaderSize,
+                          child: const CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
                     ),
                   ),
               ],

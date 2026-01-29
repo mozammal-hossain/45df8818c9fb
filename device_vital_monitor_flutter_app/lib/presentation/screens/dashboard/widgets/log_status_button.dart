@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
     show DashboardBloc, DashboardState, DashboardLoaded, LogStatusState,
@@ -22,6 +23,7 @@ class LogStatusButton extends StatelessWidget {
       builder: (context, state) {
         final isSubmitting = state is DashboardLoaded &&
             state.logStatus == LogStatusState.submitting;
+        final iconSz = AppInsets.iconS(context);
         return FilledButton.icon(
           onPressed: isSubmitting
               ? null
@@ -32,8 +34,8 @@ class LogStatusButton extends StatelessWidget {
                 },
           icon: isSubmitting
               ? SizedBox(
-                  width: 20,
-                  height: 20,
+                  width: iconSz,
+                  height: iconSz,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Theme.of(context).colorScheme.onPrimary,

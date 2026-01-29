@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/domain/entities/vital_log.dart';
 
 class VitalLogItem extends StatelessWidget {
@@ -17,8 +18,9 @@ class VitalLogItem extends StatelessWidget {
     final time =
         log.timestamp.isUtc ? log.timestamp : log.timestamp.toUtc();
     final timeStr = _timeFormat.format(time.toLocal());
+    final gap = AppInsets.spacingS(context);
     return Card(
-      margin: const EdgeInsets.only(bottom: 8),
+      margin: EdgeInsets.only(bottom: gap),
       child: ListTile(
         title: Text(timeStr, style: textTheme.titleSmall),
         subtitle: Text(

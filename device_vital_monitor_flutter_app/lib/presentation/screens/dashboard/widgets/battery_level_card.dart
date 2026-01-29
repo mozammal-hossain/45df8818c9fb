@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_colors.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
@@ -21,47 +22,61 @@ class BatteryLevelCard extends StatelessWidget {
         final isLoading =
             state is DashboardInitial || state is DashboardLoading;
         if (isLoading) {
+          final ic = AppInsets.iconContainer(context);
+          final r = AppInsets.radiusM(context);
+          final sS = AppInsets.spacingS(context);
+          final sM = AppInsets.spacingM(context);
           return VitalCard(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
                   children: [
-                    const LoadingShimmer(
-                      height: 56,
-                      width: 56,
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
+                    LoadingShimmer(
+                      height: ic,
+                      width: ic,
+                      borderRadius: BorderRadius.all(Radius.circular(r)),
                     ),
-                    const SizedBox(width: 16),
+                    SizedBox(width: sM),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Row(
+                          Wrap(
+                            spacing: sS,
+                            runSpacing: sS,
                             children: [
-                              const LoadingShimmer(height: 24, width: 100),
-                              const SizedBox(width: 8),
-                              const LoadingShimmer(
+                              LoadingShimmer(height: 24, width: 100),
+                              LoadingShimmer(
                                 height: 24,
                                 width: 60,
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
+                                    BorderRadius.all(Radius.circular(r)),
                               ),
                             ],
                           ),
-                          const SizedBox(height: 12),
-                          const LoadingShimmer(height: 48, width: 80),
-                          const SizedBox(height: 8),
-                          const LoadingShimmer(height: 14, width: 150),
-                          const SizedBox(height: 4),
-                          const LoadingShimmer(height: 14, width: 120),
+                          SizedBox(height: AppInsets.spacingSM(context)),
+                          LoadingShimmer(height: 48, width: 80),
+                          SizedBox(height: sS),
+                          LoadingShimmer(
+                            height: 14,
+                            width: double.infinity,
+                          ),
+                          SizedBox(height: AppInsets.spacingXS(context)),
+                          LoadingShimmer(
+                            height: 14,
+                            width: double.infinity,
+                          ),
                         ],
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 16),
-                const LoadingShimmer(height: 8, width: double.infinity),
+                SizedBox(height: sM),
+                LoadingShimmer(
+                  height: AppInsets.progressHeight(context),
+                  width: double.infinity,
+                ),
               ],
             ),
           );
@@ -86,6 +101,12 @@ class BatteryLevelCard extends StatelessWidget {
         final statusColor = batteryLevel != null
             ? StatusColors.getBatteryStatusColor(context, level)
             : scheme.outline;
+        final sS = AppInsets.spacingS(context);
+        final sM = AppInsets.spacingM(context);
+        final sX = AppInsets.spacingXS(context);
+        final r = AppInsets.radiusM(context);
+        final iconSize = AppInsets.iconM(context);
+        final ph = AppInsets.progressHeight(context);
         return VitalCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,37 +114,39 @@ class BatteryLevelCard extends StatelessWidget {
               Row(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(12),
+                    padding: EdgeInsets.all(r),
                     decoration: BoxDecoration(
                       color: colors.surfaceContainerLow,
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(r),
                     ),
                     child: Icon(
                       Icons.battery_charging_full,
                       color: scheme.primary,
-                      size: 32,
+                      size: iconSize,
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  SizedBox(width: sM),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
+                        Wrap(
+                          spacing: sS,
+                          runSpacing: sS,
+                          crossAxisAlignment: WrapCrossAlignment.center,
                           children: [
                             Text(
                               l10n.batteryLevel,
                               style: textTheme.titleLarge,
                             ),
-                            const SizedBox(width: 8),
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: sS,
+                                vertical: sX,
                               ),
                               decoration: BoxDecoration(
                                 color: statusColor,
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(r),
                               ),
                               child: Text(
                                 status,
@@ -133,10 +156,10 @@ class BatteryLevelCard extends StatelessWidget {
                             ),
                           ],
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: sS),
                         Text('$level%', style: textTheme.displayLarge),
                         if (batteryLevel != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: sX),
                           Text(
                             BatteryFormatters.getEstimatedTimeRemaining(
                               l10n,
@@ -146,7 +169,7 @@ class BatteryLevelCard extends StatelessWidget {
                           ),
                         ],
                         if (batteryHealth != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: sX),
                           Text(
                             l10n.deviceHealthLabel(
                               BatteryFormatters.formatBatteryHealth(
@@ -158,7 +181,7 @@ class BatteryLevelCard extends StatelessWidget {
                           ),
                         ],
                         if (chargerConnection != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: sX),
                           Text(
                             l10n.chargerLabel(
                               BatteryFormatters.formatChargerConnection(
@@ -170,7 +193,7 @@ class BatteryLevelCard extends StatelessWidget {
                           ),
                         ],
                         if (batteryStatus != null) ...[
-                          const SizedBox(height: 4),
+                          SizedBox(height: sX),
                           Text(
                             l10n.statusLabel(
                               BatteryFormatters.formatBatteryStatus(
@@ -187,12 +210,12 @@ class BatteryLevelCard extends StatelessWidget {
                 ],
               ),
               if (batteryLevel != null) ...[
-                const SizedBox(height: 16),
+                SizedBox(height: sM),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(4),
+                  borderRadius: BorderRadius.circular(AppInsets.radiusS(context)),
                   child: LinearProgressIndicator(
                     value: level / 100,
-                    minHeight: 8,
+                    minHeight: ph,
                     backgroundColor: colors.progressTrack,
                     valueColor: AlwaysStoppedAnimation<Color>(scheme.primary),
                   ),

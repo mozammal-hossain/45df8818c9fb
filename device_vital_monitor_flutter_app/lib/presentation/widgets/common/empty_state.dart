@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
+
 /// Placeholder when there is no data to show.
 class EmptyState extends StatelessWidget {
   const EmptyState({super.key, required this.message, this.icon});
@@ -11,15 +13,18 @@ class EmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final padding = AppInsets.pagePadding(context);
+    final iconSize = AppInsets.iconL(context);
+    final gap = AppInsets.spacingSM(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: padding,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, size: 48, color: scheme.outline),
-              const SizedBox(height: 12),
+              Icon(icon, size: iconSize, color: scheme.outline),
+              SizedBox(height: gap),
             ],
             Text(
               message,

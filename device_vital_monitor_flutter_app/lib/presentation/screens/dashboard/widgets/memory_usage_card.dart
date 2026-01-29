@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_colors.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
@@ -21,38 +22,44 @@ class MemoryUsageCard extends StatelessWidget {
         final isLoading =
             state is DashboardInitial || state is DashboardLoading;
         if (isLoading) {
+          final ic = AppInsets.iconContainer(context);
+          final r = AppInsets.radiusM(context);
+          final sS = AppInsets.spacingS(context);
+          final sM = AppInsets.spacingM(context);
+          final sX = AppInsets.spacingXS(context);
+          final sSM = AppInsets.spacingSM(context);
+          final ch = AppInsets.chartSize(context);
           return VitalCard(
             child: Row(
               children: [
-                const LoadingShimmer(
-                  height: 56,
-                  width: 56,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                LoadingShimmer(
+                  height: ic,
+                  width: ic,
+                  borderRadius: BorderRadius.all(Radius.circular(r)),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: sM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const LoadingShimmer(height: 24, width: 120),
-                      const SizedBox(height: 4),
-                      const LoadingShimmer(height: 14, width: 80),
-                      const SizedBox(height: 12),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        textBaseline: TextBaseline.alphabetic,
+                      LoadingShimmer(height: 24, width: 120),
+                      SizedBox(height: sX),
+                      LoadingShimmer(height: 14, width: 80),
+                      SizedBox(height: sSM),
+                      Wrap(
+                        spacing: sS,
+                        runSpacing: sS,
                         children: [
-                          const LoadingShimmer(height: 32, width: 60),
-                          const SizedBox(width: 8),
-                          const LoadingShimmer(height: 14, width: 40),
+                          LoadingShimmer(height: 32, width: 60),
+                          LoadingShimmer(height: 14, width: 40),
                         ],
                       ),
                     ],
                   ),
                 ),
-                const LoadingShimmer(
-                  height: 80,
-                  width: 80,
+                LoadingShimmer(
+                  height: ch,
+                  width: ch,
                   shape: BoxShape.circle,
                 ),
               ],
@@ -77,32 +84,42 @@ class MemoryUsageCard extends StatelessWidget {
         final statusColor = hasData
             ? StatusColors.getMemoryStatusColor(context, percent)
             : scheme.outline;
+        final r = AppInsets.radiusM(context);
+        final sS = AppInsets.spacingS(context);
+        final sM = AppInsets.spacingM(context);
+        final sX = AppInsets.spacingXS(context);
+        final ch = AppInsets.chartSize(context);
+        final iconSize = AppInsets.iconM(context);
         return VitalCard(
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(r),
                 decoration: BoxDecoration(
                   color: colors.surfaceContainerLow,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(r),
                 ),
-                child: Icon(Icons.memory, color: scheme.primary, size: 32),
+                child: Icon(
+                  Icons.memory,
+                  color: scheme.primary,
+                  size: iconSize,
+                ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: sM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.memoryUsage, style: textTheme.titleLarge),
-                    const SizedBox(height: 4),
+                    SizedBox(height: sX),
                     Text(statusLabel, style: textTheme.bodySmall),
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                    SizedBox(height: sS),
+                    Wrap(
+                      spacing: sS,
+                      runSpacing: sS,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text('$percent%', style: textTheme.displayMedium),
-                        const SizedBox(width: 8),
                         Text(l10n.used, style: textTheme.bodySmall),
                       ],
                     ),
@@ -110,14 +127,14 @@ class MemoryUsageCard extends StatelessWidget {
                 ),
               ),
               SizedBox(
-                width: 80,
-                height: 80,
+                width: ch,
+                height: ch,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     SizedBox(
-                      width: 80,
-                      height: 80,
+                      width: ch,
+                      height: ch,
                       child: CircularProgressIndicator(
                         value:
                             hasData ? (percent / 100).clamp(0.0, 1.0) : null,

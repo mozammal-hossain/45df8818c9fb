@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 
 /// App drawer with navigation items. [onDashboard], [onHistory], [onSettings]
@@ -20,12 +21,19 @@ class AppDrawer extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final padding = AppInsets.pagePadding(context);
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
           DrawerHeader(
             decoration: BoxDecoration(color: scheme.primaryContainer),
+            padding: EdgeInsets.fromLTRB(
+              padding.left,
+              padding.top,
+              padding.right,
+              padding.bottom,
+            ),
             child: Text(
               l10n.appTitle,
               style: Theme.of(context).textTheme.titleLarge,

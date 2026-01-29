@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/domain/entities/analytics_result.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/widgets/cards/vital_card.dart';
@@ -13,40 +14,39 @@ class AnalyticsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final textTheme = Theme.of(context).textTheme;
+    final sS = AppInsets.spacingS(context);
+    final sSM = AppInsets.spacingSM(context);
+    final sX = AppInsets.spacingXS(context);
     return VitalCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
           Text(l10n.analyticsTitle, style: textTheme.titleMedium),
-          const SizedBox(height: 12),
-          Row(
+          SizedBox(height: sSM),
+          Wrap(
+            spacing: sS,
+            runSpacing: sS,
             children: [
               _MetricChip(
                 label: l10n.averageThermalLabel,
                 value: analytics.averageThermal.toStringAsFixed(1),
               ),
-              const SizedBox(width: 8),
               _MetricChip(
                 label: l10n.averageBatteryLabel,
                 value: '${analytics.averageBattery.toStringAsFixed(0)}%',
               ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
               _MetricChip(
                 label: l10n.averageMemoryLabel,
                 value: '${analytics.averageMemory.toStringAsFixed(0)}%',
               ),
-              const SizedBox(width: 8),
               _MetricChip(
                 label: l10n.totalLogsLabel,
                 value: '${analytics.totalLogs}',
               ),
             ],
           ),
-          const SizedBox(height: 4),
+          SizedBox(height: sX),
           Text(
             '${l10n.rollingWindowLogsLabel}: ${analytics.rollingWindowLogs}',
             style: textTheme.bodySmall,
@@ -66,11 +66,16 @@ class _MetricChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final r = AppInsets.radiusS(context);
+    final sSM = AppInsets.spacingSM(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      padding: EdgeInsets.symmetric(
+        horizontal: sSM,
+        vertical: AppInsets.spacingXS(context) + 2,
+      ),
       decoration: BoxDecoration(
         color: scheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(r),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

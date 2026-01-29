@@ -418,9 +418,7 @@ void main() {
             });
 
         await tester.pumpWidget(_localizedMaterialApp());
-
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
+        await ensureDashboardLoaded(tester);
 
         expect(
           find.text('—'),
@@ -444,9 +442,7 @@ void main() {
         );
 
         await tester.pumpWidget(_localizedMaterialApp());
-
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
+        await ensureDashboardLoaded(tester);
 
         expect(find.text('—'), findsAtLeastNWidgets(2));
         expect(find.text('Memory Usage'), findsOneWidget);
@@ -465,9 +461,7 @@ void main() {
         );
 
         await tester.pumpWidget(_localizedMaterialApp());
-
-        await tester.pump();
-        await tester.pump(const Duration(seconds: 1));
+        await ensureDashboardLoaded(tester);
 
         expect(find.text('—'), findsAtLeastNWidgets(2));
         expect(find.text('Memory Usage'), findsOneWidget);

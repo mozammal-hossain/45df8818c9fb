@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
 
@@ -11,6 +12,8 @@ class ThemeSelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final iconSz = AppInsets.iconS(context);
+    final gap = AppInsets.spacingS(context);
     return BlocBuilder<ThemeBloc, ThemeState>(
       builder: (context, state) {
         final mode = state.mode;
@@ -22,7 +25,7 @@ class ThemeSelector extends StatelessWidget {
               label: l10n.themeLight,
               leading: Icon(
                 Icons.light_mode_outlined,
-                size: 20,
+                size: iconSz,
                 color: scheme.onSurface,
               ),
               onChanged: (_) {
@@ -32,14 +35,14 @@ class ThemeSelector extends StatelessWidget {
               },
               scheme: scheme,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: gap),
             _SelectOptionTile<ThemeMode>(
               value: ThemeMode.dark,
               groupValue: mode,
               label: l10n.themeDark,
               leading: Icon(
                 Icons.dark_mode_outlined,
-                size: 20,
+                size: iconSz,
                 color: scheme.onSurface,
               ),
               onChanged: (_) {
@@ -49,14 +52,14 @@ class ThemeSelector extends StatelessWidget {
               },
               scheme: scheme,
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: gap),
             _SelectOptionTile<ThemeMode>(
               value: ThemeMode.system,
               groupValue: mode,
               label: l10n.themeSystemDefault,
               leading: Icon(
                 Icons.settings_suggest_outlined,
-                size: 20,
+                size: iconSz,
                 color: scheme.onSurface,
               ),
               onChanged: (_) {
@@ -93,25 +96,29 @@ class _SelectOptionTile<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final selected = value == groupValue;
+    final r = AppInsets.radiusM(context);
+    final padH = AppInsets.spacingM(context);
+    final padV = 14.0;
+    final gap = AppInsets.spacingSM(context);
+    final textTheme = Theme.of(context).textTheme;
     return Material(
       color: selected ? scheme.primaryContainer : scheme.surfaceContainerHighest,
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(r),
       child: InkWell(
         onTap: () => onChanged(value),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(r),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          padding: EdgeInsets.symmetric(horizontal: padH, vertical: padV),
           child: Row(
             children: [
               if (leading != null) ...[
                 leading!,
-                const SizedBox(width: 12),
+                SizedBox(width: gap),
               ],
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 16,
+                  style: (textTheme.bodyLarge ?? const TextStyle()).copyWith(
                     fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
                     color: scheme.onSurface,
                   ),

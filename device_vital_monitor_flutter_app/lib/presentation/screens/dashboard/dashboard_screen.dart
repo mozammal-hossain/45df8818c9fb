@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
+import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
     show DashboardBloc, DashboardState, DashboardInitial, DashboardError,
@@ -118,22 +120,68 @@ class DashboardScreen extends StatelessWidget {
               if (context.mounted) _fetchSensorData(context);
             });
           }
+          final padding = AppInsets.pagePadding(context);
+          final sM = AppInsets.spacingM(context);
+          final sL = AppInsets.spacingL(context);
+          final wide = isWideScreen(context);
+          final cols = gridColumns(context);
           return RefreshIndicator(
             onRefresh: () async => _fetchSensorData(context),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const ThermalStateCard(),
-                  const SizedBox(height: 16),
-                  const BatteryLevelCard(),
-                  const SizedBox(height: 16),
-                  const MemoryUsageCard(),
-                  const SizedBox(height: 24),
-                  const LogStatusButton(),
-                ],
+              padding: padding,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final maxW = constraints.maxWidth;
+                  if (!wide) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const ThermalStateCard(),
+                        SizedBox(height: sM),
+                        const BatteryLevelCard(),
+                        SizedBox(height: sM),
+                        const MemoryUsageCard(),
+                        SizedBox(height: sL),
+                        const LogStatusButton(),
+                      ],
+                    );
+                  }
+                  final gap = sM;
+                  final cellWidth =
+                      (maxW - gap * (cols - 1)) / cols;
+                  final cards = [
+                    const ThermalStateCard(),
+                    const BatteryLevelCard(),
+                    const MemoryUsageCard(),
+                  ];
+                  final rows = <Widget>[];
+                  for (var i = 0; i < cards.length; i += cols) {
+                    final rowChildren = <Widget>[];
+                    for (var j = 0; j < cols && i + j < cards.length; j++) {
+                      if (j > 0) rowChildren.add(SizedBox(width: gap));
+                      rowChildren.add(
+                        SizedBox(
+                          width: cellWidth,
+                          child: cards[i + j],
+                        ),
+                      );
+                    }
+                    if (rows.isNotEmpty) rows.add(SizedBox(height: gap));
+                    rows.add(Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: rowChildren,
+                    ));
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ...rows,
+                      SizedBox(height: sL),
+                      const LogStatusButton(),
+                    ],
+                  );
+                },
               ),
             ),
           );

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/config/app_config.dart';
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
+import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/settings/widgets/language_selector.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/screens/settings/widgets/theme_selector.dart';
@@ -13,6 +15,35 @@ class SettingsScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
+    final padding = AppInsets.pagePadding(context);
+    final wide = isWideScreen(context);
+    final maxW = AppInsets.settingsMaxWidth(context);
+
+    Widget content = Column(
+      children: [
+        _buildBranding(context, scheme, l10n),
+        SizedBox(height: AppInsets.spacingXL(context)),
+        _buildLanguageSection(context, scheme, l10n),
+        SizedBox(height: AppInsets.spacingL(context)),
+        _buildThemeSection(context, scheme, l10n),
+        SizedBox(height: AppInsets.spacingXXL(context)),
+        _buildFooter(context, scheme, l10n),
+      ],
+    );
+
+    if (wide) {
+      content = Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxW),
+          child: Padding(
+            padding: padding,
+            child: content,
+          ),
+        ),
+      );
+    } else {
+      content = Padding(padding: padding, child: content);
+    }
 
     return Scaffold(
       backgroundColor: scheme.surface,
@@ -32,20 +63,7 @@ class SettingsScreen extends StatelessWidget {
         backgroundColor: scheme.surface,
         elevation: 0,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        child: Column(
-          children: [
-            _buildBranding(context, scheme, l10n),
-            const SizedBox(height: 32),
-            _buildLanguageSection(context, scheme, l10n),
-            const SizedBox(height: 24),
-            _buildThemeSection(context, scheme, l10n),
-            const SizedBox(height: 48),
-            _buildFooter(context, scheme, l10n),
-          ],
-        ),
-      ),
+      body: SingleChildScrollView(child: content),
     );
   }
 
@@ -54,18 +72,27 @@ class SettingsScreen extends StatelessWidget {
     ColorScheme scheme,
     AppLocalizations l10n,
   ) {
+    final sz = AppInsets.chartSize(context);
+    final r = AppInsets.radiusL(context);
+    final iconSize = AppInsets.iconM(context);
+    final sSM = AppInsets.spacingSM(context);
+    final sX = AppInsets.spacingXS(context);
     return Column(
       children: [
         Container(
-          width: 72,
-          height: 72,
+          width: sz,
+          height: sz,
           decoration: BoxDecoration(
             color: scheme.primary.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(r),
           ),
-          child: Icon(Icons.show_chart, size: 40, color: scheme.primary),
+          child: Icon(
+            Icons.show_chart,
+            size: iconSize,
+            color: scheme.primary,
+          ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: sSM),
         Text(
           l10n.appTitle,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
@@ -73,7 +100,7 @@ class SettingsScreen extends StatelessWidget {
                 color: scheme.onSurface,
               ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: sX),
         Text(
           l10n.settingsSubtitle,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -89,13 +116,19 @@ class SettingsScreen extends StatelessWidget {
     ColorScheme scheme,
     AppLocalizations l10n,
   ) {
+    final sS = AppInsets.spacingS(context);
+    final sSM = AppInsets.spacingSM(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.language, color: scheme.primary, size: 22),
-            const SizedBox(width: 8),
+            Icon(
+              Icons.language,
+              color: scheme.primary,
+              size: 22,
+            ),
+            SizedBox(width: sS),
             Text(
               l10n.languageLabel,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -105,7 +138,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: sSM),
         const LanguageSelector(),
       ],
     );
@@ -116,13 +149,19 @@ class SettingsScreen extends StatelessWidget {
     ColorScheme scheme,
     AppLocalizations l10n,
   ) {
+    final sS = AppInsets.spacingS(context);
+    final sSM = AppInsets.spacingSM(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            Icon(Icons.palette_outlined, color: scheme.primary, size: 22),
-            const SizedBox(width: 8),
+            Icon(
+              Icons.palette_outlined,
+              color: scheme.primary,
+              size: 22,
+            ),
+            SizedBox(width: sS),
             Text(
               l10n.themeLabel,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
@@ -132,7 +171,7 @@ class SettingsScreen extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: sSM),
         const ThemeSelector(),
       ],
     );
@@ -143,6 +182,7 @@ class SettingsScreen extends StatelessWidget {
     ColorScheme scheme,
     AppLocalizations l10n,
   ) {
+    final sX = AppInsets.spacingXS(context);
     return Column(
       children: [
         Text(
@@ -152,7 +192,7 @@ class SettingsScreen extends StatelessWidget {
                 letterSpacing: 1.2,
               ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: sX),
         Text(
           l10n.versionBuild(AppConfig.version, AppConfig.build),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
+
 /// Full-screen or inline error message with optional retry.
 class ErrorView extends StatelessWidget {
   const ErrorView({
@@ -17,17 +19,24 @@ class ErrorView extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
+    final padding = AppInsets.pagePadding(context);
+    final iconSize = AppInsets.iconXL(context);
+    final gap = AppInsets.spacingM(context);
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: padding,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 64, color: scheme.error),
-            const SizedBox(height: 16),
-            Text(message, textAlign: TextAlign.center, style: textTheme.bodyLarge),
+            Icon(icon, size: iconSize, color: scheme.error),
+            SizedBox(height: gap),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: textTheme.bodyLarge,
+            ),
             if (onRetry != null) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: gap),
               FilledButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),

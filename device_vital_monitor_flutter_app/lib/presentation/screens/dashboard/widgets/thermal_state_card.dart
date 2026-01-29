@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/layout/app_insets.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_colors.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
@@ -19,42 +20,53 @@ class ThermalStateCard extends StatelessWidget {
         final isLoading =
             state is DashboardInitial || state is DashboardLoading;
         if (isLoading) {
+          final ic = AppInsets.iconContainer(context);
+          final ch = AppInsets.chartSize(context);
+          final r = AppInsets.radiusM(context);
+          final rS = AppInsets.radiusS(context);
+          final sS = AppInsets.spacingS(context);
+          final sM = AppInsets.spacingM(context);
+          final sSM = AppInsets.spacingSM(context);
           return VitalCard(
             child: Row(
               children: [
-                const LoadingShimmer(
-                  height: 56,
-                  width: 56,
-                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                LoadingShimmer(
+                  height: ic,
+                  width: ic,
+                  borderRadius: BorderRadius.all(Radius.circular(r)),
                 ),
-                const SizedBox(width: 16),
+                SizedBox(width: sM),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const LoadingShimmer(height: 24, width: 120),
-                      const SizedBox(height: 12),
-                      Row(
+                      LoadingShimmer(height: 24, width: 120),
+                      SizedBox(height: sSM),
+                      Wrap(
+                        spacing: sSM,
+                        runSpacing: sS,
                         children: [
-                          const LoadingShimmer(height: 40, width: 60),
-                          const SizedBox(width: 12),
-                          const LoadingShimmer(
+                          LoadingShimmer(height: 40, width: 60),
+                          LoadingShimmer(
                             height: 24,
                             width: 80,
                             borderRadius:
-                                BorderRadius.all(Radius.circular(12)),
+                                BorderRadius.all(Radius.circular(r)),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      const LoadingShimmer(height: 16, width: 180),
+                      SizedBox(height: sS),
+                      LoadingShimmer(
+                        height: 16,
+                        width: double.infinity,
+                      ),
                     ],
                   ),
                 ),
-                const LoadingShimmer(
-                  height: 80,
-                  width: 80,
-                  borderRadius: BorderRadius.all(Radius.circular(8)),
+                LoadingShimmer(
+                  height: ch,
+                  width: ch,
+                  borderRadius: BorderRadius.all(Radius.circular(rS)),
                 ),
               ],
             ),
@@ -80,38 +92,50 @@ class ThermalStateCard extends StatelessWidget {
             ? _getThermalStateDescription(l10n, stateValue)
             : l10n.thermalDescriptionUnavailable;
         final textTheme = Theme.of(context).textTheme;
+        final r = AppInsets.radiusM(context);
+        final rS = AppInsets.radiusS(context);
+        final sS = AppInsets.spacingS(context);
+        final sM = AppInsets.spacingM(context);
+        final sSM = AppInsets.spacingSM(context);
+        final sX = AppInsets.spacingXS(context);
+        final ch = AppInsets.chartSize(context);
+        final iconSize = AppInsets.iconM(context);
         return VitalCard(
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(r),
                 decoration: BoxDecoration(
                   color: stateColor.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(r),
                 ),
-                child: Icon(Icons.thermostat, color: stateColor, size: 32),
+                child: Icon(
+                  Icons.thermostat,
+                  color: stateColor,
+                  size: iconSize,
+                ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: sM),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(l10n.thermalState, style: textTheme.titleLarge),
-                    const SizedBox(height: 8),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
+                    SizedBox(height: sS),
+                    Wrap(
+                      spacing: sSM,
+                      runSpacing: sS,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text('$stateValue', style: textTheme.displayLarge),
-                        const SizedBox(width: 12),
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: sS,
+                            vertical: sX,
                           ),
                           decoration: BoxDecoration(
                             color: stateColor,
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(r),
                           ),
                           child: Text(
                             stateLabel,
@@ -121,16 +145,16 @@ class ThermalStateCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: sX),
                     Text(stateDescription, style: textTheme.bodySmall),
                   ],
                 ),
               ),
               Container(
-                width: 80,
-                height: 80,
+                width: ch,
+                height: ch,
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(rS),
                   gradient: LinearGradient(
                     colors: [
                       stateColor.withValues(alpha: 0.3),
