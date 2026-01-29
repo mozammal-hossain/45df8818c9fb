@@ -256,11 +256,14 @@ void main() {
   group('VitalsRemoteDatasource - getAnalytics', () {
     test('returns analytics when server returns 200', () async {
       mockAdapter.getAnalyticsBody = jsonEncode({
-        'rollingWindowLogs': 10,
-        'averageThermal': 1.5,
-        'averageBattery': 80.0,
-        'averageMemory': 45.0,
-        'totalLogs': 100,
+        'rolling_window_logs': 10,
+        'average_thermal': 1.5,
+        'average_battery': 80.0,
+        'average_memory': 45.0,
+        'total_logs': 100,
+        'trend_thermal': 'stable',
+        'trend_battery': 'increasing',
+        'trend_memory': 'decreasing',
       });
       mockAdapter.getAnalyticsStatus = 200;
 
@@ -277,11 +280,11 @@ void main() {
       'returns zeroed analytics when server returns empty-like data',
       () async {
         mockAdapter.getAnalyticsBody = jsonEncode({
-          'rollingWindowLogs': 0,
-          'averageThermal': 0,
-          'averageBattery': 0,
-          'averageMemory': 0,
-          'totalLogs': 0,
+          'rolling_window_logs': 0,
+          'average_thermal': 0,
+          'average_battery': 0,
+          'average_memory': 0,
+          'total_logs': 0,
         });
 
         final result = await datasource.getAnalytics();

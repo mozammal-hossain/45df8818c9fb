@@ -174,11 +174,44 @@ class AppLocalizationsEs extends AppLocalizations {
   String get historyTitle => 'Historial';
 
   @override
+  String get detailedHistoryTitle => 'Historial detallado';
+
+  @override
   String get historyEmpty =>
       'Aún no hay registros. Usa «Registrar estado» en el panel.';
 
   @override
-  String get analyticsTitle => 'Analíticas (ventana móvil)';
+  String get analyticsTitle => 'Analíticas';
+
+  @override
+  String get analyticsSubtitleRolling24h => 'Promedio de los últimos 100 datos';
+
+  @override
+  String get sectionToday => 'Hoy';
+
+  @override
+  String get sectionYesterday => 'Ayer';
+
+  @override
+  String get statusOptimal => 'ÓPTIMO';
+
+  @override
+  String get statusNormal => 'NORMAL';
+
+  @override
+  String get statusSpace => 'ESPACIO';
+
+  @override
+  String get statusCritical => 'CRÍTICO';
+
+  @override
+  String get thermalLabelShort => 'TÉRMICO';
+
+  @override
+  String get batteryLabelShort => 'BATERÍA';
+
+  @override
+  String get memoryLabelShort => 'MEMORIA';
 
   @override
   String get averageThermalLabel => 'Térmico medio';

@@ -174,11 +174,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get historyTitle => 'History';
 
   @override
+  String get detailedHistoryTitle => 'Detailed History';
+
+  @override
   String get historyEmpty =>
       'No vitals logged yet. Use “Log Status” on the dashboard.';
 
   @override
-  String get analyticsTitle => 'Analytics (rolling window)';
+  String get analyticsTitle => 'Analytics';
+
+  @override
+  String get analyticsSubtitleRolling24h => 'Rolling 100 data\'s average';
+
+  @override
+  String get sectionToday => 'Today';
+
+  @override
+  String get sectionYesterday => 'Yesterday';
+
+  @override
+  String get statusOptimal => 'OPTIMAL';
+
+  @override
+  String get statusNormal => 'NORMAL';
+
+  @override
+  String get statusSpace => 'SPACE';
+
+  @override
+  String get statusCritical => 'CRITICAL';
+
+  @override
+  String get thermalLabelShort => 'THERMAL';
+
+  @override
+  String get batteryLabelShort => 'BATTERY';
+
+  @override
+  String get memoryLabelShort => 'MEMORY';
 
   @override
   String get averageThermalLabel => 'Avg thermal';

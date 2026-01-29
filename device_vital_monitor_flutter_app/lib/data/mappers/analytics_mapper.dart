@@ -9,5 +9,8 @@ extension AnalyticsResponseMapper on AnalyticsResponse {
     averageBattery: averageBattery,
     averageMemory: averageMemory,
     totalLogs: totalLogs,
+    trendThermal: trendThermal,
+    trendBattery: trendBattery,
+    trendMemory: trendMemory,
   );
 }
