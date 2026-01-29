@@ -18,6 +18,7 @@ class _HistorySection {
 }
 
 /// Groups [logs] by local date into "Today", "Yesterday", or a formatted date.
+/// Log timestamps are UTC; we use [timestamp.toLocal] for grouping and labels.
 List<_HistorySection> _groupLogsByDay(List<VitalLog> logs) {
   if (logs.isEmpty) return [];
   final now = DateTime.now();
@@ -27,7 +28,7 @@ List<_HistorySection> _groupLogsByDay(List<VitalLog> logs) {
 
   final map = <DateTime, List<VitalLog>>{};
   for (final log in logs) {
-    final local = log.timestamp.isUtc ? log.timestamp.toLocal() : log.timestamp;
+    final local = log.timestamp.toLocal();
     final day = DateTime(local.year, local.month, local.day);
     map.putIfAbsent(day, () => []).add(log);
   }
@@ -37,8 +38,8 @@ List<_HistorySection> _groupLogsByDay(List<VitalLog> logs) {
   for (final day in orderedDays) {
     final dayLogs = map[day]!;
     dayLogs.sort((a, b) {
-      final ta = a.timestamp.isUtc ? a.timestamp.toLocal() : a.timestamp;
-      final tb = b.timestamp.isUtc ? b.timestamp.toLocal() : b.timestamp;
+      final ta = a.timestamp.toLocal();
+      final tb = b.timestamp.toLocal();
       return tb.compareTo(ta);
     });
     final label = day == today

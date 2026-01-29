@@ -38,9 +38,8 @@ class VitalLogItem extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
     final colors = Theme.of(context).extension<AppColors>()!;
-    final localTime = log.timestamp.isUtc
-        ? log.timestamp.toLocal()
-        : log.timestamp;
+    // API timestamp is UTC; show user local time.
+    final localTime = log.timestamp.toLocal();
     final timeStr = _timeFormat.format(localTime);
     final status = vitalLogStatusFromLog(log);
     final gap = AppInsets.spacingS(context);
