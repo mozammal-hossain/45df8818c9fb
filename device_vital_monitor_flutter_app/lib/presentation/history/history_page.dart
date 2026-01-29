@@ -52,13 +52,16 @@ List<_HistorySection> _groupLogsByDay(List<VitalLog> logs) {
   return sections;
 }
 
-/// Thermal values 0–1 for sparkline (oldest to newest, left to right). From [logs] newest-first, take up to [maxPoints].
+/// Thermal values 0–3 from backend for sparkline (oldest to newest, left to right). From [logs] newest-first, take up to [maxPoints].
 List<double> _thermalSparklineValues(
   List<VitalLog> logs, {
   int maxPoints = 24,
 }) {
   if (logs.isEmpty) return [];
-  final take = logs.take(maxPoints).map((l) => l.thermalValue / 3.0).toList();
+  final take = logs
+      .take(maxPoints)
+      .map((l) => l.thermalValue.toDouble())
+      .toList();
   return take.reversed.toList();
 }
 

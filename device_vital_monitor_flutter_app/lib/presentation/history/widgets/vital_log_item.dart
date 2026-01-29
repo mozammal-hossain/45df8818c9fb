@@ -21,9 +21,9 @@ VitalLogStatus vitalLogStatusFromLog(VitalLog log) {
   return VitalLogStatus.optimal;
 }
 
-/// Thermal 0–3 displayed as 0–1 scale with one decimal.
+/// Thermal 0–3 from backend, displayed as-is.
 String formatThermalForDisplay(int thermalValue) =>
-    (thermalValue / 3.0).toStringAsFixed(1);
+    thermalValue.clamp(0, 3).toString();
 
 class VitalLogItem extends StatelessWidget {
   const VitalLogItem({super.key, required this.log});

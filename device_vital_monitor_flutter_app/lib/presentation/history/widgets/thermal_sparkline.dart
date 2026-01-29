@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-/// Paints a simple line + area chart for thermal values (0–1 normalized).
+/// Paints a simple line + area chart for thermal values (0–3 from backend).
 class ThermalSparklinePainter extends CustomPainter {
   ThermalSparklinePainter({
     required this.values,
@@ -16,9 +16,9 @@ class ThermalSparklinePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (values.isEmpty) return;
     final count = values.length;
-    final maxVal = values.reduce((a, b) => a > b ? a : b).clamp(0.001, 1.0);
+    final maxVal = values.reduce((a, b) => a > b ? a : b).clamp(0.001, 3.0);
     final minVal = values.reduce((a, b) => a < b ? a : b);
-    final range = (maxVal - minVal).clamp(0.001, 1.0);
+    final range = (maxVal - minVal).clamp(0.001, 3.0);
     final stepX = count > 1 ? (size.width - 1) / (count - 1) : 0.0;
 
     final path = Path();
