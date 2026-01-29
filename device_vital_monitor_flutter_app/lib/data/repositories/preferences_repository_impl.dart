@@ -21,4 +21,11 @@ class PreferencesRepositoryImpl implements PreferencesRepository {
 
   @override
   Future<void> setLocale(Locale? locale) => _prefs.setLocale(locale);
+
+  @override
+  Future<bool> getAutoLoggingEnabled() => _prefs.getAutoLoggingEnabled();
+
+  @override
+  Future<void> setAutoLoggingEnabled(bool enabled) =>
+      _prefs.setAutoLoggingEnabled(enabled);
 }

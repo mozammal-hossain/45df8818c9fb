@@ -1,9 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:device_vital_monitor_flutter_app/core/config/api_config.dart';
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
@@ -11,7 +13,10 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
-    show DashboardBloc, DashboardSensorDataRequested, DashboardLoaded,
+    show
+        DashboardBloc,
+        DashboardSensorDataRequested,
+        DashboardLoaded,
         DashboardError;
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/dashboard_page.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
@@ -69,6 +74,19 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final prefs = await SharedPreferences.getInstance();
     getIt.registerSingleton<SharedPreferences>(prefs);
+    final apiConfig = ApiConfig();
+    getIt.registerSingleton<ApiConfig>(apiConfig);
+    getIt.registerSingleton<Dio>(
+      Dio(
+        BaseOptions(
+          baseUrl: apiConfig.baseUrl,
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
+          contentType: Headers.jsonContentType,
+        ),
+      ),
+    );
     configureDependencies();
     final preferencesRepo = getIt<PreferencesRepository>();
     final mode = await ThemeBloc.loadThemeMode(preferencesRepo);
@@ -173,10 +191,7 @@ void main() {
         await tester.pumpWidget(_localizedMaterialApp());
         await ensureDashboardLoaded(tester);
 
-        expect(
-          find.text('0%'),
-          findsAtLeast(1),
-        );
+        expect(find.text('0%'), findsAtLeast(1));
         expect(find.text('used'), findsOneWidget);
         expect(find.text('Optimized'), findsOneWidget);
       });

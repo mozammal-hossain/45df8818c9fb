@@ -235,4 +235,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String versionBuild(String version, String build) {
     return 'Versión $version (Compilación $build)';
   }
+
+  @override
+  String get autoLoggingLabel => 'Registro automático';
+
+  @override
+  String get autoLoggingDescription =>
+      'Registrar vitals en el backend cada 15 minutos (en la app y en segundo plano).';
 }

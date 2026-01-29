@@ -235,4 +235,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String versionBuild(String version, String build) {
     return 'সংস্করণ $version (বিল্ড $build)';
   }
+
+  @override
+  String get autoLoggingLabel => 'অটো-লগিং';
+
+  @override
+  String get autoLoggingDescription =>
+      'প্রতি ১৫ মিনিটে ব্যাকএন্ডে ভাইটাল লগ করুন (অ্যাপ এবং ব্যাকগ্রাউন্ডে)।';
 }

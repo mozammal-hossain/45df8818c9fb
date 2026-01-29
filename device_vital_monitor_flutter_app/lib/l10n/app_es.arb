@@ -70,5 +70,7 @@
   "themeDark": "Oscuro",
   "themeSystemDefault": "Predeterminado del sistema",
   "settingsTitle": "Ajustes",
-  "versionBuild": "Versión {version} (Compilación {build})"
+  "versionBuild": "Versión {version} (Compilación {build})",
+  "autoLoggingLabel": "Registro automático",
+  "autoLoggingDescription": "Registrar vitals en el backend cada 15 minutos (en la app y en segundo plano)."
 }

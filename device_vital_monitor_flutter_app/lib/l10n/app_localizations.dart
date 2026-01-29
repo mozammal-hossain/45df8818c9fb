@@ -525,6 +525,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version {version} (Build {build})'**
   String versionBuild(String version, String build);
+
+  /// No description provided for @autoLoggingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-logging'**
+  String get autoLoggingLabel;
+
+  /// No description provided for @autoLoggingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Log vitals to the backend every 15 minutes (in app and in background).'**
+  String get autoLoggingDescription;
 }
 
 class _AppLocalizationsDelegate

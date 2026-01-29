@@ -235,4 +235,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String versionBuild(String version, String build) {
     return 'Version $version (Build $build)';
   }
+
+  @override
+  String get autoLoggingLabel => 'Auto-logging';
+
+  @override
+  String get autoLoggingDescription =>
+      'Log vitals to the backend every 15 minutes (in app and in background).';
 }
