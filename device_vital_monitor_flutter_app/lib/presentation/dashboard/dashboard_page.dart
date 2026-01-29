@@ -7,8 +7,14 @@ import 'package:device_vital_monitor_flutter_app/core/layout/responsive.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/app_drawer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
-    show DashboardBloc, DashboardState, DashboardInitial, DashboardError,
-        DashboardLoaded, LogStatusState, DashboardSensorDataRequested;
+    show
+        DashboardBloc,
+        DashboardState,
+        DashboardInitial,
+        DashboardError,
+        DashboardLoaded,
+        LogStatusState,
+        DashboardSensorDataRequested;
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/battery_level_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/log_status_button.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/memory_usage_card.dart';
@@ -39,11 +45,9 @@ class DashboardPage extends StatelessWidget {
 
   void _openSettings(BuildContext context) {
     Navigator.of(context).pop();
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (context) => const SettingsPage(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (context) => const SettingsPage()));
   }
 
   @override
@@ -58,6 +62,8 @@ class DashboardPage extends StatelessWidget {
         onHistory: () => _openHistory(context),
         onSettings: () => _openSettings(context),
       ),
+      floatingActionButton: const LogStatusButton(floating: true),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
@@ -72,10 +78,7 @@ class DashboardPage extends StatelessWidget {
               );
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert),
-            onPressed: () {},
-          ),
+          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
         ],
       ),
       body: BlocConsumer<DashboardBloc, DashboardState>(
@@ -96,8 +99,9 @@ class DashboardPage extends StatelessWidget {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text(logStatusMessage),
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
+                      backgroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
                     ),
                   );
                 case LogStatusState.failure:
@@ -122,7 +126,6 @@ class DashboardPage extends StatelessWidget {
           }
           final padding = AppInsets.pagePadding(context);
           final sM = AppInsets.spacingM(context);
-          final sL = AppInsets.spacingL(context);
           final wide = isWideScreen(context);
           final cols = gridColumns(context);
           return RefreshIndicator(
@@ -142,14 +145,11 @@ class DashboardPage extends StatelessWidget {
                         const BatteryLevelCard(),
                         SizedBox(height: sM),
                         const MemoryUsageCard(),
-                        SizedBox(height: sL),
-                        const LogStatusButton(),
                       ],
                     );
                   }
                   final gap = sM;
-                  final cellWidth =
-                      (maxW - gap * (cols - 1)) / cols;
+                  final cellWidth = (maxW - gap * (cols - 1)) / cols;
                   final cards = [
                     const ThermalStateCard(),
                     const BatteryLevelCard(),
@@ -161,25 +161,20 @@ class DashboardPage extends StatelessWidget {
                     for (var j = 0; j < cols && i + j < cards.length; j++) {
                       if (j > 0) rowChildren.add(SizedBox(width: gap));
                       rowChildren.add(
-                        SizedBox(
-                          width: cellWidth,
-                          child: cards[i + j],
-                        ),
+                        SizedBox(width: cellWidth, child: cards[i + j]),
                       );
                     }
                     if (rows.isNotEmpty) rows.add(SizedBox(height: gap));
-                    rows.add(Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: rowChildren,
-                    ));
+                    rows.add(
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: rowChildren,
+                      ),
+                    );
                   }
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ...rows,
-                      SizedBox(height: sL),
-                      const LogStatusButton(),
-                    ],
+                    children: rows,
                   );
                 },
               ),

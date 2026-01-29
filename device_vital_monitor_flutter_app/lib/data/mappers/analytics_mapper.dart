@@ -4,10 +4,10 @@ import 'package:device_vital_monitor_flutter_app/domain/entities/analytics_resul
 /// Maps [AnalyticsResponse] to domain [AnalyticsResult].
 extension AnalyticsResponseMapper on AnalyticsResponse {
   AnalyticsResult toDomain() => AnalyticsResult(
-        rollingWindowLogs: rollingWindowLogs,
-        averageThermal: averageThermal,
-        averageBattery: averageBattery,
-        averageMemory: averageMemory,
-        totalLogs: totalLogs,
-      );
+    rollingWindowLogs: rollingWindowLogs,
+    averageThermal: averageThermal,
+    averageBattery: averageBattery,
+    averageMemory: averageMemory,
+    totalLogs: totalLogs,
+  );
 }

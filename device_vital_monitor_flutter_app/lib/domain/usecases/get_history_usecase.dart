@@ -10,9 +10,6 @@ class GetHistoryUsecase {
 
   final VitalsRepository _vitalsRepository;
 
-  Future<PagedResult<VitalLog>> call({
-    int page = 1,
-    int pageSize = 20,
-  }) =>
+  Future<PagedResult<VitalLog>> call({int page = 1, int pageSize = 20}) =>
       _vitalsRepository.getHistoryPage(page: page, pageSize: pageSize);
 }

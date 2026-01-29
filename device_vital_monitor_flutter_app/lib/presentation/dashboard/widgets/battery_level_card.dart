@@ -9,8 +9,13 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
-    show DashboardBloc, DashboardState, DashboardInitial, DashboardLoading,
-        DashboardLoaded, DashboardError;
+    show
+        DashboardBloc,
+        DashboardState,
+        DashboardInitial,
+        DashboardLoading,
+        DashboardLoaded,
+        DashboardError;
 
 class BatteryLevelCard extends StatelessWidget {
   const BatteryLevelCard({super.key});
@@ -50,23 +55,18 @@ class BatteryLevelCard extends StatelessWidget {
                               LoadingShimmer(
                                 height: 24,
                                 width: 60,
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(r)),
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(r),
+                                ),
                               ),
                             ],
                           ),
                           SizedBox(height: AppInsets.spacingSM(context)),
                           LoadingShimmer(height: 48, width: 80),
                           SizedBox(height: sS),
-                          LoadingShimmer(
-                            height: 14,
-                            width: double.infinity,
-                          ),
+                          LoadingShimmer(height: 14, width: double.infinity),
                           SizedBox(height: AppInsets.spacingXS(context)),
-                          LoadingShimmer(
-                            height: 14,
-                            width: double.infinity,
-                          ),
+                          LoadingShimmer(height: 14, width: double.infinity),
                         ],
                       ),
                     ),
@@ -150,8 +150,9 @@ class BatteryLevelCard extends StatelessWidget {
                               ),
                               child: Text(
                                 status,
-                                style: textTheme.labelLarge
-                                    ?.copyWith(color: colors.onStatus),
+                                style: textTheme.labelLarge?.copyWith(
+                                  color: colors.onStatus,
+                                ),
                               ),
                             ),
                           ],
@@ -212,7 +213,9 @@ class BatteryLevelCard extends StatelessWidget {
               if (batteryLevel != null) ...[
                 SizedBox(height: sM),
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(AppInsets.radiusS(context)),
+                  borderRadius: BorderRadius.circular(
+                    AppInsets.radiusS(context),
+                  ),
                   child: LinearProgressIndicator(
                     value: level / 100,
                     minHeight: ph,

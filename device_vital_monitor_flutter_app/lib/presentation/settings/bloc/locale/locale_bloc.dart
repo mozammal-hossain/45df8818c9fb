@@ -9,7 +9,7 @@ part 'locale_state.dart';
 
 class LocaleBloc extends Bloc<LocaleEvent, LocaleState> {
   LocaleBloc(this._preferences, {Locale? initial})
-      : super(LocaleState(locale: initial)) {
+    : super(LocaleState(locale: initial)) {
     on<LocaleChanged>(_onLocaleChanged);
   }
 

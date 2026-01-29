@@ -26,14 +26,13 @@ class SensorData {
     String? chargerConnection,
     String? batteryStatus,
     int? memoryUsage,
-  }) =>
-      SensorData(
-        thermalState: thermalState ?? this.thermalState,
-        thermalHeadroom: thermalHeadroom ?? this.thermalHeadroom,
-        batteryLevel: batteryLevel ?? this.batteryLevel,
-        batteryHealth: batteryHealth ?? this.batteryHealth,
-        chargerConnection: chargerConnection ?? this.chargerConnection,
-        batteryStatus: batteryStatus ?? this.batteryStatus,
-        memoryUsage: memoryUsage ?? this.memoryUsage,
-      );
+  }) => SensorData(
+    thermalState: thermalState ?? this.thermalState,
+    thermalHeadroom: thermalHeadroom ?? this.thermalHeadroom,
+    batteryLevel: batteryLevel ?? this.batteryLevel,
+    batteryHealth: batteryHealth ?? this.batteryHealth,
+    chargerConnection: chargerConnection ?? this.chargerConnection,
+    batteryStatus: batteryStatus ?? this.batteryStatus,
+    memoryUsage: memoryUsage ?? this.memoryUsage,
+  );
 }

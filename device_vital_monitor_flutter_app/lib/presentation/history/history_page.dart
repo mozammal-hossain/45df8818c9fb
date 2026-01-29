@@ -108,7 +108,10 @@ class _HistoryPageState extends State<HistoryPage> {
                 ),
                 if (state.logs.isEmpty)
                   SliverPadding(
-                    padding: EdgeInsets.only(left: padding.left, right: padding.right),
+                    padding: EdgeInsets.only(
+                      left: padding.left,
+                      right: padding.right,
+                    ),
                     sliver: SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.symmetric(vertical: sL),
@@ -123,7 +126,10 @@ class _HistoryPageState extends State<HistoryPage> {
                   )
                 else
                   SliverPadding(
-                    padding: EdgeInsets.only(left: padding.left, right: padding.right),
+                    padding: EdgeInsets.only(
+                      left: padding.left,
+                      right: padding.right,
+                    ),
                     sliver: SliverList.builder(
                       itemCount: state.logs.length,
                       itemBuilder: (context, index) =>
@@ -138,7 +144,9 @@ class _HistoryPageState extends State<HistoryPage> {
                         child: SizedBox(
                           height: loaderSize,
                           width: loaderSize,
-                          child: const CircularProgressIndicator(strokeWidth: 2),
+                          child: const CircularProgressIndicator(
+                            strokeWidth: 2,
+                          ),
                         ),
                       ),
                     ),

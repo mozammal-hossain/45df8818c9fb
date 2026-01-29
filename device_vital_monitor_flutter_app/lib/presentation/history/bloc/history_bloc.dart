@@ -17,7 +17,7 @@ const int _historyPageSize = 20;
 @injectable
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   HistoryBloc(this._getHistory, this._getAnalytics)
-      : super(const HistoryState()) {
+    : super(const HistoryState()) {
     on<HistoryRequested>(_onHistoryRequested);
     on<HistoryLoadMoreRequested>(_onHistoryLoadMoreRequested);
   }
@@ -52,10 +52,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
       );
     } on VitalsRepositoryException catch (e) {
       emit(
-        state.copyWith(
-          status: HistoryStatus.failure,
-          errorMessage: e.message,
-        ),
+        state.copyWith(status: HistoryStatus.failure, errorMessage: e.message),
       );
     } catch (e, st) {
       addError(e, st);
@@ -91,21 +88,11 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
         ),
       );
     } on VitalsRepositoryException catch (e) {
-      emit(
-        state.copyWith(
-          isLoadingMore: false,
-          errorMessage: e.message,
-        ),
-      );
+      emit(state.copyWith(isLoadingMore: false, errorMessage: e.message));
       // Optionally show snackbar via listener for load-more errors
     } catch (e, st) {
       addError(e, st);
-      emit(
-        state.copyWith(
-          isLoadingMore: false,
-          errorMessage: e.toString(),
-        ),
-      );
+      emit(state.copyWith(isLoadingMore: false, errorMessage: e.toString()));
     }
   }
 }

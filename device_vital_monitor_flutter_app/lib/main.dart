@@ -30,11 +30,13 @@ void main() async {
 
   final dashboardBloc = getIt<DashboardBloc>();
 
-  runApp(MyApp(
-    themeBloc: themeBloc,
-    localeBloc: localeBloc,
-    dashboardBloc: dashboardBloc,
-  ));
+  runApp(
+    MyApp(
+      themeBloc: themeBloc,
+      localeBloc: localeBloc,
+      dashboardBloc: dashboardBloc,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -67,8 +69,7 @@ class MyApp extends StatelessWidget {
                 darkTheme: AppTheme.buildDarkTheme(),
                 themeMode: themeState.mode,
                 locale: localeState.locale,
-                localizationsDelegates:
-                    AppLocalizations.localizationsDelegates,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
                 home: const DashboardPage(),
               );

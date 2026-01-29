@@ -7,8 +7,13 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
-    show DashboardBloc, DashboardState, DashboardInitial, DashboardLoading,
-        DashboardLoaded, DashboardError;
+    show
+        DashboardBloc,
+        DashboardState,
+        DashboardInitial,
+        DashboardLoading,
+        DashboardLoaded,
+        DashboardError;
 
 class ThermalStateCard extends StatelessWidget {
   const ThermalStateCard({super.key});
@@ -50,16 +55,12 @@ class ThermalStateCard extends StatelessWidget {
                           LoadingShimmer(
                             height: 24,
                             width: 80,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(r)),
+                            borderRadius: BorderRadius.all(Radius.circular(r)),
                           ),
                         ],
                       ),
                       SizedBox(height: sS),
-                      LoadingShimmer(
-                        height: 16,
-                        width: double.infinity,
-                      ),
+                      LoadingShimmer(height: 16, width: double.infinity),
                     ],
                   ),
                 ),
@@ -81,8 +82,9 @@ class ThermalStateCard extends StatelessWidget {
         final thermalState = data?.thermalState;
         final stateValue = thermalState ?? 0;
         final hasData = thermalState != null;
-        final stateLabel =
-            hasData ? _getThermalStateLabel(l10n, stateValue) : l10n.dash;
+        final stateLabel = hasData
+            ? _getThermalStateLabel(l10n, stateValue)
+            : l10n.dash;
         final colors = Theme.of(context).extension<AppColors>()!;
         final scheme = Theme.of(context).colorScheme;
         final stateColor = hasData
@@ -139,8 +141,9 @@ class ThermalStateCard extends StatelessWidget {
                           ),
                           child: Text(
                             stateLabel,
-                            style: textTheme.labelLarge
-                                ?.copyWith(color: colors.onStatus),
+                            style: textTheme.labelLarge?.copyWith(
+                              color: colors.onStatus,
+                            ),
                           ),
                         ),
                       ],

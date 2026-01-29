@@ -9,8 +9,13 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/loading_shimmer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/widgets/vital_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
-    show DashboardBloc, DashboardState, DashboardInitial, DashboardLoading,
-        DashboardLoaded, DashboardError;
+    show
+        DashboardBloc,
+        DashboardState,
+        DashboardInitial,
+        DashboardLoading,
+        DashboardLoaded,
+        DashboardError;
 
 class MemoryUsageCard extends StatelessWidget {
   const MemoryUsageCard({super.key});
@@ -57,11 +62,7 @@ class MemoryUsageCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                LoadingShimmer(
-                  height: ch,
-                  width: ch,
-                  shape: BoxShape.circle,
-                ),
+                LoadingShimmer(height: ch, width: ch, shape: BoxShape.circle),
               ],
             ),
           );
@@ -136,12 +137,10 @@ class MemoryUsageCard extends StatelessWidget {
                       width: ch,
                       height: ch,
                       child: CircularProgressIndicator(
-                        value:
-                            hasData ? (percent / 100).clamp(0.0, 1.0) : null,
+                        value: hasData ? (percent / 100).clamp(0.0, 1.0) : null,
                         strokeWidth: 8,
                         backgroundColor: colors.progressTrack,
-                        valueColor:
-                            AlwaysStoppedAnimation<Color>(statusColor),
+                        valueColor: AlwaysStoppedAnimation<Color>(statusColor),
                       ),
                     ),
                     Text(

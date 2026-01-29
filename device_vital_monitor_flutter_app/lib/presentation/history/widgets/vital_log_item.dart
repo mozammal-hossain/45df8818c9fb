@@ -15,8 +15,7 @@ class VitalLogItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final textTheme = Theme.of(context).textTheme;
-    final time =
-        log.timestamp.isUtc ? log.timestamp : log.timestamp.toUtc();
+    final time = log.timestamp.isUtc ? log.timestamp : log.timestamp.toUtc();
     final timeStr = _timeFormat.format(time.toLocal());
     final gap = AppInsets.spacingS(context);
     return Card(
@@ -25,9 +24,7 @@ class VitalLogItem extends StatelessWidget {
         title: Text(timeStr, style: textTheme.titleSmall),
         subtitle: Text(
           'Thermal: ${log.thermalValue} · Battery: ${log.batteryLevel.toStringAsFixed(0)}% · Memory: ${log.memoryUsage.toStringAsFixed(0)}%',
-          style: textTheme.bodySmall?.copyWith(
-            color: scheme.onSurfaceVariant,
-          ),
+          style: textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
         ),
       ),
     );

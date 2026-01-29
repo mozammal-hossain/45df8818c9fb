@@ -43,6 +43,13 @@ final class HistoryState extends Equatable {
   }
 
   @override
-  List<Object?> get props =>
-      [status, logs, analytics, errorMessage, hasNextPage, isLoadingMore, nextPage];
+  List<Object?> get props => [
+    status,
+    logs,
+    analytics,
+    errorMessage,
+    hasNextPage,
+    isLoadingMore,
+    nextPage,
+  ];
 }

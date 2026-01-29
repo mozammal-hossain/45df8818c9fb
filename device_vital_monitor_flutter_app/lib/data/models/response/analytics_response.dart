@@ -30,10 +30,10 @@ class AnalyticsResponse {
   }
 
   AnalyticsResult toEntity() => AnalyticsResult(
-        rollingWindowLogs: rollingWindowLogs,
-        averageThermal: averageThermal,
-        averageBattery: averageBattery,
-        averageMemory: averageMemory,
-        totalLogs: totalLogs,
-      );
+    rollingWindowLogs: rollingWindowLogs,
+    averageThermal: averageThermal,
+    averageBattery: averageBattery,
+    averageMemory: averageMemory,
+    totalLogs: totalLogs,
+  );
 }
