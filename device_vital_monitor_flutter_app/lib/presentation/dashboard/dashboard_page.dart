@@ -35,23 +35,7 @@ class DashboardPage extends StatelessWidget {
       backgroundColor: scheme.surfaceContainerLow,
       floatingActionButton: const LogStatusButton(floating: true),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      appBar: AppBar(
-        title: Text(l10n.appTitle),
-        actions: [
-          BlocBuilder<ThemeBloc, ThemeState>(
-            builder: (context, state) {
-              return IconButton(
-                icon: const Icon(Icons.brightness_6),
-                onPressed: () {
-                  context.read<ThemeBloc>().add(const ThemeCycleRequested());
-                },
-                tooltip: l10n.toggleThemeTooltip,
-              );
-            },
-          ),
-          IconButton(icon: const Icon(Icons.more_vert), onPressed: () {}),
-        ],
-      ),
+      appBar: AppBar(title: Text(l10n.appTitle)),
       body: BlocConsumer<DashboardBloc, DashboardState>(
         listener: (context, state) {
           switch (state) {
