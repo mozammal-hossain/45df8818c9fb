@@ -168,45 +168,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get dash => '—';
 
   @override
-  String get diskSpace => 'Espacio en disco';
-
-  @override
-  String get total => 'total';
-
-  @override
-  String usedFormatted(String formatted) {
-    return 'Usado: $formatted';
-  }
-
-  @override
-  String availableFormatted(String formatted) {
-    return 'Disponible: $formatted';
-  }
-
-  @override
-  String get storageUnavailable =>
-      'Información de almacenamiento no disponible';
-
-  @override
   String get logStatusSnapshot => 'Registrar instantánea de estado';
-
-  @override
-  String get unitB => 'B';
-
-  @override
-  String get unitKB => 'KB';
-
-  @override
-  String get unitMB => 'MB';
-
-  @override
-  String get unitGB => 'GB';
-
-  @override
-  String get unitTB => 'TB';
-
-  @override
-  String get zeroBytes => '0 B';
 
   @override
   String get historyTitle => 'Historial';

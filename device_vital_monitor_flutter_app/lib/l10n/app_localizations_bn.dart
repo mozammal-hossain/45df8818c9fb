@@ -168,44 +168,7 @@ class AppLocalizationsBn extends AppLocalizations {
   String get dash => '—';
 
   @override
-  String get diskSpace => 'ডিস্ক স্পেস';
-
-  @override
-  String get total => 'মোট';
-
-  @override
-  String usedFormatted(String formatted) {
-    return 'ব্যবহৃত: $formatted';
-  }
-
-  @override
-  String availableFormatted(String formatted) {
-    return 'উপলব্ধ: $formatted';
-  }
-
-  @override
-  String get storageUnavailable => 'স্টোরেজ তথ্য উপলব্ধ নয়';
-
-  @override
   String get logStatusSnapshot => 'লগ স্ট্যাটাস স্ন্যাপশট';
-
-  @override
-  String get unitB => 'B';
-
-  @override
-  String get unitKB => 'KB';
-
-  @override
-  String get unitMB => 'MB';
-
-  @override
-  String get unitGB => 'GB';
-
-  @override
-  String get unitTB => 'TB';
-
-  @override
-  String get zeroBytes => '০ B';
 
   @override
   String get historyTitle => 'ইতিহাস';

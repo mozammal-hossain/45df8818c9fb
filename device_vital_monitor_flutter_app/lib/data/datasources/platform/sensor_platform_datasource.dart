@@ -5,14 +5,12 @@ import 'package:flutter/services.dart';
 import 'package:injectable/injectable.dart';
 
 import 'package:device_vital_monitor_flutter_app/core/platform/method_channels.dart';
-import 'package:device_vital_monitor_flutter_app/data/models/local/storage_info.dart';
 
 @lazySingleton
 class SensorPlatformDatasource {
   SensorPlatformDatasource() {
     _channel = const MethodChannel(MethodChannels.sensors);
-    _thermalEventChannel =
-        const EventChannel(MethodChannels.thermalEvents);
+    _thermalEventChannel = const EventChannel(MethodChannels.thermalEvents);
   }
 
   late final MethodChannel _channel;
@@ -51,12 +49,14 @@ class SensorPlatformDatasource {
     }
   }
 
-  Stream<int?> get thermalStatusChangeStream =>
-      _thermalEventChannel.receiveBroadcastStream().map<int?>((e) {
+  Stream<int?> get thermalStatusChangeStream => _thermalEventChannel
+      .receiveBroadcastStream()
+      .map<int?>((e) {
         if (e == null) return null;
         if (e is int) return e;
         return int.tryParse(e.toString());
-      }).handleError((Object error, StackTrace stackTrace) {});
+      })
+      .handleError((Object error, StackTrace stackTrace) {});
 
   Future<int?> getBatteryLevel() async {
     try {
@@ -70,7 +70,9 @@ class SensorPlatformDatasource {
 
   Future<String?> getBatteryHealth() async {
     try {
-      final result = await _channel.invokeMethod<Object?>(SensorMethods.getBatteryHealth);
+      final result = await _channel.invokeMethod<Object?>(
+        SensorMethods.getBatteryHealth,
+      );
       if (result == null) return null;
       return result is String ? result : result.toString();
     } on PlatformException catch (e) {
@@ -85,8 +87,9 @@ class SensorPlatformDatasource {
 
   Future<String?> getChargerConnection() async {
     try {
-      final result =
-          await _channel.invokeMethod<Object?>(SensorMethods.getChargerConnection);
+      final result = await _channel.invokeMethod<Object?>(
+        SensorMethods.getChargerConnection,
+      );
       if (result == null) return null;
       return result is String ? result : result.toString();
     } on PlatformException catch (e) {
@@ -101,7 +104,9 @@ class SensorPlatformDatasource {
 
   Future<String?> getBatteryStatus() async {
     try {
-      final result = await _channel.invokeMethod<Object?>(SensorMethods.getBatteryStatus);
+      final result = await _channel.invokeMethod<Object?>(
+        SensorMethods.getBatteryStatus,
+      );
       if (result == null) return null;
       return result is String ? result : result.toString();
     } on PlatformException catch (e) {
@@ -123,30 +128,6 @@ class SensorPlatformDatasource {
       );
       return null;
     } on MissingPluginException {
-      return null;
-    }
-  }
-
-  Future<StorageInfo?> getStorageInfo() async {
-    try {
-      final result =
-          await _channel.invokeMethod<Map<Object?, Object?>>(SensorMethods.getStorageInfo);
-      if (result == null) return null;
-      final jsonMap = <String, dynamic>{};
-      for (final entry in result.entries) {
-        final key = entry.key?.toString();
-        if (key != null) jsonMap[key] = entry.value;
-      }
-      return StorageInfo.fromJson(jsonMap);
-    } on PlatformException catch (e) {
-      debugPrint(
-        'SensorPlatformDatasource.getStorageInfo: ${e.code} ${e.message}',
-      );
-      return null;
-    } on MissingPluginException {
-      return null;
-    } catch (e) {
-      debugPrint('SensorPlatformDatasource.getStorageInfo: $e');
       return null;
     }
   }

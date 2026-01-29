@@ -1,6 +1,6 @@
 # Device Vital Monitor – Flutter App
 
-A Flutter application that monitors device vitals (thermal state, battery, memory, disk) in real time, logs snapshots to a backend API, and displays history and analytics. It uses **MethodChannels** for native Android/iOS sensor access (no third‑party sensor plugins) and follows **Clean Architecture** with **Bloc** for state and **get_it + injectable** for dependency injection.
+A Flutter application that monitors device vitals (thermal state, battery, memory) in real time, logs snapshots to a backend API, and displays history and analytics. It uses **MethodChannels** for native Android/iOS sensor access (no third‑party sensor plugins) and follows **Clean Architecture** with **Bloc** for state and **get_it + injectable** for dependency injection.
 
 ---
 
@@ -8,7 +8,7 @@ A Flutter application that monitors device vitals (thermal state, battery, memor
 
 ### What the app does
 
-- **Dashboard**: Shows live thermal state, battery level/health/charger/status, memory usage, and disk space. Pull-to-refresh updates readings. A “Log Status Snapshot” button sends the current vitals to the backend.
+- **Dashboard**: Shows live thermal state, battery level/health/charger/status, and memory usage. Pull-to-refresh updates readings. A “Log Status Snapshot” button sends the current vitals to the backend.
 - **History**: Loads the latest vital logs from the API and shows analytics (rolling averages, total logs). Supports pull-to-refresh.
 - **Settings**: App language (Bangla / English), theme (Light / Dark / System), and app version/build.
 
@@ -29,8 +29,6 @@ All sensor data is read via a single **MethodChannel** (`device_vital_monitor/se
     Level %, health (Good, Overheat, etc.), charger (AC/USB/Wireless/None), status (Charging/Discharging/Full/Not charging). Shimmer while loading.
   - **Memory usage**  
     Percentage and qualitative label (Optimized / Normal / Moderate / High / Critical). Shimmer while loading.
-  - **Disk space**  
-    Used / available (formatted), usage %. Shimmer while loading.
 - **Actions**:
   - Pull-to-refresh: re-fetches all sensor data.
   - “Log Status Snapshot”: builds a `VitalLogRequest` (device_id, timestamp, thermal_value, battery_level, memory_usage), POSTs to `/api/vitals`, shows Snackbar on success or error. Button shows loading state while submitting.
@@ -86,15 +84,15 @@ Blocs are provided at app or screen level. Dependency injection uses **get_it** 
 ### Native integration (MethodChannel)
 
 - **Channels** (`core/platform/method_channels.dart`): `MethodChannels.sensors` = `device_vital_monitor/sensors`; `MethodChannels.thermalEvents` = `device_vital_monitor/thermal_events`.
-- **Method names** (`SensorMethods`): `getThermalState`, `getThermalHeadroom`, `getBatteryLevel`, `getBatteryHealth`, `getChargerConnection`, `getBatteryStatus`, `getMemoryUsage`, `getStorageInfo`. Platform returns values or null when unsupported.
+- **Method names** (`SensorMethods`): `getThermalState`, `getThermalHeadroom`, `getBatteryLevel`, `getBatteryHealth`, `getChargerConnection`, `getBatteryStatus`, `getMemoryUsage`. Platform returns values or null when unsupported.
 - **EventChannel**: `device_vital_monitor/thermal_events` (Android) streams thermal changes; `DashboardBloc` subscribes via `DeviceRepository.thermalStatusChangeStream`.
 
 Device id for log requests comes from `DeviceIdLocalDatasource` (e.g. persistent store or UUID).
 
 ### Domain entities and data models
 
-- **Entities** (`domain/entities/`): `VitalLog`, `AnalyticsResult`, `SensorData`, `StorageInfo`, `DeviceInfo`.
-- **Request/response** (`data/models/`): `VitalLogRequest`, `VitalLogResponse`, `AnalyticsResponse`, local `StorageInfo`; mappers convert to/from domain.
+- **Entities** (`domain/entities/`): `VitalLog`, `AnalyticsResult`, `SensorData`, `DeviceInfo`.
+- **Request/response** (`data/models/`): `VitalLogRequest`, `VitalLogResponse`, `AnalyticsResponse`; mappers convert to/from domain.
 
 ### Configuration
 
@@ -105,7 +103,7 @@ Device id for log requests comes from `DeviceIdLocalDatasource` (e.g. persistent
 ## Localization (l10n)
 
 - **Mechanism**: Flutter `gen-l10n` from ARB files (`app_en.arb`, `app_bn.arb`, etc.).
-- **Scope**: All user-visible strings (dashboard labels, thermal/battery/memory/disk copy, history, settings, theme/language options, errors, etc.).
+- **Scope**: All user-visible strings (dashboard labels, thermal/battery/memory copy, history, settings, theme/language options, errors, etc.).
 - **Locales**: English (en), Bangla (bn), and any others defined in ARB + `supportedLocales`.
 
 ---

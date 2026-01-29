@@ -51,16 +51,6 @@ import Darwin
             details: nil
           ))
         }
-      case "getStorageInfo":
-        if let storageInfo = self?.getStorageInfo() {
-          result(storageInfo)
-        } else {
-          result(FlutterError(
-            code: "STORAGE_ERROR",
-            message: "Failed to get storage info",
-            details: nil
-          ))
-        }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -119,26 +109,4 @@ import Darwin
     return min(100, max(0, percent))
   }
 
-  /// Returns storage information as a dictionary with:
-  /// - 'total': total storage in bytes (Int64)
-  /// - 'used': used storage in bytes (Int64)
-  /// - 'available': available storage in bytes (Int64)
-  /// - 'usagePercent': usage percentage 0-100 (Int)
-  private func getStorageInfo() -> [String: Any]? {
-    guard let attributes = try? FileManager.default.attributesOfFileSystem(forPath: NSHomeDirectory()),
-          let totalBytes = attributes[.systemSize] as? Int64,
-          let freeBytes = attributes[.systemFreeSize] as? Int64 else {
-      return nil
-    }
-    
-    let usedBytes = totalBytes - freeBytes
-    let usagePercent = totalBytes > 0 ? Int((Double(usedBytes) / Double(totalBytes)) * 100) : 0
-    
-    return [
-      "total": totalBytes,
-      "used": usedBytes,
-      "available": freeBytes,
-      "usagePercent": max(0, min(100, usagePercent))
-    ]
-  }
 }

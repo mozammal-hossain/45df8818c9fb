@@ -25,9 +25,9 @@ class PagedVitalsResponse {
     final rawList = json['data'];
     final list = rawList is List
         ? rawList
-            .whereType<Map<String, dynamic>>()
-            .map((e) => VitalLogResponse.fromJson(e))
-            .toList()
+              .whereType<Map<String, dynamic>>()
+              .map((e) => VitalLogResponse.fromJson(e))
+              .toList()
         : <VitalLogResponse>[];
     return PagedVitalsResponse(
       data: list,

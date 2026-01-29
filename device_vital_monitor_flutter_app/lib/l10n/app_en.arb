@@ -77,32 +77,7 @@
   "loading": "loading…",
   "unavailable": "unavailable",
   "dash": "—",
-  "diskSpace": "Disk Space",
-  "total": "total",
-  "usedFormatted": "Used: {formatted}",
-  "@usedFormatted": {
-    "placeholders": {
-      "formatted": {
-        "type": "String"
-      }
-    }
-  },
-  "availableFormatted": "Available: {formatted}",
-  "@availableFormatted": {
-    "placeholders": {
-      "formatted": {
-        "type": "String"
-      }
-    }
-  },
-  "storageUnavailable": "Storage information unavailable",
   "logStatusSnapshot": "Log Status Snapshot",
-  "unitB": "B",
-  "unitKB": "KB",
-  "unitMB": "MB",
-  "unitGB": "GB",
-  "unitTB": "TB",
-  "zeroBytes": "0 B",
   "historyTitle": "History",
   "historyEmpty": "No vitals logged yet. Use “Log Status” on the dashboard.",
   "analyticsTitle": "Analytics (rolling window)",

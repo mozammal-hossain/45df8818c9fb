@@ -37,10 +37,10 @@ import 'package:device_vital_monitor_flutter_app/domain/usecases/get_sensor_data
     as _i531;
 import 'package:device_vital_monitor_flutter_app/domain/usecases/log_vital_snapshot_usecase.dart'
     as _i366;
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart'
-    as _i326;
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/history/history_bloc.dart'
-    as _i983;
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart'
+    as _i686;
+import 'package:device_vital_monitor_flutter_app/presentation/history/bloc/history_bloc.dart'
+    as _i801;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
@@ -67,8 +67,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i732.GetHistoryUsecase>(
       () => _i732.GetHistoryUsecase(gh<_i734.VitalsRepository>()),
     );
-    gh.factory<_i983.HistoryBloc>(
-      () => _i983.HistoryBloc(
+    gh.factory<_i801.HistoryBloc>(
+      () => _i801.HistoryBloc(
         gh<_i732.GetHistoryUsecase>(),
         gh<_i783.GetAnalyticsUsecase>(),
       ),
@@ -97,8 +97,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i608.PreferencesRepository>(
       () => _i422.PreferencesRepositoryImpl(gh<_i969.PreferencesDatasource>()),
     );
-    gh.factory<_i326.DashboardBloc>(
-      () => _i326.DashboardBloc(
+    gh.factory<_i686.DashboardBloc>(
+      () => _i686.DashboardBloc(
         gh<_i531.GetSensorDataUsecase>(),
         gh<_i366.LogVitalSnapshotUsecase>(),
         gh<_i480.DeviceRepository>(),

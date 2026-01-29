@@ -5,12 +5,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:device_vital_monitor_flutter_app/core/di/injection.dart';
 import 'package:device_vital_monitor_flutter_app/core/theme/app_theme.dart';
 import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/dashboard/dashboard_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/locale/locale_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/settings/theme/theme_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/bloc/common/app_bloc_observer.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/screens/dashboard/dashboard_screen.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/common/bloc/app_bloc_observer.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/shell/main_shell_page.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,11 +30,13 @@ void main() async {
 
   final dashboardBloc = getIt<DashboardBloc>();
 
-  runApp(MyApp(
-    themeBloc: themeBloc,
-    localeBloc: localeBloc,
-    dashboardBloc: dashboardBloc,
-  ));
+  runApp(
+    MyApp(
+      themeBloc: themeBloc,
+      localeBloc: localeBloc,
+      dashboardBloc: dashboardBloc,
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -67,10 +69,10 @@ class MyApp extends StatelessWidget {
                 darkTheme: AppTheme.buildDarkTheme(),
                 themeMode: themeState.mode,
                 locale: localeState.locale,
-                localizationsDelegates:
-                    AppLocalizations.localizationsDelegates,
+                localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
-                home: const DashboardScreen(),
+                debugShowCheckedModeBanner: false,
+                home: const MainShellPage(),
               );
             },
           );

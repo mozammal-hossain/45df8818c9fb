@@ -491,7 +491,7 @@ void main() {
         expect(results.length, equals(10));
         expect(callCount, equals(10));
         // All should be valid integers
-        expect(results.every((r) => r != null && r is int), isTrue);
+        expect(results.every((r) => r != null), isTrue);
       });
     });
   });

@@ -4,12 +4,12 @@ import 'package:device_vital_monitor_flutter_app/domain/entities/vital_log.dart'
 
 extension PagedVitalsResponseMapper on PagedVitalsResponse {
   PagedResult<VitalLog> toDomain() => PagedResult<VitalLog>(
-        items: data.map((r) => r.toEntity()).toList(),
-        page: page,
-        pageSize: pageSize,
-        totalCount: totalCount,
-        totalPages: totalPages,
-        hasNextPage: hasNextPage,
-        hasPreviousPage: hasPreviousPage,
-      );
+    items: data.map((r) => r.toEntity()).toList(),
+    page: page,
+    pageSize: pageSize,
+    totalCount: totalCount,
+    totalPages: totalPages,
+    hasNextPage: hasNextPage,
+    hasPreviousPage: hasPreviousPage,
+  );
 }
