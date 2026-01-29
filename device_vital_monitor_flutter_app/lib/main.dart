@@ -71,6 +71,7 @@ class MyApp extends StatelessWidget {
                 locale: localeState.locale,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
+                debugShowCheckedModeBanner: false,
                 home: const MainShellPage(),
               );
             },
