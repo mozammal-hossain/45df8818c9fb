@@ -10,7 +10,7 @@ A Flutter application that monitors device vitals (thermal state, battery, memor
 
 - **Dashboard**: Shows live thermal state, battery level/health/charger/status, and memory usage. Pull-to-refresh updates readings. A “Log Status Snapshot” button sends the current vitals to the backend.
 - **History**: Loads the latest vital logs from the API and shows analytics (rolling averages, total logs). Supports pull-to-refresh.
-- **Settings**: App language (Bangla / English), theme (Light / Dark / System), and app version/build.
+- **Settings**: App language (Bangla / English), theme (Light / Dark / System), **auto-logging** (optional: log vitals every 15 minutes in app and in background), and app version/build.
 
 All sensor data is read via a single **MethodChannel** (`device_vital_monitor/sensors`) from native Android or iOS code. The app talks to a .NET backend (default `http://10.0.2.2:5265` on Android, `http://localhost:5265` on iOS/macOS).
 
@@ -52,6 +52,7 @@ All sensor data is read via a single **MethodChannel** (`device_vital_monitor/se
   - **Branding**: App title, short subtitle, icon.
   - **Language**: Bangla / English. Choice is stored and applied via `LocaleBloc` and `supportedLocales` / `locale` in `MaterialApp`.
   - **Theme**: Light / Dark / System. Choice is stored and applied via `ThemeBloc` and `themeMode` in `MaterialApp`.
+  - **Auto-logging**: Toggle to log vitals to the backend every 15 minutes. When enabled, an in-app timer runs every 15 min and native background work is scheduled (Android: **WorkManager** periodic work; iOS: **BGAppRefreshTask**). The preference is persisted; on next launch the scheduler is started if auto-logging was on.
   - **Footer**: “DEVICE VITAL MONITOR”, version and build (e.g. “Version 1.0.0 (Build 1)”).
 
 Theme and locale are persisted (e.g. `SharedPreferences`) and restored on next launch.
@@ -76,16 +77,18 @@ Blocs are provided at app or screen level. Dependency injection uses **get_it** 
 - **Repositories** (interfaces in `domain/repositories/`, implementations in `data/repositories/`):
   - **VitalsRepository**: `logVital(...)`, `getHistoryPage(...)` → `PagedResult<VitalLog>`, `getAnalytics()` → `AnalyticsResult`. Implemented with `VitalsRemoteDatasource` (Dio, base URL from `ApiConfig`).
   - **DeviceRepository**: `getDeviceInfo()`, `getSensorData()` → `SensorData`, `thermalStatusChangeStream`. Implemented with `DeviceIdLocalDatasource` and `SensorPlatformDatasource`.
-  - **PreferencesRepository**: theme/locale persistence (e.g. SharedPreferences).
+  - **PreferencesRepository**: theme/locale/auto-logging persistence (e.g. SharedPreferences).
 - **Use cases** (`domain/usecases/`): `GetSensorDataUsecase` (returns `Result<SensorData>`), `LogVitalSnapshotUsecase`, `GetHistoryUsecase`, `GetAnalyticsUsecase`.
+- **Auto-logging** (`core/services/auto_logging_scheduler.dart`): `AutoLoggingScheduler` runs an in-app `Timer.periodic(15 min)` and calls `AutoLoggingPlatformDatasource` to schedule/cancel native background work. On start it passes `ApiConfig.baseUrl` and `DeviceRepository.getDeviceInfo().deviceId` to the platform; the worker/fetch reads vitals and POSTs to the backend.
 - **Mappers** (`data/mappers/`): e.g. `VitalLogResponse.toDomain()`, `AnalyticsResponse.toDomain()`; repositories use these to map API models to domain entities.
 - **Error/result**: `core/error/result.dart` defines sealed `Result<T>` (`Success<T>`, `Error<T>`); failures include `PlatformFailure`, `UnexpectedFailure`, `ServerFailure`, `NetworkFailure`.
 
 ### Native integration (MethodChannel)
 
-- **Channels** (`core/platform/method_channels.dart`): `MethodChannels.sensors` = `device_vital_monitor/sensors`; `MethodChannels.thermalEvents` = `device_vital_monitor/thermal_events`.
+- **Channels** (`core/platform/method_channels.dart`): `MethodChannels.sensors` = `device_vital_monitor/sensors`; `MethodChannels.thermalEvents` = `device_vital_monitor/thermal_events`; `AutoLoggingChannel.name` = `device_vital_monitor/auto_logging`.
 - **Method names** (`SensorMethods`): `getThermalState`, `getThermalHeadroom`, `getBatteryLevel`, `getBatteryHealth`, `getChargerConnection`, `getBatteryStatus`, `getMemoryUsage`. Platform returns values or null when unsupported.
 - **EventChannel**: `device_vital_monitor/thermal_events` (Android) streams thermal changes; `DashboardBloc` subscribes via `DeviceRepository.thermalStatusChangeStream`.
+- **Auto-logging channel** (`AutoLoggingChannel`): `scheduleBackgroundAutoLog(baseUrl, deviceId)` and `cancelBackgroundAutoLog`. On Android this saves baseUrl/deviceId to SharedPreferences and enqueues a **WorkManager** `PeriodicWorkRequest` (15 min). On iOS it saves to UserDefaults and submits a **BGAppRefreshTaskRequest** (earliest 15 min). When the background task runs, native code reads vitals (same logic as the sensor channel) and POSTs to `/api/vitals`.
 
 Device id for log requests comes from `DeviceIdLocalDatasource` (e.g. persistent store or UUID).
 

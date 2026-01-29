@@ -1,4 +1,6 @@
+using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
+using device_vital_monitor_backend.Converters;
 using device_vital_monitor_backend.Data;
 using device_vital_monitor_backend.DTOs;
 using device_vital_monitor_backend.Middleware;
@@ -9,8 +11,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllers();
+// Add services to the container. Timestamps: API uses UTC (serialize/deserialize).
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new UtcDateTimeJsonConverter());
+        options.JsonSerializerOptions.Converters.Add(new NullableUtcDateTimeJsonConverter());
+    });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

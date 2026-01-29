@@ -16,4 +16,7 @@ abstract final class Constants {
 
   /// SharedPreferences key for persistent device id.
   static const String deviceIdKey = 'device_vital_monitor_device_id';
+
+  /// SharedPreferences key for auto-logging enabled (bool).
+  static const String autoLoggingEnabledKey = 'auto_logging_enabled';
 }

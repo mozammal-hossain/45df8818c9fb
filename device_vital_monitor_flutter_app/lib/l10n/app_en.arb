@@ -79,8 +79,19 @@
   "dash": "—",
   "logStatusSnapshot": "Log Status Snapshot",
   "historyTitle": "History",
+  "detailedHistoryTitle": "Detailed History",
   "historyEmpty": "No vitals logged yet. Use “Log Status” on the dashboard.",
-  "analyticsTitle": "Analytics (rolling window)",
+  "analyticsTitle": "Analytics",
+  "analyticsSubtitleRolling24h": "Rolling 100 data's average",
+  "sectionToday": "Today",
+  "sectionYesterday": "Yesterday",
+  "statusOptimal": "OPTIMAL",
+  "statusNormal": "NORMAL",
+  "statusSpace": "SPACE",
+  "statusCritical": "CRITICAL",
+  "thermalLabelShort": "THERMAL",
+  "batteryLabelShort": "BATTERY",
+  "memoryLabelShort": "MEMORY",
   "averageThermalLabel": "Avg thermal",
   "averageBatteryLabel": "Avg battery",
   "averageMemoryLabel": "Avg memory",
@@ -104,5 +115,7 @@
       "version": {"type": "String"},
       "build": {"type": "String"}
     }
-  }
+  },
+  "autoLoggingLabel": "Auto-logging",
+  "autoLoggingDescription": "Log vitals to the backend every 15 minutes (in app and in background)."
 }

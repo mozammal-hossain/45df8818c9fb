@@ -91,7 +91,7 @@ Log device vital data.
 **Validation Rules:**
 
 - `device_id`: Required, non-empty string
-- `timestamp`: Required, ISO8601 format, cannot be more than 5 minutes in the future
+- `timestamp`: Required, ISO8601 **UTC** (e.g. `...Z`); cannot be more than 5 minutes in the future. All API timestamps are in UTC.
 - `thermal_value`: Required, integer between 0 and 3 (inclusive)
 - `battery_level`: Required, number between 0 and 100 (inclusive)
 - `memory_usage`: Required, number between 0 and 100 (inclusive)

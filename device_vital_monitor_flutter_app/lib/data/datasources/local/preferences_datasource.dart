@@ -37,4 +37,12 @@ class PreferencesDatasource {
       await _prefs.setString(Constants.localeKey, locale.languageCode);
     }
   }
+
+  Future<bool> getAutoLoggingEnabled() async {
+    return _prefs.getBool(Constants.autoLoggingEnabledKey) ?? false;
+  }
+
+  Future<void> setAutoLoggingEnabled(bool enabled) async {
+    await _prefs.setBool(Constants.autoLoggingEnabledKey, enabled);
+  }
 }

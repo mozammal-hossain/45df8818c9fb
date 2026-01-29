@@ -174,11 +174,44 @@ class AppLocalizationsBn extends AppLocalizations {
   String get historyTitle => 'ইতিহাস';
 
   @override
+  String get detailedHistoryTitle => 'বিস্তারিত ইতিহাস';
+
+  @override
   String get historyEmpty =>
       'এখনও কোনো ভাইটাল লগ নেই। ড্যাশবোর্ডে \"লগ স্ট্যাটাস\" ব্যবহার করুন।';
 
   @override
-  String get analyticsTitle => 'বিশ্লেষণ (রোলিং উইন্ডো)';
+  String get analyticsTitle => 'বিশ্লেষণ';
+
+  @override
+  String get analyticsSubtitleRolling24h => '১০০ ডেটার রোলিং গড়';
+
+  @override
+  String get sectionToday => 'আজ';
+
+  @override
+  String get sectionYesterday => 'গতকাল';
+
+  @override
+  String get statusOptimal => 'অপটিমাল';
+
+  @override
+  String get statusNormal => 'স্বাভাবিক';
+
+  @override
+  String get statusSpace => 'স্পেস';
+
+  @override
+  String get statusCritical => 'সমালোচনামূলক';
+
+  @override
+  String get thermalLabelShort => 'তাপীয়';
+
+  @override
+  String get batteryLabelShort => 'ব্যাটারি';
+
+  @override
+  String get memoryLabelShort => 'মেমরি';
 
   @override
   String get averageThermalLabel => 'গড় তাপীয়';
@@ -235,4 +268,11 @@ class AppLocalizationsBn extends AppLocalizations {
   String versionBuild(String version, String build) {
     return 'সংস্করণ $version (বিল্ড $build)';
   }
+
+  @override
+  String get autoLoggingLabel => 'অটো-লগিং';
+
+  @override
+  String get autoLoggingDescription =>
+      'প্রতি ১৫ মিনিটে ব্যাকএন্ডে ভাইটাল লগ করুন (অ্যাপ এবং ব্যাকগ্রাউন্ডে)।';
 }

@@ -406,6 +406,12 @@ abstract class AppLocalizations {
   /// **'History'**
   String get historyTitle;
 
+  /// No description provided for @detailedHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed History'**
+  String get detailedHistoryTitle;
+
   /// No description provided for @historyEmpty.
   ///
   /// In en, this message translates to:
@@ -415,8 +421,68 @@ abstract class AppLocalizations {
   /// No description provided for @analyticsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Analytics (rolling window)'**
+  /// **'Analytics'**
   String get analyticsTitle;
+
+  /// No description provided for @analyticsSubtitleRolling24h.
+  ///
+  /// In en, this message translates to:
+  /// **'Rolling 100 data\'s average'**
+  String get analyticsSubtitleRolling24h;
+
+  /// No description provided for @sectionToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get sectionToday;
+
+  /// No description provided for @sectionYesterday.
+  ///
+  /// In en, this message translates to:
+  /// **'Yesterday'**
+  String get sectionYesterday;
+
+  /// No description provided for @statusOptimal.
+  ///
+  /// In en, this message translates to:
+  /// **'OPTIMAL'**
+  String get statusOptimal;
+
+  /// No description provided for @statusNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'NORMAL'**
+  String get statusNormal;
+
+  /// No description provided for @statusSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'SPACE'**
+  String get statusSpace;
+
+  /// No description provided for @statusCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'CRITICAL'**
+  String get statusCritical;
+
+  /// No description provided for @thermalLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'THERMAL'**
+  String get thermalLabelShort;
+
+  /// No description provided for @batteryLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'BATTERY'**
+  String get batteryLabelShort;
+
+  /// No description provided for @memoryLabelShort.
+  ///
+  /// In en, this message translates to:
+  /// **'MEMORY'**
+  String get memoryLabelShort;
 
   /// No description provided for @averageThermalLabel.
   ///
@@ -525,6 +591,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Version {version} (Build {build})'**
   String versionBuild(String version, String build);
+
+  /// No description provided for @autoLoggingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Auto-logging'**
+  String get autoLoggingLabel;
+
+  /// No description provided for @autoLoggingDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Log vitals to the backend every 15 minutes (in app and in background).'**
+  String get autoLoggingDescription;
 }
 
 class _AppLocalizationsDelegate
