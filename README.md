@@ -1,533 +1,186 @@
-# Device Vital Monitor - Project Description
+# Device Vital Monitor
 
-## Executive Summary
-
-Device Vital Monitor is a comprehensive full-stack mobile application designed to monitor, track, and analyze critical device metrics in real-time. The application provides a complete solution for monitoring device health, including thermal state, battery level, and memory usage, with seamless data synchronization to a backend service for persistent storage and advanced analytics.
-
-This project demonstrates modern software development practices, combining cross-platform mobile development with Flutter, native platform integration for Android and iOS, and a robust backend API for data management and analytics.
+A **Flutter** app that monitors device sensor data (thermal state, battery level, memory usage), logs it to a **.NET backend API**, and displays history plus analytics. Built as a full-stack take-home: Flutter UI, **native platform integration via MethodChannels** (no third‑party sensor plugins), and a persistent backend with validation and rolling averages.
 
 ---
 
-## Project Purpose
+## Overview
 
-The primary objective of Device Vital Monitor is to create a reliable, cross-platform solution for monitoring device vitals that:
-
-1. **Provides Real-Time Monitoring**: Continuously tracks critical device metrics (thermal state, battery level, memory usage) and displays them to users in an intuitive interface.
-
-2. **Ensures Data Persistence**: All monitored data is securely transmitted to and stored in a backend service, ensuring data survives app restarts and device reboots.
-
-3. **Enables Historical Analysis**: Users can access historical data and analytics, including rolling averages and trend analysis, to understand device performance over time.
-
-4. **Demonstrates Full-Stack Development**: Showcases proficiency in mobile development (Flutter), native platform integration (Android/iOS), and backend API development.
+- **Mobile app**: Dashboard (live sensor readings, “Log Status” button), History (vital logs + analytics), Settings (theme, language). Sensor data is read through **Flutter MethodChannels** from **native Android (Kotlin)** and **iOS (Swift)** code only.
+- **Backend**: REST API that accepts vital logs, validates them, stores persistently in **SQLite**, and exposes history plus **rolling-average analytics** over the latest 100 logs.
+- **Tests**: Backend unit tests (rolling average, validation, paging) and Flutter tests (repository/platform layer, dashboard, widget smoke).
 
 ---
 
-## System Architecture
+## Tech Stack
 
-### High-Level Architecture
-
-The application follows a three-tier architecture:
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    Flutter Mobile App                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   UI Layer   │  │  Business    │  │   Platform   │     │
-│  │              │  │   Logic      │  │  Integration │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-│         │                  │                  │             │
-│         └──────────────────┼──────────────────┘           │
-│                            │                                │
-│                    ┌───────▼────────┐                      │
-│                    │  API Client    │                      │
-│                    └───────┬────────┘                      │
-└────────────────────────────┼────────────────────────────────┘
-                             │ HTTP/REST
-                             │
-┌────────────────────────────▼────────────────────────────────┐
-│                    Backend API Server                       │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   REST API   │  │  Validation  │  │   Data       │     │
-│  │  Endpoints   │  │    Layer     │  │  Persistence │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘     │
-│                            │                                │
-│                    ┌───────▼────────┐                      │
-│                    │   Database/   │                      │
-│                    │   Storage      │                      │
-│                    └────────────────┘                      │
-└─────────────────────────────────────────────────────────────┘
-```
-
-### Component Overview
-
-#### 1. Mobile Application (Flutter)
-
-**Technology Stack:**
-- **Framework**: Flutter 3.10.4+
-- **Language**: Dart
-- **Platform Support**: Android, iOS
-
-**Key Components:**
-
-- **User Interface Layer**
-  - Real-time display of device vitals
-  - Historical data visualization
-  - Analytics dashboard
-  - Error handling and user feedback
-
-- **Business Logic Layer**
-  - Data models and state management
-  - API communication logic
-  - Data validation and transformation
-  - Error handling and retry logic
-
-- **Platform Integration Layer**
-  - MethodChannel implementation for native communication
-  - Platform-specific sensor access
-  - Error handling for platform exceptions
-
-**Architecture Pattern:**
-- Repository pattern for data abstraction
-- Separation of concerns between UI, business logic, and data layers
-- Dependency injection for testability
-
-#### 2. Native Platform Integration
-
-**Android Implementation (Kotlin)**
-- **Thermal State**: Uses `PowerManager.getCurrentThermalStatus()` API
-- **Battery Level**: Accesses `BatteryManager.BATTERY_PROPERTY_CAPACITY`
-- **Memory Usage**: Calculates using `ActivityManager.MemoryInfo`
-
-**iOS Implementation (Swift)**
-- **Thermal State**: Uses `ProcessInfo.processInfo.thermalState`
-- **Battery Level**: Accesses `UIDevice.current.batteryLevel`
-- **Memory Usage**: Calculates using `mach_task_basic_info` system call
-
-**Communication Mechanism:**
-- Flutter MethodChannels for bidirectional communication
-- Channel name: `device_vital_monitor/sensors`
-- Methods: `getThermalState()`, `getBatteryLevel()`, `getMemoryUsage()`
-
-#### 3. Backend API Service
-
-**Technology Options:**
-- Node.js with Express (or similar framework)
-- .NET Core/ASP.NET Core
-
-**Core Functionality:**
-
-- **RESTful API Endpoints**
-  - `POST /api/vitals`: Log device vital data
-  - `GET /api/vitals`: Retrieve historical logs (latest 100 entries)
-  - `GET /api/vitals/analytics`: Get analytics with rolling averages
-
-- **Data Validation**
-  - Thermal value: 0-3 (inclusive)
-  - Battery level: 0-100 (inclusive)
-  - Memory usage: 0-100 (inclusive)
-  - Timestamp: Valid ISO8601 format, not in the future
-  - Device ID: Required string field
-
-- **Data Persistence**
-  - Persistent storage (SQLite, JSON file, or LiteDB)
-  - Data survives server restarts
-  - Efficient querying for historical data
-
-- **Analytics Engine**
-  - Rolling average calculations
-  - Time range analysis
-  - Total log count tracking
+| Layer       | Choices                                                                        |
+| ----------- | ------------------------------------------------------------------------------ |
+| **Backend** | .NET 10, ASP.NET Core, Entity Framework Core, SQLite                           |
+| **Mobile**  | Flutter 3.10+, Dart 3.10+, Bloc, get_it + injectable, Clean Architecture       |
+| **Native**  | Android: Kotlin; iOS: Swift. MethodChannels only—no `battery_plus` or similar. |
 
 ---
 
-## Key Features
+## Platform Support
 
-### 1. Real-Time Monitoring
-
-The application continuously monitors three critical device metrics:
-
-- **Thermal State** (0-3 scale)
-  - 0: None
-  - 1: Light
-  - 2: Moderate
-  - 3: Severe
-  - Provides early warning of device overheating
-
-- **Battery Level** (0-100%)
-  - Real-time battery percentage
-  - Helps users manage device power consumption
-
-- **Memory Usage** (0-100%)
-  - Current memory utilization percentage
-  - Identifies potential performance bottlenecks
-
-### 2. Data Synchronization
-
-- Automatic data transmission to backend
-- Retry logic for failed network requests
-- Offline data queuing (if implemented)
-- Conflict resolution for concurrent updates
-
-### 3. Historical Data Access
-
-- View up to 100 most recent log entries
-- Time-stamped records for trend analysis
-- Filtering and search capabilities
-
-### 4. Analytics Dashboard
-
-- **Rolling Averages**: Calculated averages for each metric
-- **Time Range Analysis**: Data aggregated by time periods
-- **Total Log Count**: Number of records stored
-- **Trend Visualization**: Graphical representation of metrics over time
-
-### 5. Error Handling
-
-Comprehensive error handling for various scenarios:
-
-- **Network Errors**: Graceful handling when backend is unreachable
-- **Platform Exceptions**: Handles cases where native sensors are unavailable
-- **Validation Errors**: Clear error messages for invalid data
-- **Timeout Errors**: Automatic retry with exponential backoff
-- **Platform-Specific Errors**: Android/iOS specific error handling
+| Platform    | Status                                                                                                                                       |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Android** | ✅ Implemented. MethodChannel `device_vital_monitor/sensors`; thermal (API 29+), battery, memory. Optional EventChannel for thermal updates. |
+| **iOS**     | ✅ Implemented. Same MethodChannel; `ProcessInfo.thermalState`, `UIDevice.batteryLevel`, `mach_task_basic_info` for memory.                  |
 
 ---
 
-## Data Flow
+## Prerequisites
 
-### Monitoring Flow
-
-```
-1. User opens application
-   ↓
-2. Flutter app initializes MethodChannel
-   ↓
-3. App requests sensor data from native platform
-   ↓
-4. Native code (Android/iOS) reads system APIs
-   ↓
-5. Data returned to Flutter via MethodChannel
-   ↓
-6. Flutter app displays data in UI
-   ↓
-7. App sends data to backend API
-   ↓
-8. Backend validates and stores data
-   ↓
-9. Backend returns confirmation
-   ↓
-10. App updates UI with success/error status
-```
-
-### Data Retrieval Flow
-
-```
-1. User requests historical data
-   ↓
-2. Flutter app sends GET request to backend
-   ↓
-3. Backend queries persistent storage
-   ↓
-4. Backend returns JSON response with data
-   ↓
-5. Flutter app parses and displays data
-```
-
-### Analytics Flow
-
-```
-1. User requests analytics
-   ↓
-2. Flutter app sends GET request to /api/vitals/analytics
-   ↓
-3. Backend calculates rolling averages
-   ↓
-4. Backend aggregates time range data
-   ↓
-5. Backend returns analytics JSON
-   ↓
-6. Flutter app visualizes analytics data
-```
+- **.NET SDK 10** – [Download](https://dotnet.microsoft.com/download)
+- **Flutter SDK** (3.10+) – [Install Flutter](https://docs.flutter.dev/get-started/install)
+- **Android**: SDK with API 29+ (for thermal APIs)
+- **iOS**: Xcode + CocoaPods (for simulator/device)
 
 ---
 
-## Technical Specifications
+## Setup and Run
 
-### Mobile Application
+### 1. Backend
 
-**Minimum Requirements:**
-- Flutter SDK 3.10.4 or higher
-- Dart SDK (included with Flutter)
-- Android: API level 29+ (Android 10+)
-- iOS: iOS 12.0+
+From the **repository root**:
 
-**Dependencies:**
-- Flutter framework (core)
-- HTTP client for API communication
-- State management solution (Provider/Riverpod/Bloc)
-- JSON serialization libraries
-
-**Performance Considerations:**
-- Efficient sensor polling intervals
-- Optimized network requests
-- Minimal battery impact
-- Smooth UI rendering
-
-### Backend API
-
-**Minimum Requirements:**
-- Node.js 18.0+ (if using Node.js)
-- .NET SDK 6.0+ (if using .NET)
-- Persistent storage solution
-
-**API Specifications:**
-- RESTful architecture
-- JSON request/response format
-- HTTP status codes for error handling
-- CORS support for cross-origin requests
-
-**Data Storage:**
-- Persistent file-based or database storage
-- Efficient querying for historical data
-- Data integrity and validation
-
----
-
-## Security Considerations
-
-1. **Data Validation**: All incoming data is validated on the backend
-2. **Input Sanitization**: Prevents injection attacks and malformed data
-3. **Error Messages**: Generic error messages to prevent information leakage
-4. **Network Security**: HTTPS support for production deployments
-5. **Device Identification**: Secure device ID generation and management
-
----
-
-## Testing Strategy
-
-### Unit Testing
-- Business logic layer testing
-- Data validation testing
-- API client testing
-- Repository pattern testing
-
-### Integration Testing
-- MethodChannel communication testing
-- API endpoint testing
-- End-to-end data flow testing
-
-### Platform Testing
-- Android device/emulator testing
-- iOS device/simulator testing
-- Cross-platform compatibility testing
-
-### Performance Testing
-- Network request performance
-- Data storage and retrieval performance
-- UI rendering performance
-
----
-
-## Backend Setup Instructions
-
-### Prerequisites
-
-- **.NET SDK 10.0** or higher ([Download](https://dotnet.microsoft.com/download))
-- **SQLite** (included with .NET, no separate installation needed)
-
-### Installation Steps
-
-1. **Navigate to the backend directory:**
-   ```bash
-   cd device_vital_monitor_backend
-   ```
-
-2. **Restore dependencies:**
-   ```bash
-   dotnet restore
-   ```
-
-3. **Build the project:**
-   ```bash
-   dotnet build
-   ```
-
-4. **Run the backend:**
-   ```bash
-   dotnet run
-   ```
-
-   The backend will start and listen on:
-   - HTTP: `http://localhost:5265` (or the port specified in `launchSettings.json`)
-   - HTTPS: `https://localhost:5266` (if configured)
-
-### Database Setup
-
-The backend uses **SQLite** for persistent storage. The database file (`app.db`) is automatically created in the `device_vital_monitor_backend` directory when you first run the application.
-
-- **Database Location**: `device_vital_monitor_backend/app.db`
-- **Connection String**: Configured in `appsettings.json` as `Data Source=app.db`
-- **Auto-creation**: The database and tables are automatically created on first run via `context.Database.EnsureCreated()` in `Program.cs`
-
-### Configuration
-
-**Connection String** (`appsettings.json`):
-```json
-{
-  "ConnectionStrings": {
-    "DefaultConnection": "Data Source=app.db"
-  }
-}
+```bash
+cd device_vital_monitor_backend
+dotnet restore
+dotnet build
+dotnet run
 ```
 
-**Development Settings** (`appsettings.Development.json`):
-- Logging levels and other development-specific configurations
+- Listens on **http://localhost:5265** (HTTP profile in `launchSettings.json`).
+- SQLite DB: `device_vital_monitor_backend/app.db` (created on first run).
+- Data **persists across restarts**.
 
-### API Endpoints
+### 2. Flutter app
 
-Once running, the backend exposes the following endpoints:
+```bash
+cd device_vital_monitor_flutter_app
+flutter pub get
+dart run build_runner build --delete-conflicting-outputs   # if you change injectable DI
+flutter run
+```
 
-- **POST** `/api/vitals` - Log device vital data
-  - Request body: `{ "device_id": "string", "timestamp": "ISO8601", "thermal_value": 0-3, "battery_level": 0-100, "memory_usage": 0-100 }`
-  - Returns: Created vital log with ID
+- **Android emulator**: app uses `http://10.0.2.2:5265` as the API base URL.
+- **iOS simulator / macOS**: app uses `http://localhost:5265`.
+- Use a device or emulator; sensor data comes from the native side.
 
-- **GET** `/api/vitals` - Get historical logs with pagination
-  - Query parameters (optional): `page` (default: 1), `pageSize` (default: 20, max: 100)
-  - Example: `/api/vitals?page=1&pageSize=20`
-  - Returns: Paginated list of vital logs
+### 3. Run tests
 
-- **GET** `/api/vitals/analytics` - Get analytics data
-  - Returns: Rolling averages (last 100 logs), total logs count
+**Backend:**
 
-### Testing the Backend
-
-Run unit tests:
 ```bash
 cd device_vital_monitor_backend.Tests
 dotnet test
 ```
 
-### Troubleshooting
+**Flutter:**
 
-**Port already in use:**
-- Change the port in `Properties/launchSettings.json` or use:
-  ```bash
-  dotnet run --urls "http://localhost:5000"
-  ```
-
-**Database issues:**
-- Delete `app.db` and restart the application to recreate the database
-- Ensure write permissions in the backend directory
-
-**CORS errors (when connecting from Flutter app):**
-- CORS is configured in `Program.cs` to allow requests from Flutter app
-- For Android emulator, use `http://10.0.2.2:5265` as the base URL
-- For iOS simulator, use `http://localhost:5265` as the base URL
-
-### Running in Production
-
-For production deployment:
-1. Update `appsettings.json` with production connection string
-2. Configure HTTPS certificates
-3. Set appropriate logging levels
-4. Consider using migrations instead of `EnsureCreated()` for database setup
+```bash
+cd device_vital_monitor_flutter_app
+flutter test
+```
 
 ---
 
-## Deployment Considerations
+## API Endpoints
 
-### Mobile Application
-- **Android**: APK or AAB distribution via Google Play Store
-- **iOS**: IPA distribution via App Store
-- **Configuration**: Backend URL configuration for different environments
+| Method | Path                    | Description                                                                                                                             |
+| ------ | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST` | `/api/vitals`           | Log a vital snapshot. Body: `device_id`, `timestamp` (ISO8601), `thermal_value` (0–3), `battery_level` (0–100), `memory_usage` (0–100). |
+| `GET`  | `/api/vitals`           | Paginated history. Query: `page` (default 1), `pageSize` (default 20, max 100).                                                         |
+| `GET`  | `/api/vitals/analytics` | Analytics: rolling averages (last 100 logs), min/max, trends, total log count.                                                          |
 
-### Backend API
-- **Development**: Local development server (as described above)
-- **Production**: Deploy to cloud service (Azure, AWS, etc.) with proper database configuration
-- **Production**: Cloud deployment (AWS, Azure, GCP, etc.)
-- **Scaling**: Horizontal scaling for high traffic
-- **Monitoring**: Logging and error tracking
+**Validation (all enforced):**
 
----
-
-## Future Enhancements
-
-Potential improvements and extensions:
-
-1. **Real-Time Notifications**: Push notifications for critical thresholds
-2. **Advanced Analytics**: Machine learning for predictive analysis
-3. **Multi-Device Support**: Monitor multiple devices from one account
-4. **Export Functionality**: Export data to CSV/JSON formats
-5. **Customizable Thresholds**: User-defined alert thresholds
-6. **Offline Mode**: Queue data when offline, sync when online
-7. **Data Visualization**: Advanced charts and graphs
-8. **User Authentication**: Secure user accounts and data privacy
-9. **Cloud Sync**: Cross-device data synchronization
-10. **Performance Optimization**: Background monitoring with minimal impact
+- `thermal_value` ∈ [0, 3]
+- `battery_level` ∈ [0, 100]
+- `memory_usage` ∈ [0, 100]
+- `timestamp` not in the future (up to 5 min clock skew allowed)
+- Required fields present; invalid requests return `400` with `ErrorResponse` body.
 
 ---
 
 ## Project Structure
 
 ```
-device_vital_monitor/
-├── lib/                          # Flutter application source code
-│   ├── main.dart                 # Application entry point
-│   ├── models/                   # Data models
-│   ├── services/                 # Business logic services
-│   ├── repositories/             # Data repositories
-│   ├── screens/                  # UI screens
-│   ├── widgets/                  # Reusable widgets
-│   ├── utils/                    # Utility functions
-│   └── config/                   # Configuration files
+├── device_vital_monitor_backend/        # .NET API
+│   ├── Controllers/                     # VitalsController
+│   ├── Data/                            # VitalContext, SQLite
+│   ├── DTOs/                            # VitalLogRequest, AnalyticsResult, etc.
+│   ├── Models/                          # DeviceVital
+│   ├── Repositories/                    # DeviceVitalRepository
+│   ├── Services/                        # VitalService (rolling average, etc.)
+│   └── Program.cs
 │
-├── android/                      # Android native code
-│   └── app/src/main/kotlin/      # Kotlin implementation
+├── device_vital_monitor_backend.Tests/  # xUnit
+│   ├── VitalServiceTests.cs             # Rolling average, paging, persistence
+│   └── VitalsControllerTests.cs         # Validation (thermal, battery, memory, timestamp)
 │
-├── ios/                          # iOS native code
-│   └── Runner/                   # Swift implementation
+├── device_vital_monitor_flutter_app/    # Flutter app
+│   ├── lib/
+│   │   ├── core/                        # config, di, error, platform, theme
+│   │   ├── data/                        # datasources (remote, platform, local), mappers, repositories
+│   │   ├── domain/                      # entities, repositories, use cases
+│   │   ├── l10n/                        # ARB + generated localizations
+│   │   └── presentation/                # Bloc, dashboard, history, settings, shell
+│   ├── android/.../MainActivity.kt      # MethodChannel handlers (thermal, battery, memory)
+│   ├── ios/Runner/AppDelegate.swift     # MethodChannel handlers
+│   └── test/                            # widget, service, dashboard tests
 │
-├── backend/                      # Backend API server
-│   ├── src/                      # Source code
-│   ├── routes/                   # API routes
-│   ├── models/                   # Data models
-│   ├── services/                 # Business logic
-│   └── storage/                  # Data persistence
-│
-├── test/                         # Unit and widget tests
-├── README.md                     # Quick start guide
-├── PROJECT_DESCRIPTION.md        # This file
-├── DECISIONS.md                  # Design decisions
-└── pubspec.yaml                  # Flutter dependencies
+├── DECISIONS.md                         # Ambiguities, design decisions, assumptions
+├── ai_log.md                            # AI collaboration (prompts, wins, failures)
+└── README.md                            # This file
 ```
 
 ---
 
-## Development Workflow
+## Native Implementation (MethodChannels)
 
-1. **Setup**: Install dependencies and configure development environment
-2. **Development**: Implement features following architecture patterns
-3. **Testing**: Write and run tests for all components
-4. **Integration**: Test end-to-end functionality
-5. **Documentation**: Update documentation as features are added
-6. **Deployment**: Deploy to development/staging/production environments
+- **Channel**: `device_vital_monitor/sensors`
+- **Methods**: `getThermalState`, `getBatteryLevel`, `getMemoryUsage` (plus optional `getThermalHeadroom`, battery health/status on Android).
+- **Android**: `PowerManager.getCurrentThermalStatus()` (API 29+), `BatteryManager.BATTERY_PROPERTY_CAPACITY`, `ActivityManager.MemoryInfo`.
+- **iOS**: `ProcessInfo.processInfo.thermalState`, `UIDevice.current.batteryLevel`, `mach_task_basic_info` for memory.
 
----
-
-## Conclusion
-
-Device Vital Monitor represents a complete full-stack mobile application solution that demonstrates proficiency in:
-
-- **Cross-platform mobile development** with Flutter
-- **Native platform integration** for Android and iOS
-- **Backend API development** with robust data handling
-- **Modern software architecture** patterns and best practices
-- **Comprehensive error handling** and user experience design
-
-The project serves as a practical demonstration of building production-ready mobile applications with proper separation of concerns, data persistence, and analytics capabilities.
+No third‑party packages are used for sensor data.
 
 ---
 
-**Document Version**: 1.0  
-**Last Updated**: 2026
-**Project Status**: Active Development
+## Error Handling
+
+- **Backend unreachable / timeouts**: Snackbar in app; History shows an error state.
+- **PlatformException / MissingPluginException**: Caught in platform datasource; UI shows “—” or similar for unavailable sensors.
+- **Validation / 4xx from API**: Error message from server shown in Snackbar when logging fails.
+
+---
+
+## Documentation
+
+- **[DECISIONS.md](./DECISIONS.md)** – Ambiguities, options considered, decisions, trade-offs, assumptions.
+- **[ai_log.md](./ai_log.md)** – AI usage (prompts, wins, failures, line‑by‑line explanation of chosen code).
+
+---
+
+## Quick Reference
+
+| Task            | Command                                                |
+| --------------- | ------------------------------------------------------ |
+| Run backend     | `cd device_vital_monitor_backend && dotnet run`        |
+| Run Flutter app | `cd device_vital_monitor_flutter_app && flutter run`   |
+| Backend tests   | `cd device_vital_monitor_backend.Tests && dotnet test` |
+| Flutter tests   | `cd device_vital_monitor_flutter_app && flutter test`  |
+
+Ensure the backend is running on **http://localhost:5265** before using the app’s “Log Status” or History screen.
+
+---
+
+## Troubleshooting
+
+- **Port 5265 in use:** Run with `dotnet run --urls "http://localhost:5000"` and set the app's API base URL accordingly (or change the port in `Properties/launchSettings.json`).
+- **Android emulator:** Use `http://10.0.2.2:5265` (default). **iOS simulator:** Use `http://localhost:5265`.
+- **Database:** SQLite file is `device_vital_monitor_backend/app.db`. Delete it and restart the backend to reset data.
