@@ -34,7 +34,7 @@ class DashboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surfaceContainerLow,
       floatingActionButton: const LogStatusButton(floating: true),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       appBar: AppBar(
         title: Text(l10n.appTitle),
         actions: [
