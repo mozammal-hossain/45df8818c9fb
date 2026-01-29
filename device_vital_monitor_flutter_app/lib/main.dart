@@ -8,7 +8,7 @@ import 'package:device_vital_monitor_flutter_app/l10n/app_localizations.dart';
 import 'package:device_vital_monitor_flutter_app/domain/repositories/preferences_repository.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/common/bloc/app_bloc_observer.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/bloc/dashboard_bloc.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/dashboard/dashboard_page.dart';
+import 'package:device_vital_monitor_flutter_app/presentation/shell/main_shell_page.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/locale/locale_bloc.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
@@ -71,7 +71,7 @@ class MyApp extends StatelessWidget {
                 locale: localeState.locale,
                 localizationsDelegates: AppLocalizations.localizationsDelegates,
                 supportedLocales: AppLocalizations.supportedLocales,
-                home: const DashboardPage(),
+                home: const MainShellPage(),
               );
             },
           );

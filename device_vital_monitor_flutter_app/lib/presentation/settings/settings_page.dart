@@ -35,10 +35,7 @@ class SettingsPage extends StatelessWidget {
       content = Center(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: maxW),
-          child: Padding(
-            padding: padding,
-            child: content,
-          ),
+          child: Padding(padding: padding, child: content),
         ),
       );
     } else {
@@ -48,10 +45,12 @@ class SettingsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: scheme.surface,
       appBar: AppBar(
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: scheme.primary),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: Navigator.of(context).canPop()
+            ? IconButton(
+                icon: Icon(Icons.arrow_back, color: scheme.primary),
+                onPressed: () => Navigator.of(context).pop(),
+              )
+            : null,
         title: Text(
           l10n.appSettingsTitle,
           style: theme.appBarTheme.titleTextStyle?.copyWith(
@@ -86,26 +85,22 @@ class SettingsPage extends StatelessWidget {
             color: scheme.primary.withValues(alpha: 0.2),
             borderRadius: BorderRadius.circular(r),
           ),
-          child: Icon(
-            Icons.show_chart,
-            size: iconSize,
-            color: scheme.primary,
-          ),
+          child: Icon(Icons.show_chart, size: iconSize, color: scheme.primary),
         ),
         SizedBox(height: sSM),
         Text(
           l10n.appTitle,
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: scheme.onSurface,
-              ),
+            fontWeight: FontWeight.bold,
+            color: scheme.onSurface,
+          ),
         ),
         SizedBox(height: sX),
         Text(
           l10n.settingsSubtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
         ),
       ],
     );
@@ -123,18 +118,14 @@ class SettingsPage extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.language,
-              color: scheme.primary,
-              size: 22,
-            ),
+            Icon(Icons.language, color: scheme.primary, size: 22),
             SizedBox(width: sS),
             Text(
               l10n.languageLabel,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurface,
-                  ),
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
             ),
           ],
         ),
@@ -156,18 +147,14 @@ class SettingsPage extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(
-              Icons.palette_outlined,
-              color: scheme.primary,
-              size: 22,
-            ),
+            Icon(Icons.palette_outlined, color: scheme.primary, size: 22),
             SizedBox(width: sS),
             Text(
               l10n.themeLabel,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: scheme.onSurface,
-                  ),
+                fontWeight: FontWeight.w600,
+                color: scheme.onSurface,
+              ),
             ),
           ],
         ),
@@ -188,16 +175,16 @@ class SettingsPage extends StatelessWidget {
         Text(
           'DEVICE VITAL MONITOR',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: scheme.onSurfaceVariant,
-                letterSpacing: 1.2,
-              ),
+            color: scheme.onSurfaceVariant,
+            letterSpacing: 1.2,
+          ),
         ),
         SizedBox(height: sX),
         Text(
           l10n.versionBuild(AppConfig.version, AppConfig.build),
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
-              ),
+            color: scheme.onSurfaceVariant.withValues(alpha: 0.8),
+          ),
         ),
       ],
     );
