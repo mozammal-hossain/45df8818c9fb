@@ -109,11 +109,11 @@ class _NavItem extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, size: 26, color: color),
+            Icon(icon, size: 20, color: color),
             const SizedBox(height: 4),
             Text(
               label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
                 color: color,
                 fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
               ),

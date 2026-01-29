@@ -17,7 +17,6 @@ import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/log_status_button.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/memory_usage_card.dart';
 import 'package:device_vital_monitor_flutter_app/presentation/dashboard/widgets/thermal_state_card.dart';
-import 'package:device_vital_monitor_flutter_app/presentation/settings/bloc/theme/theme_bloc.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
