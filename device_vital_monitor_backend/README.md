@@ -12,16 +12,19 @@ A .NET Core Web API backend for the Device Vital Monitor application. This backe
 ### Installation
 
 1. **Restore dependencies:**
+
    ```bash
    dotnet restore
    ```
 
 2. **Build the project:**
+
    ```bash
    dotnet build
    ```
 
 3. **Run the backend:**
+
    ```bash
    dotnet run
    ```
@@ -74,6 +77,7 @@ Data/
 Log device vital data.
 
 **Request Body:**
+
 ```json
 {
   "device_id": "string",
@@ -85,6 +89,7 @@ Log device vital data.
 ```
 
 **Validation Rules:**
+
 - `device_id`: Required, non-empty string
 - `timestamp`: Required, ISO8601 format, cannot be more than 5 minutes in the future
 - `thermal_value`: Required, integer between 0 and 3 (inclusive)
@@ -92,6 +97,7 @@ Log device vital data.
 - `memory_usage`: Required, number between 0 and 100 (inclusive)
 
 **Success Response (201 Created):**
+
 ```json
 {
   "id": 1,
@@ -104,6 +110,7 @@ Log device vital data.
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "error": "Thermal value must be between 0 and 3.",
@@ -117,15 +124,18 @@ Log device vital data.
 Get historical logs with pagination.
 
 **Query Parameters:**
+
 - `page` (optional): Page number, default: 1
 - `pageSize` (optional): Items per page, default: 20, maximum: 100
 
 **Example Request:**
+
 ```
 GET /api/vitals?page=1&pageSize=20
 ```
 
 **Success Response (200 OK):**
+
 ```json
 {
   "data": [
@@ -148,6 +158,7 @@ GET /api/vitals?page=1&pageSize=20
 ```
 
 **Error Response (400 Bad Request):**
+
 ```json
 {
   "error": "Page size must be between 1 and 100.",
@@ -161,6 +172,7 @@ GET /api/vitals?page=1&pageSize=20
 Get analytics data including rolling averages.
 
 **Success Response (200 OK):**
+
 ```json
 {
   "rolling_window_logs": 100,
@@ -181,6 +193,7 @@ Get analytics data including rolling averages.
 ```
 
 **Analytics Details:**
+
 - **Rolling Window**: Last 100 logs (most recent first)
 - **Trends**: Calculated by comparing recent half vs older half of rolling window
   - `increasing`: Recent average > older average
@@ -201,25 +214,42 @@ All error responses follow a standardized format:
 ```
 
 **Error Codes:**
+
 - `INVALID_REQUEST`: Request body is null or malformed
 - `MISSING_FIELD`: Required field is missing or empty
 - `INVALID_RANGE`: Value is outside allowed range
 - `INVALID_TIMESTAMP`: Timestamp is invalid or in the future
+- `RATE_LIMIT_EXCEEDED`: Too many requests (429 Too Many Requests)
+
+### Rate Limiting (429 Too Many Requests)
+
+The API is rate-limited per client IP using a fixed window. When the limit is exceeded, the server returns **429 Too Many Requests** with the same JSON shape:
+
+```json
+{
+  "error": "Too many requests. Please try again later.",
+  "field": null,
+  "code": "RATE_LIMIT_EXCEEDED"
+}
+```
+
+Defaults: 100 requests per 60 seconds per IP. Configurable via `appsettings.json` (see Configuration).
 
 ## Database Schema
 
 ### DeviceVital Table
 
-| Column | Type | Constraints |
-|--------|------|-------------|
-| Id | int | Primary Key, Auto-increment |
-| DeviceId | string | Required |
-| Timestamp | DateTime | Required |
-| ThermalValue | int | Required, 0-3 |
-| BatteryLevel | double | Required, 0-100 |
-| MemoryUsage | double | Required, 0-100 |
+| Column       | Type     | Constraints                 |
+| ------------ | -------- | --------------------------- |
+| Id           | int      | Primary Key, Auto-increment |
+| DeviceId     | string   | Required                    |
+| Timestamp    | DateTime | Required                    |
+| ThermalValue | int      | Required, 0-3               |
+| BatteryLevel | double   | Required, 0-100             |
+| MemoryUsage  | double   | Required, 0-100             |
 
 **Indexes:**
+
 - Index on `Timestamp` (descending) for efficient pagination queries
 
 ## Testing
@@ -234,6 +264,7 @@ dotnet test
 ### Test Coverage
 
 The test suite covers:
+
 - ✅ Data validation (all required fields, ranges, boundaries)
 - ✅ Rolling average calculation logic
 - ✅ Pagination logic and defaults
@@ -262,9 +293,16 @@ The test suite covers:
   "AllowedHosts": "*",
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=app.db"
+  },
+  "RateLimiting": {
+    "PermitLimit": 100,
+    "WindowSeconds": 60
   }
 }
 ```
+
+- **RateLimiting:PermitLimit**: Maximum requests allowed per client IP per window (default: 100).
+- **RateLimiting:WindowSeconds**: Window duration in seconds (default: 60).
 
 ### Development Settings
 
@@ -283,6 +321,7 @@ CORS is configured to allow requests from the Flutter app:
 ### Port Already in Use
 
 Change the port in `Properties/launchSettings.json` or use:
+
 ```bash
 dotnet run --urls "http://localhost:5000"
 ```
@@ -307,6 +346,7 @@ Key design decisions are documented in the root `DECISIONS.md` file. Notable dec
 - **Rolling Average**: Uses last 100 logs (most recent first)
 - **Timestamp Validation**: Allows 5-minute clock skew tolerance
 - **Error Format**: Standardized error responses with field and code for better client handling
+- **Rate Limiting**: Per-IP fixed window (default 100 requests per 60 seconds); 429 uses same error format as other API errors
 
 ## Project Structure
 

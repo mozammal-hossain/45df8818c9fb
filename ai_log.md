@@ -307,3 +307,18 @@ The following were implemented so the app aligns with the ADPF thermal doc and t
    - **API &lt; 29:** Thermal state remains 0 (NONE); no thermal APIs on stock Android.
 
 Tests were updated so `DashboardBloc` is constructed with the three required dependencies (`DeviceSensorService`, `VitalsRepository`, `DeviceIdService`), including `SharedPreferences.setMockInitialValues` and a shared `DashboardBloc` in `setUpAll` for the dashboard screen memory tests.
+
+---
+
+## Backend Rate Limiter
+
+**Context:** Introduced rate limiting on the device_vital_monitor_backend API to protect against abuse and ensure fair usage across clients.
+
+**Approach:**
+
+- Used ASP.NET Core’s built-in rate limiting (no extra package). In `Program.cs`: `AddRateLimiter` with a custom policy that partitions by client IP via `RateLimitPartition.GetFixedWindowLimiter(clientIp, ...)`.
+- Default: 100 requests per 60 seconds per IP. Values are configurable in `appsettings.json` under `RateLimiting:PermitLimit` and `RateLimiting:WindowSeconds`.
+- All API routes use the policy via `RequireRateLimiting("api")`. When the limit is exceeded, the middleware returns **429 Too Many Requests** with a JSON body matching the existing `ErrorResponse` shape (`error`, `field`, `code`), with `code: "RATE_LIMIT_EXCEEDED"`.
+- Pipeline order: `UseRateLimiter()` is registered after CORS and before `UseAuthorization()` so rate limiting runs after logging and CORS.
+
+**Why it works:** Each client IP gets its own fixed window; when the window resets, the counter replenishes. The Flutter app can treat 429 like other API errors and show a user-friendly “too many requests” message. Design and assumptions are recorded in **DECISIONS.md** (Ambiguity 6: Rate Limiting).

@@ -1,7 +1,10 @@
+using System.Threading.RateLimiting;
 using device_vital_monitor_backend.Data;
+using device_vital_monitor_backend.DTOs;
 using device_vital_monitor_backend.Middleware;
 using device_vital_monitor_backend.Repositories;
 using device_vital_monitor_backend.Services;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +22,37 @@ builder.Services.AddCors(options =>
         policy.AllowAnyOrigin()
               .AllowAnyMethod()
               .AllowAnyHeader();
+    });
+});
+
+// Rate limiting: fixed window per IP, configurable via appsettings
+var rateLimitSection = builder.Configuration.GetSection("RateLimiting");
+var permitLimit = rateLimitSection.GetValue("PermitLimit", 100);
+var windowSeconds = rateLimitSection.GetValue("WindowSeconds", 60);
+
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.ContentType = "application/json";
+        var response = new ErrorResponse(
+            "Too many requests. Please try again later.",
+            field: null,
+            code: "RATE_LIMIT_EXCEEDED");
+        await context.HttpContext.Response.WriteAsJsonAsync(response, cancellationToken);
+    };
+    options.AddPolicy("api", context =>
+    {
+        var clientIp = context.Connection.RemoteIpAddress?.ToString() ?? "unknown";
+        return RateLimitPartition.GetFixedWindowLimiter(clientIp, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = permitLimit,
+            Window = TimeSpan.FromSeconds(windowSeconds),
+            QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
     });
 });
 
@@ -43,9 +77,12 @@ app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.UseCors();
 
+app.UseRateLimiter();
+
 app.UseAuthorization();
 
-app.MapControllers();
+app.MapControllers()
+    .RequireRateLimiting("api");
 
 // Ensure database is created
 using (var scope = app.Services.CreateScope())

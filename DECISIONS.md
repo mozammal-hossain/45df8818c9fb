@@ -171,6 +171,24 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 
 ---
 
+#### Ambiguity 6: Rate Limiting
+
+**Question:** Should the API be protected by rate limiting, and if so, how (per IP, per endpoint, global)?
+
+**Options Considered:**
+
+- **Option A:** No rate limiting; keep the API open for this assignment.
+- **Option B:** Global rate limit (all clients share one quota).
+- **Option C:** Per-IP fixed-window rate limit, configurable via appsettings (e.g. 100 requests per 60 seconds per IP).
+
+**Decision:** Option C – **per-IP fixed-window rate limiting**. Use ASP.NET Core’s built-in rate limiting middleware with a partition key of client IP. Default: 100 requests per 60 seconds per IP. Configurable via `RateLimiting:PermitLimit` and `RateLimiting:WindowSeconds`. When exceeded, return **429 Too Many Requests** with a JSON body consistent with `ErrorResponse` (code `RATE_LIMIT_EXCEEDED`).
+
+**Trade-offs:** Per-IP limits are fair across clients and avoid one client starving others. Fixed window is simple and sufficient for this scope; sliding window would be smoother but adds no extra package. No authentication, so IP is the only available key.
+
+**Implementation:** `AddRateLimiter` with a custom policy using `RateLimitPartition.GetFixedWindowLimiter(clientIp, ...)`. All API endpoints use the same policy via `RequireRateLimiting("api")`. `OnRejected` writes `ErrorResponse` JSON so the Flutter app can show a consistent error.
+
+---
+
 #### Ambiguity 5: GET /api/vitals — Fixed “Latest 100” vs Pagination
 
 **Question:** The brief says “Return historical logs (latest 100 entries).” Should the endpoint return exactly 100 items, or support pagination for a scrollable History UI?
@@ -237,6 +255,7 @@ This document records ambiguities, decisions, assumptions, and clarifying questi
 - **Rolling window shape:** “Last 100” is by **newest-first** (most recent timestamp first), then take 100. This matches the history endpoint’s “latest 100 entries” semantics.
 - **Analytics semantics:** When there are fewer than 100 logs, the rolling average uses all available logs; when there are zero, we return zeros and still expose `rolling_window_logs` (as the configured window size) for clarity.
 - **GET /api/vitals:** Paginated; default `pageSize` 20, max 100. History screen uses scroll-to-load-more rather than fetching a large fixed set upfront.
+- **Rate limiting:** Per-IP fixed-window; default 100 requests per 60 seconds per IP; configurable via `appsettings.json` (`RateLimiting:PermitLimit`, `RateLimiting:WindowSeconds`). 429 responses use `ErrorResponse` with code `RATE_LIMIT_EXCEEDED`.
 
 ---
 
